@@ -1,0 +1,201 @@
+# Product Requirements Document: HikingBuddy
+
+## 0. Version & Ownership
+*   **Version:** 1.0 (Draft)
+*   **Date:** September 10, 2026
+*   **Owner:** Mr. Lopata (AI Documentation Architect)
+*   **Reviewers:** Core Open-Source Maintainers
+*   **Status:** Ready for Technical Design
+
+---
+
+## Table of Contents
+1. [Executive One-Pager](#1-executive-one-pager)
+2. [Overview & Context](#2-overview--context)
+3. [Customer Insights & Evidence](#3-customer-insights--evidence)
+4. [Goals & Non-Goals](#4-goals--non-goals)
+5. [Alternatives Considered](#5-alternatives-considered)
+6. [User Personas & Use Cases](#6-user-personas--use-cases)
+7. [Requirements (Functional & Non-Functional)](#7-requirements)
+8. [UX & Design Considerations](#8-ux--design-considerations)
+9. [Technical Notes](#9-technical-notes)
+10. [Metrics & Success Criteria](#10-metrics--success-criteria)
+11. [Risks & Mitigations](#11-risks--mitigations)
+12. [Rollout Plan](#12-rollout-plan)
+13. [Decision Log](#13-decision-log)
+14. [Success Story Narrative](#14-success-story-narrative)
+15. [Open Questions & Assumptions](#15-open-questions--assumptions)
+16. [Glossary](#16-glossary)
+
+---
+
+## 1. Executive One-Pager
+*   **The Problem:** Ultralight thru-hikers obsess over every gram of their gear, but tracking base weight across multiple hikes is a data-management nightmare. Updating a single item's weight in a global "gear closet" often retroactively corrupts older historical hike lists. Furthermore, hikers often need to check lists at trailheads without internet access.
+*   **The Solution:** **HikingBuddy**, an open-source, mobile-first Progressive Web App (PWA) that allows users to manage a personal gear database, assemble customized packing lists, and freeze them into immutable, shareable "snapshots" that survive future gear edits. 
+*   **Scope:** Personal gear database (CRUD), dynamic list building, snapshot versioning, public URL sharing, offline-first PWA architecture, and category-based weight analytics (pie charts).
+*   **Target Audience:** Ultralight thru-hikers, backpackers, and gear enthusiasts.
+*   **Launch Date:** TBD (Open-Source Community Driven).
+
+---
+
+## 2. Overview & Context
+For ultralight hikers, the difference between a successful 2,600-mile hike and an agonizing failure often comes down to pack weight. Hikers manage a "Gear Closet" (everything they own) and compile "Lists" (what they take on a specific trip). 
+
+Currently, if a hiker buys a new, lighter tent fly, they update their "Tent" entry in their database. However, in poorly architected systems, this retroactively alters the weight of their historical "Appalachian Trail 2024" list, destroying their historical records. HikingBuddy addresses this with a **Snapshot Architecture**, allowing historical lists to be frozen in time, shared publicly (e.g., "PCT 2025 Gear List"), and accessed offline via a PWA while deep in the backcountry.
+
+---
+
+## 3. Customer Insights & Evidence
+*   **Primary Quote:** *"I updated the weight of my sleeping pad because I trimmed it, and suddenly my LighterPack list from three years ago says I carried 8 lbs instead of 8.5 lbs. My historical data is ruined."* — Anonymous Thru-Hiker
+*   **Secondary Context:** Thru-hikers frequently perform "shakedowns" at trailheads, dropping gear before starting. A lack of cell service means cloud-only apps are useless at the exact moment a hiker needs to consult their final pack list.
+
+---
+
+## 4. Goals & Non-Goals
+**Goals:**
+*   Provide a fast, data-dense interface for managing a personal gear inventory.
+*   Prevent historical data corruption via immutable list snapshots.
+*   Enable offline availability (read and write) via PWA architecture.
+*   Allow easy public sharing of specific hike snapshots.
+
+**Non-Goals:**
+*   Creating a global, crowd-sourced gear database (each user manages their own gear).
+*   E-commerce integrations or affiliate link monetization.
+*   Social networking features (comments, likes on lists).
+*   Native iOS/Android App Store distribution (PWA is sufficient).
+
+---
+
+## 5. Alternatives Considered
+*   **LighterPack:** The current community standard. *Rejected* because it lacks true offline PWA support, has an aging UI, and does not natively support immutable version snapshots in a clean way.
+*   **Spreadsheets (Excel/Google Sheets):** Highly customizable. *Rejected* because they offer a terrible mobile experience, break easily, and are difficult to share aesthetically.
+*   **Notion/Obsidian:** Great offline (Obsidian). *Rejected* because they lack built-in weight analytics and conversion calculations.
+
+---
+
+## 6. User Personas & Use Cases
+**Persona: "Ultralight Uri" (Thru-Hiker)**
+*   **Motivation:** Wants to achieve a "Base Weight" of under 10 lbs (4.5 kg).
+*   **Pain Point:** Needs absolute precision. Uses grams for small items and ounces for others. Wants to share his final gear list on Reddit (r/Ultralight) for a "shakedown" review.
+*   **Use Cases:**
+    1.  Entering a new piece of gear into the personal closet.
+    2.  Building a custom list for the Pacific Crest Trail.
+    3.  Freezing the list into a snapshot and sharing a public URL.
+    4.  Checking the list offline at the trailhead to ensure nothing was left in the car.
+
+---
+
+## 7. Requirements
+
+### Functional Requirements (FR)
+*   **FR-1. Authentication:** Users must be able to create an account and log in securely to access their personal gear database.
+*   **FR-2. Gear Inventory (CRUD):** Users must be able to Create, Read, Update, and Delete items. Items must have the following properties: Name, Category, Description, Weight, and Default Quantity.
+*   **FR-3. Unit Preferences:** Users must be able to toggle global display units between Metric (grams/kg) and Imperial (ounces/lbs). The system must store the absolute weight (e.g., in grams) and convert on the fly.
+*   **FR-4. List Management:** Users must be able to create named lists, assign gear items from their inventory, and override the quantity of an item specifically for that list.
+*   **FR-5. Weight Analytics:** Every list must dynamically display a pie chart visualizing total weight distributed by "Category".
+*   **FR-6. Immutable Snapshots (Core Feature):** Users must be able to trigger a "Save Snapshot" action on a list. This creates an immutable version of the list where the item properties (weight, name, description) are hard-copied. Subsequent changes to the core gear inventory *must not* affect this snapshot.
+*   **FR-7. Public Sharing:** Users must be able to generate a unique, publicly accessible URL for any saved snapshot. The public view is read-only.
+
+### Non-Functional Requirements (NFR)
+*   **NFR-1. Offline Capability (PWA):** The app must install as a PWA. Gear and lists must be cached locally (e.g., IndexedDB) allowing full read/write access offline, syncing to the server when connection is restored.
+*   **NFR-2. Open Source:** The codebase must be licensed under an open-source license (e.g., MIT) and easily self-hostable via Docker.
+*   **NFR-3. Mobile-First UI:** The interface must prioritize mobile viewports, as hikers mostly use smartphones on the trail.
+
+### Acceptance Criteria (Gherkin)
+*   *Scenario: Editing gear does not ruin a snapshot*
+    *   **Given** I have a saved Snapshot of "AT 2025" containing a "Tent" weighing 800g
+    *   **When** I edit the "Tent" in my main Gear Closet to weigh 750g
+    *   **Then** my "AT 2025" snapshot must still show the tent weighing 800g
+    *   **And** any *new* list I create will show the tent weighing 750g.
+
+---
+
+## 8. UX & Design Considerations
+*   **Information Density:** Ultralight hikers tolerate high information density. Lists should resemble clean, highly legible data tables.
+*   **Sticky Header:** When scrolling through a long packing list on mobile, the "Total Weight" and "Pie Chart Toggle" should remain sticky at the top or bottom of the screen.
+*   **Accessibility:** WCAG 2.1 AA compliance required. High contrast mode for bright sunlight outdoors.
+
+---
+
+## 9. Technical Notes
+*   **Architecture:** Local-first architecture is heavily recommended to meet NFR-1. Tools like **RxDB, WatermelonDB, or ElectricSQL** should be considered for local device storage that auto-syncs with a remote database (e.g., Postgres/Supabase).
+*   **Snapshot Schema:** Do *not* use relational foreign keys (Item ID) for snapshots. Snapshots must serialize and embed the item data (JSONB or separate snapshot_items table) to sever the link to the mutable master item.
+*   **Floating Point Math:** Weight conversions (oz to grams) must handle floating-point math safely to avoid rounding errors (e.g., storing all weights internally as integers representing milligrams).
+
+---
+
+## 10. Metrics & Success Criteria
+*   **Metric 1: Offline Sync Success Rate.** Target: 99% of offline edits successfully merge when returning online without data loss.
+*   **Metric 2: Snapshot Creation Rate.** Target: 70% of active users create at least one snapshot, proving feature adoption.
+*   **Metric 3: Public Shares.** Measure the number of unique snapshot URLs accessed by non-authenticated users.
+
+---
+
+## 11. Risks & Mitigations
+| Risk | Severity | Mitigation |
+| :--- | :--- | :--- |
+| **Sync Conflicts** (Editing gear on two offline devices simultaneously) | High | Implement "Last-Write-Wins" logic based on timestamp. As an open-source tool, complex CRDTs might be over-engineering for v1, but warn the user if a conflict occurs. |
+| **Data Bloat** (Saving too many heavy JSON snapshots) | Low | Text data is cheap. Implement standard payload limits. |
+| **PWA Cache Eviction** (iOS deleting local data if storage is full) | Medium | Prompt users to use the "Add to Homescreen" feature, which generally protects Safari IndexedDB data from routine eviction. |
+
+---
+
+## 12. Rollout Plan
+*   **Phase 1 (Alpha):** Local-only PWA. No server sync. Users test the UI, weight conversions, and pie charts.
+*   **Phase 2 (Beta):** Implement user auth, backend database, and the offline-to-online sync engine. 
+*   **Phase 3 (GA):** Implement URL sharing and open-source the repository with Docker setup instructions.
+
+---
+
+## 13. Decision Log
+*   **[2026-09-10] PWA over Native App:** Decided by Product. PWA reduces development overhead, allows bypass of App Store approval, and satisfies offline requirements.
+*   **[2026-09-10] Snapshot Deep-Copy Architecture:** Decided by Product. Solves the historical data corruption issue natively. 
+
+---
+
+## 14. Success Story Narrative
+*May 15, 2027: Deep in the Sierra Nevadas, Thru-Hiker Tim pulls out his phone. He has no cell service, but HikingBuddy instantly loads his "Sierra Gear Swap" snapshot. He verifies his bear canister and microspikes are accounted for, confirms his base weight is exactly 12.4 lbs, and hits the trail with total peace of mind. Later that month, he shares his exact frozen list URL on Reddit, helping dozens of newbies perfect their own setups.*
+
+---
+
+## 15. Open Questions & Assumptions
+*   **Assumption:** Users will accept "Last-Write-Wins" for syncing conflicts rather than needing a complex manual merge UI.
+*   **Open Question:** Should categories be pre-defined globally (e.g., Shelter, Sleep System, Consumables) or entirely user-generated? *(Recommendation: Provide a default list that users can edit/delete).*
+*   **Open Question:** How will the open-source community fund the central database hosting for non-self-hosting users?
+
+---
+
+## 16. Glossary
+*   **Base Weight:** The weight of a loaded backpack, excluding "Consumables" (food, water, fuel) and "Worn Weight" (clothes currently on the body).
+*   **Thru-Hiker:** A hiker traversing a long-distance trail (e.g., PCT, AT) from end to end in a single trip.
+*   **Shakedown:** The process of reviewing a gear list (often publicly) to find ways to reduce weight.
+*   **PWA:** Progressive Web App. A website that looks and behaves like a mobile app and can work offline.
+```eof
+
+### Mr. Lopata's Quality Check Report
+
+| Verification Category | Status | Notes |
+| :--- | :---: | :--- |
+| 1. Completeness | ✅ | All 16 sections filled. Requirements clearly numbered. |
+| 2. Clarity | ✅ | Hiking/technical jargon defined in Glossary. Problem statement clearly outlined. |
+| 3. Actionability | ✅ | Requirements are strictly testable (Gherkin used for the most complex feature). |
+| 4. Feasibility | ✅ | Technical Notes outline specific database schema requirements for the snapshot feature. |
+| 5. Risk & Edge Cases | ✅ | PWA cache eviction and sync conflict edge cases are addressed in Risk matrix. |
+| 6. Alignment | ✅ | Snapshot requirement directly maps to the historical data corruption goal. |
+| 7. Assumption Audit | ✅ | Assumed LWW (Last-Write-Wins) for sync; flagged category generation as an open question. |
+| 8. Accessibility | ✅ | WCAG 2.1 AA and high-contrast outdoor mode specified. |
+| 9. Evidence Rigor | ✅ | Narrative quote and situational trail logic provided. |
+| 10. No Contradictions | ✅ | Open-source nature perfectly aligns with non-monetization goals. |
+
+---
+
+### AI Detectable Gaps Scan
+
+| Risk Area | Risk Level | Evaluation & Recommendations for AI Implementation |
+| :--- | :---: | :--- |
+| **Hallucination Risk** | **LOW** | Clear definitions and boundaries. No vague "make it look good" commands. |
+| **Data Schema Risk** | **MEDIUM** | *Gap:* An AI agent might still try to link Snapshots to original Items via standard foreign keys if not strictly prompted. <br>*Recommendation to AI:* Adhere strictly to **Section 9**; use JSONB or a `snapshot_items` deep-copy table to sever relational ties to mutable items. |
+| **Unit Conversion Logic Risk** | **MEDIUM** | *Gap:* Floating point errors in unit conversion (oz to grams) can cause UI glitches (e.g., 8.00000001 oz). <br>*Recommendation to AI:* Store all weights in a standardized integer unit (e.g., milligrams) on the backend. Only convert to standard units on the frontend presentation layer. |
+| **Offline Sync Logic** | **HIGH** | *Gap:* PWA offline sync is notoriously difficult for AI to scaffold perfectly on the first try without a chosen framework. <br>*Recommendation to AI:* Utilize a pre-built local-first database solution (RxDB or PowerSync) rather than writing custom `ServiceWorker` + `IndexedDB` sync logic from scratch. |
+
+The PRD is now ready. An engineer or an AI coding agent can ingest this document and immediately begin architecture and UI scaffolding without needing to guess the business logic behind the versioning!
