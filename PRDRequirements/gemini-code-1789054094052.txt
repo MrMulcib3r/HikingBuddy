@@ -53,7 +53,8 @@ Currently, if a hiker buys a new, lighter tent fly, they update their "Tent" ent
 
 ## 4. Goals & Non-Goals
 **Goals:**
-*   Provide a fast, data-dense interface for managing a personal gear inventory.
+*	Provide a place where hikers can create and manage their gear and use it to create and manage gear lists for their hikes.
+*   Provide a fast, easy to read and data-dense interface for managing a personal gear inventory.
 *   Prevent historical data corruption via immutable list snapshots.
 *   Enable offline availability (read and write) via PWA architecture.
 *   Allow easy public sharing of specific hike snapshots.
