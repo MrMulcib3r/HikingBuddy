@@ -30,4 +30,9 @@ Run locally: in the `app/` folder, run `npm install` then `npm run dev`. Data is
 **2026-09-23 (repo housekeeping, moving development to Claude Code):**
 - Added `CLAUDE.md` (project rules for Claude Code), this `build-status.md`, and a real root `README.md`.
 - `PRDRequirements/PRD-MVP.md` in the repo was still **v4** (Draft/Finalized model) while the code implements **v7** — replaced with v7 so the repo and the code agree.
-- Open cleanup item: delete the empty stub `app/src/components/WeightTypeToggle.tsx`.
+- Open cleanup item: delete the empty stub `app/src/components/WeightTypeToggle.tsx` *(done — see next entry)*.
+
+**2026-09-23 (first Claude Code session — environment check + cleanup):**
+- Verified the dev environment on Martin's PC: Node.js v24.14.0 and npm 11.9.0 are installed; `npm install` (0 vulnerabilities), `npm run build` and `npm run lint` all pass (lint: 3 harmless "fast refresh" warnings, no errors). Dev server starts and the app loads in the browser with no console errors.
+- Deleted the empty leftover stub `app/src/components/WeightTypeToggle.tsx` (nothing referenced it; build still clean afterwards).
+- Added a root `.gitignore` with `.obsidian/`, so the Obsidian notes app's local settings folder never ends up in git.
