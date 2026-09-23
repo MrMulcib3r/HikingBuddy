@@ -46,4 +46,4 @@ There is no automated test suite in the repo yet (earlier checks were one-off Pl
 - After finishing, give Martin a short Czech summary: what changed, why, how you verified it, and how he can try it.
 
 ## Known cleanup
-- `app/src/components/WeightTypeToggle.tsx` is an empty leftover stub — safe to delete.
+- Nothing open right now.
