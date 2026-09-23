@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useApp } from '../state/AppContext';
 
-/** FR-2: kategorie jsou od začátku plně editovatelné — přejmenovat, smazat, přidat vlastní. */
+/** FR-2: categories are fully editable from the start — rename, delete, add your own. */
 export function CategoryManager({ onClose }: { onClose: () => void }) {
   const { state, addCategory, renameCategory, deleteCategory } = useApp();
   const [newName, setNewName] = useState('');
@@ -30,8 +30,8 @@ export function CategoryManager({ onClose }: { onClose: () => void }) {
   return (
     <div className="dialog-backdrop" role="presentation" onClick={onClose}>
       <div className="dialog" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-        <h3>Kategorie</h3>
-        <p className="dialog-hint">Předdefinovaný seznam je jen startovní bod — uprav si ho podle sebe.</p>
+        <h3>Categories</h3>
+        <p className="dialog-hint">The predefined list is just a starting point — make it your own.</p>
         <ul className="category-list">
           {state.categories.map((c) => (
             <li key={c.id} className="category-row">
@@ -49,7 +49,7 @@ export function CategoryManager({ onClose }: { onClose: () => void }) {
                 </span>
               )}
               <button type="button" className="btn btn-ghost btn-small" onClick={() => deleteCategory(c.id)}>
-                Smazat
+                Delete
               </button>
             </li>
           ))}
@@ -58,16 +58,16 @@ export function CategoryManager({ onClose }: { onClose: () => void }) {
           <input
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
-            placeholder="Nová kategorie"
+            placeholder="New category"
             onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
           />
           <button type="button" className="btn btn-primary btn-small" onClick={handleAdd}>
-            Přidat
+            Add
           </button>
         </div>
         <div className="dialog-actions">
           <button type="button" className="btn btn-ghost" onClick={onClose}>
-            Zavřít
+            Close
           </button>
         </div>
       </div>

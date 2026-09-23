@@ -1,13 +1,5 @@
 import { UNCATEGORIZED } from '../types';
-import type {
-  AppState,
-  Category,
-  DraftGearList,
-  GearItem,
-  GearList,
-  GearListItem,
-  WeightBreakdown,
-} from '../types';
+import type { AppState, Category, GearItem, GearList, GearListItem, WeightBreakdown } from '../types';
 
 /** Jméno kategorie k zobrazení/zamrazení — FR-8: chybějící kategorie -> "Uncategorized". */
 export function categoryNameFor(categoryId: string | null, categories: Category[]): string {
@@ -15,35 +7,38 @@ export function categoryNameFor(categoryId: string | null, categories: Category[
   return categories.find((c) => c.id === categoryId)?.name ?? UNCATEGORIZED;
 }
 
-/** Zrcadlová pole, která se u "linked" položky v Draft gearlistu přebírají z Gear Vaultu (FR-5). */
+/** Zrcadlová pole, která se u "linked" položky v gearlistu přebírají z Gear Vaultu (FR-5). */
 export function mirrorFromVault(item: GearItem, categories: Category[]) {
   return {
     name: item.name,
     categoryName: categoryNameFor(item.categoryId, categories),
     weightGrams: item.weightGrams,
-    vaultWeightType: item.weightType,
   };
 }
 
-/** Součet vah podle typu (FR-10). Násobí váhu jednotky počtem kusů. */
+/** Součet vah podle typu (FR-10). Worn a Consumable jsou nezávislé per-list příznaky
+ * (FR-9); pro přehledové dlaždice se každá položka řadí do jednoho ze tří košů podle
+ * priority Consumable > Worn > Base, ale do celkové váhy (total) se počítá vždy jen
+ * jednou. Násobí váhu jednotky počtem kusů. */
 export function computeBreakdown(items: GearListItem[]): WeightBreakdown {
   const result: WeightBreakdown = { base: 0, worn: 0, consumable: 0, total: 0 };
   for (const item of items) {
     const subtotal = item.weightGrams * item.quantity;
-    result[item.weightType] += subtotal;
     result.total += subtotal;
+    if (item.isConsumable) {
+      result.consumable += subtotal;
+    } else if (item.isWorn) {
+      result.worn += subtotal;
+    } else {
+      result.base += subtotal;
+    }
   }
   return result;
 }
 
-/** Draft gearlisty, které obsahují danou položku z Gear Vaultu — pro potvrzovací dialog FR-5/FR-7. */
-export function findAffectedDraftLists(state: AppState, gearItemId: string): DraftGearList[] {
-  return state.gearLists.filter(
-    (list): list is DraftGearList =>
-      list.status === 'draft' && list.items.some((i) => i.gearItemId === gearItemId)
-  );
-}
-
-export function isFinalized(list: GearList): list is Extract<GearList, { status: 'finalized' }> {
-  return list.status === 'finalized';
+/** Gearlisty, které obsahují danou položku z Gear Vaultu — pro potvrzovací dialog FR-5
+ * (Cancel / Create a copy of the item / Continue). Gearlisty jsou teď vždy editovatelné,
+ * takže se na rozdíl od dřívějška nefiltruje podle stavu. */
+export function findAffectedLists(state: AppState, gearItemId: string): GearList[] {
+  return state.gearLists.filter((list) => list.items.some((i) => i.gearItemId === gearItemId));
 }

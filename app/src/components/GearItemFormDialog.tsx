@@ -1,30 +1,48 @@
 import { useState, type FormEvent } from 'react';
-import type { Category, GearItem, UnitPreference, WeightType } from '../types';
-import { WEIGHT_TYPE_LABELS } from '../types';
-import { fromGrams, inputUnitLabel, toGrams } from '../utils/weight';
+import type { Category, GearItem, UnitPreference } from '../types';
+import { inputUnitLabel, toGrams } from '../utils/weight';
 
 interface GearItemFormDialogProps {
   categories: Category[];
   unitPreference: UnitPreference;
-  initial: GearItem | null;
-  onSubmit: (data: Omit<GearItem, 'id'>) => void;
+  onSubmit: (data: Omit<GearItem, 'id' | 'order'>) => void;
   onCancel: () => void;
+  onCreateCategory: (name: string) => string;
 }
 
-const WEIGHT_TYPES: WeightType[] = ['base', 'worn', 'consumable'];
+const NEW_CATEGORY_VALUE = '__new__';
 
-/** Formulář pro přidání/editaci položky v Gear Vaultu (FR-1). Příklad z PRD: Snickers,
- * kategorie Food, 60 g, quantity 5, typ Consumable, poznámka "bílá čokoláda". */
-export function GearItemFormDialog({ categories, unitPreference, initial, onSubmit, onCancel }: GearItemFormDialogProps) {
-  const [name, setName] = useState(initial?.name ?? '');
-  const [categoryId, setCategoryId] = useState<string>(initial?.categoryId ?? '');
-  const [weightType, setWeightType] = useState<WeightType>(initial?.weightType ?? 'base');
-  const [weightInput, setWeightInput] = useState<string>(
-    initial ? String(roundForInput(fromGrams(initial.weightGrams, unitPreference))) : ''
-  );
-  const [defaultQuantity, setDefaultQuantity] = useState<string>(String(initial?.defaultQuantity ?? 1));
-  const [note, setNote] = useState(initial?.note ?? '');
+/** Form for adding a new Gear Vault item (FR-1). Editing an existing item happens inline
+ * in the Gear Vault list itself, not through this dialog — this is add-only. */
+export function GearItemFormDialog({ categories, unitPreference, onSubmit, onCancel, onCreateCategory }: GearItemFormDialogProps) {
+  const [name, setName] = useState('');
+  const [categoryId, setCategoryId] = useState<string>('');
+  const [weightInput, setWeightInput] = useState<string>('');
+  const [defaultQuantity, setDefaultQuantity] = useState<string>('1');
+  const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [creatingCategory, setCreatingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
+
+  function handleCategorySelect(value: string) {
+    if (value === NEW_CATEGORY_VALUE) {
+      setCreatingCategory(true);
+      return;
+    }
+    setCategoryId(value);
+  }
+
+  function confirmNewCategory() {
+    const trimmed = newCategoryName.trim();
+    if (!trimmed) {
+      setCreatingCategory(false);
+      return;
+    }
+    const id = onCreateCategory(trimmed);
+    setCategoryId(id);
+    setNewCategoryName('');
+    setCreatingCategory(false);
+  }
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -32,21 +50,20 @@ export function GearItemFormDialog({ categories, unitPreference, initial, onSubm
     const weightValue = Number(weightInput);
     const quantityValue = Number(defaultQuantity);
     if (!trimmedName) {
-      setError('Zadej název položky.');
+      setError('Enter an item name.');
       return;
     }
     if (!Number.isFinite(weightValue) || weightValue < 0) {
-      setError('Váha musí být kladné číslo.');
+      setError('Weight must be a positive number.');
       return;
     }
     if (!Number.isInteger(quantityValue) || quantityValue < 1) {
-      setError('Výchozí množství musí být celé číslo alespoň 1.');
+      setError('Default quantity must be a whole number of at least 1.');
       return;
     }
     onSubmit({
       name: trimmedName,
       categoryId: categoryId || null,
-      weightType,
       weightGrams: toGrams(weightValue, unitPreference),
       defaultQuantity: quantityValue,
       note: note.trim(),
@@ -56,26 +73,45 @@ export function GearItemFormDialog({ categories, unitPreference, initial, onSubm
   return (
     <div className="dialog-backdrop" role="presentation" onClick={onCancel}>
       <div className="dialog" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-        <h3>{initial ? 'Upravit vybavení' : 'Přidat vybavení do Gear Vaultu'}</h3>
+        <h3>Add item to Gear Vault</h3>
         <form onSubmit={handleSubmit} className="form">
           <label className="field">
-            <span>Název</span>
-            <input value={name} onChange={(e) => setName(e.target.value)} autoFocus placeholder="např. Snickers" />
+            <span>Name</span>
+            <input value={name} onChange={(e) => setName(e.target.value)} autoFocus placeholder="e.g. Snickers" />
           </label>
           <label className="field">
-            <span>Kategorie</span>
-            <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
-              <option value="">(bez kategorie)</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+            <span>Category</span>
+            {creatingCategory ? (
+              <div className="field-row">
+                <input
+                  autoFocus
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  placeholder="New category name"
+                  onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), confirmNewCategory())}
+                />
+                <button type="button" className="btn btn-primary btn-small" onClick={confirmNewCategory}>
+                  Add
+                </button>
+                <button type="button" className="btn btn-ghost btn-small" onClick={() => setCreatingCategory(false)}>
+                  Cancel
+                </button>
+              </div>
+            ) : (
+              <select value={categoryId} onChange={(e) => handleCategorySelect(e.target.value)}>
+                <option value="">(no category)</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+                <option value={NEW_CATEGORY_VALUE}>+ Add new category…</option>
+              </select>
+            )}
           </label>
           <div className="field-row">
             <label className="field">
-              <span>Váha ({inputUnitLabel(unitPreference)}/ks)</span>
+              <span>Weight ({inputUnitLabel(unitPreference)}/unit)</span>
               <input
                 type="number"
                 min={0}
@@ -86,7 +122,7 @@ export function GearItemFormDialog({ categories, unitPreference, initial, onSubm
               />
             </label>
             <label className="field">
-              <span>Výchozí množství</span>
+              <span>Default quantity</span>
               <input
                 type="number"
                 min={1}
@@ -97,34 +133,20 @@ export function GearItemFormDialog({ categories, unitPreference, initial, onSubm
             </label>
           </div>
           <label className="field">
-            <span>Typ váhy</span>
-            <select value={weightType} onChange={(e) => setWeightType(e.target.value as WeightType)}>
-              {WEIGHT_TYPES.map((t) => (
-                <option key={t} value={t}>
-                  {WEIGHT_TYPE_LABELS[t]}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span>Poznámka (nepovinné)</span>
-            <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="např. bílá čokoláda" />
+            <span>Note (optional)</span>
+            <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. white chocolate" />
           </label>
           {error && <p className="form-error">{error}</p>}
           <div className="dialog-actions">
             <button type="button" className="btn btn-ghost" onClick={onCancel}>
-              Zrušit
+              Cancel
             </button>
             <button type="submit" className="btn btn-primary">
-              {initial ? 'Uložit změny' : 'Přidat'}
+              Add
             </button>
           </div>
         </form>
       </div>
     </div>
   );
-}
-
-function roundForInput(value: number): number {
-  return Math.round(value * 100) / 100;
 }

@@ -15,6 +15,11 @@ function defaultState(): AppState {
  * do prohlížeče (localStorage). Přechod na server je připravený jako
  * budoucí fáze, tahle vrstva je jediné místo, které by se při přechodu
  * měnilo.
+ *
+ * Poznámka k v2: datový model se v této verzi zásadně změnil (zrušení
+ * Draft/Finalized, Worn/Consumable přesunuté na gearlist item, snapshoty).
+ * Starší data (klíč v1) se proto nemigrují a appka po tomto updatu začíná
+ * s prázdným stavem — je to čistě lokální MVP bez cloudové zálohy.
  */
 export function loadState(): AppState {
   try {

@@ -1,36 +1,27 @@
-// Datový model HikingBuddy — viz PRDRequirements/PRD-MVP.md (v4) v repozitáři.
-
-export type WeightType = 'base' | 'worn' | 'consumable';
-
-export const WEIGHT_TYPE_LABELS: Record<WeightType, string> = {
-  base: 'Base Weight',
-  worn: 'Worn Weight',
-  consumable: 'Consumable',
-};
+// Datový model HikingBuddy — viz PRDRequirements/PRD-MVP.md (v5) v repozitáři.
 
 export type UnitPreference = 'metric' | 'imperial';
 
 export interface Category {
   id: string;
   name: string;
+  order: number;
 }
 
 export const UNCATEGORIZED = 'Uncategorized';
 
-/** Položka v Gear Vaultu (osobní databáze vybavení). FR-1, FR-9. */
+/** Položka v Gear Vaultu (osobní databáze vybavení). FR-1. */
 export interface GearItem {
   id: string;
   name: string;
   categoryId: string | null;
-  weightType: WeightType;
   /** Váha jedné jednotky, vždy v gramech (FR-3). */
   weightGrams: number;
   /** Výchozí množství při přidání do gearlistu. */
   defaultQuantity: number;
   note: string;
+  order: number;
 }
-
-export type GearListStatus = 'draft' | 'finalized';
 
 /**
  * Položka uvnitř gearlistu.
@@ -38,14 +29,16 @@ export type GearListStatus = 'draft' | 'finalized';
  * `gearItemId` je odkaz na zdrojovou položku v Gear Vaultu. Dokud je
  * neprázdný, jde o "linked" položku: pole name/categoryName/weightGrams se
  * zrcadlí z Gear Vaultu při každé jeho editaci (FR-5, po potvrzení
- * uživatelem). `weightType` a `quantity` jdou nastavit per-list nezávisle
- * (FR-9 override).
+ * uživatelem — Cancel / Create a copy / Continue).
  *
- * Jakmile se gearlist finalizuje (FR-6), `gearItemId` se nastaví na `null`
- * u všech položek — od té chvíle jsou to nezávislé zmrazené kopie a Gear
- * Vault na ně nemá žádný vliv. Stejně tak se `gearItemId` vynuluje, pokud je
- * zdrojová položka v Gear Vaultu smazána (item se "odpojí", ale zůstane v
- * gearlistu se svými posledními známými hodnotami).
+ * `gearItemId` se vynuluje (item se "odpojí"), pokud je zdrojová položka v
+ * Gear Vaultu smazána, nebo pokud uživatel při editaci zvolí "Create a copy" —
+ * od té chvíle je to nezávislá kopie se svými posledními hodnotami.
+ *
+ * `isWorn` a `isConsumable` jsou nezávislé příznaky vázané pouze na tento
+ * konkrétní gearlist (FR-9/FR-10) — nikdy nejsou vlastností Gear Vault
+ * položky a jejich přepnutí nikdy nezobrazuje potvrzovací dialog, protože
+ * neovlivňuje žádný jiný gearlist.
  */
 export interface GearListItem {
   id: string;
@@ -53,32 +46,30 @@ export interface GearListItem {
   name: string;
   categoryName: string;
   weightGrams: number;
-  /** Efektivní typ váhy použitý pro výpočty (override, nebo zrcadlo z Vaultu). */
-  weightType: WeightType;
-  /** Explicitní override typu váhy pro tento konkrétní gearlist (FR-9). Null = použij hodnotu z Vaultu (jen u linked položek). */
-  weightTypeOverride: WeightType | null;
   quantity: number;
   note: string;
+  isWorn: boolean;
+  isConsumable: boolean;
+  order: number;
 }
 
-export interface GearListBase {
+/** Zmrazená kopie obsahu gearlistu v okamžiku uložení (FR-6). Jeden snapshot na gearlist,
+ * opakované uložení ten předchozí přepíše. */
+export interface GearListSnapshot {
+  savedAt: string;
+  items: GearListItem[];
+}
+
+/** Gearlist je vždy editovatelný — žádný Draft/Finalized přepínač. Snapshot je jediný
+ * mechanismus, jak si "zamrazit" stav pro cestu, aniž by to bránilo dalším úpravám. */
+export interface GearList {
   id: string;
   name: string;
   createdAt: string;
-}
-
-export interface DraftGearList extends GearListBase {
-  status: 'draft';
   items: GearListItem[];
+  snapshot: GearListSnapshot | null;
+  order: number;
 }
-
-export interface FinalizedGearList extends GearListBase {
-  status: 'finalized';
-  items: GearListItem[];
-  finalizedAt: string;
-}
-
-export type GearList = DraftGearList | FinalizedGearList;
 
 export interface WeightBreakdown {
   base: number;

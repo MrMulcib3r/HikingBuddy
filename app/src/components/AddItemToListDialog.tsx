@@ -7,7 +7,7 @@ interface AddItemToListDialogProps {
   onClose: () => void;
 }
 
-/** FR-4: přidání položky z Gear Vaultu do Draft gearlistu, s možností nastavit množství. */
+/** FR-4: add an item from Gear Vault into a Draft gearlist, with an optional quantity. */
 export function AddItemToListDialog({ listId, onClose }: AddItemToListDialogProps) {
   const { state, addItemToList } = useApp();
   const [search, setSearch] = useState('');
@@ -27,17 +27,17 @@ export function AddItemToListDialog({ listId, onClose }: AddItemToListDialogProp
   return (
     <div className="dialog-backdrop" role="presentation" onClick={onClose}>
       <div className="dialog dialog-wide" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-        <h3>Přidat vybavení do gearlistu</h3>
+        <h3>Add gear to this gearlist</h3>
         <input
           type="search"
           className="search-input"
-          placeholder="Hledat v Gear Vaultu…"
+          placeholder="Search Gear Vault…"
           value={search}
           autoFocus
           onChange={(e) => setSearch(e.target.value)}
         />
         <div className="add-item-list">
-          {state.gearItems.length === 0 && <p className="empty-hint">Gear Vault je prázdný — nejdřív přidej vybavení vlevo.</p>}
+          {state.gearItems.length === 0 && <p className="empty-hint">Gear Vault is empty — add some gear on the left first.</p>}
           {filtered.map((item) => (
             <div key={item.id} className="add-item-row">
               <span className="add-item-name">{item.name}</span>
@@ -55,14 +55,14 @@ export function AddItemToListDialog({ listId, onClose }: AddItemToListDialogProp
                 className="btn btn-primary btn-small"
                 onClick={() => addItemToList(listId, item.id, quantityFor(item.id, item.defaultQuantity))}
               >
-                Přidat
+                Add
               </button>
             </div>
           ))}
         </div>
         <div className="dialog-actions">
           <button type="button" className="btn btn-ghost" onClick={onClose}>
-            Hotovo
+            Done
           </button>
         </div>
       </div>
