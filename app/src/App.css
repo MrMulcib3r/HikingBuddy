@@ -199,9 +199,14 @@ select {
   padding-bottom: 4px;
 }
 
+/* Rows are grids with named areas so that a narrow panel can move the "props" group
+   (category, weight, flags, quantity) onto a second line under the name — see the
+   @container rules at the end of this file. The breakpoint depends on the panel's own
+   width, not the window's, so it also works with the window snapped to half a screen. */
 .vault-item-row {
   display: grid;
-  grid-template-columns: auto 1fr auto auto auto auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  grid-template-areas: 'handle main props actions';
   align-items: center;
   gap: 10px;
   padding: 8px 6px;
@@ -210,15 +215,46 @@ select {
 
 .list-item-row {
   display: grid;
-  grid-template-columns: auto 1fr auto auto auto auto auto auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+  grid-template-areas: 'handle main props subtotal actions';
   align-items: center;
   gap: 10px;
   padding: 8px 6px;
   border-radius: 6px;
 }
 
-.list-item-row-readonly {
-  grid-template-columns: 1fr auto auto auto auto;
+.vault-item-row > .drag-handle,
+.list-item-row > .drag-handle {
+  grid-area: handle;
+}
+.vault-item-main,
+.list-item-main {
+  grid-area: main;
+}
+.vault-item-props,
+.list-item-props {
+  grid-area: props;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.list-item-row > .list-item-subtotal {
+  grid-area: subtotal;
+  text-align: right;
+}
+.vault-item-actions,
+.list-item-actions {
+  grid-area: actions;
+}
+
+/* Read-only snapshot rows have their own simple layout (no areas). */
+.list-item-row.list-item-row-readonly {
+  grid-template-columns: minmax(0, 1fr) auto auto auto auto;
+  grid-template-areas: none;
+}
+.list-item-row.list-item-row-readonly > * {
+  grid-area: auto;
 }
 
 .drag-handle {
@@ -357,6 +393,11 @@ select {
   gap: 6px;
 }
 
+.vault-list,
+.list-items {
+  container-type: inline-size;
+}
+
 .empty-hint {
   color: #7f8798;
   font-size: 0.9rem;
@@ -405,13 +446,90 @@ select {
   color: #ffb46b;
 }
 
-/* Gear lists panel */
-.gear-lists-panel {
-  padding: 0;
+/* Gear lists panel — the open gearlist's name is a dropdown for switching lists
+   (replaces the former sidebar column, so the list gets the full panel width). */
+.gear-lists-panel .panel-header {
+  gap: 12px;
 }
-.gear-lists-panel > .panel-header,
-.gear-lists-panel > .new-list-form {
-  padding: 16px 20px 0;
+
+.gearlist-switcher {
+  position: relative;
+  min-width: 0;
+  flex: 1;
+}
+
+.gearlist-switcher-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  margin-left: -8px;
+  padding: 4px 8px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: #e8e9ec;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+.gearlist-switcher-button:hover,
+.gearlist-switcher-button[aria-expanded='true'] {
+  background: #1f232b;
+  border-color: #3a3f4a;
+}
+
+.gearlist-switcher-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gearlist-switcher-caret {
+  color: #9aa0ab;
+  font-size: 0.9rem;
+}
+
+.gearlist-switcher-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: -8px;
+  z-index: 20;
+  min-width: 260px;
+  max-width: min(420px, 90vw);
+  max-height: 60vh;
+  overflow-y: auto;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: #1b1e24;
+  border: 1px solid #2f333c;
+  border-radius: 8px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+.gearlist-switcher-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: #cfd3da;
+}
+.gearlist-switcher-item:hover {
+  background: #1f232b;
+}
+.gearlist-switcher-item.active {
+  background: #22304f;
+  color: #e8e9ec;
+}
+
+.gearlist-switcher-item-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .new-list-form {
@@ -421,6 +539,7 @@ select {
 }
 .new-list-form input {
   flex: 1;
+  min-width: 0;
   background: #10131a;
   border: 1px solid #3a3f4a;
   border-radius: 6px;
@@ -428,61 +547,17 @@ select {
   color: #e8e9ec;
 }
 
-.gear-lists-body {
-  display: grid;
-  grid-template-columns: 220px 1fr;
-  flex: 1;
-  min-height: 0;
-  border-top: 1px solid #262b34;
-}
-
-.list-sidebar {
-  list-style: none;
-  margin: 0;
-  padding: 8px;
-  border-right: 1px solid #262b34;
-  overflow-y: auto;
-}
-
-.list-sidebar-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 0.88rem;
-  color: #cfd3da;
-}
-
-.list-sidebar-name {
-  flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.list-sidebar-item:hover {
-  background: #1f232b;
-}
-.list-sidebar-item.active {
-  background: #22304f;
-  color: #e8e9ec;
-}
-
-.list-detail-container {
-  overflow-y: auto;
-  padding: 16px 20px;
+.list-detail {
+  container-type: inline-size;
 }
 
 .list-detail-header {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 10px;
   margin-bottom: 14px;
-}
-
-.list-detail-header h3 {
-  margin: 0 0 4px;
 }
 
 .list-detail-meta {
@@ -494,8 +569,12 @@ select {
 
 .list-detail-actions {
   display: flex;
+  align-items: center;
   gap: 8px;
   flex-shrink: 0;
+}
+.list-detail-actions .btn-secondary {
+  margin: 0;
 }
 
 /* Weight summary tiles */
@@ -694,17 +773,49 @@ select {
   padding: 5px;
 }
 
+/* Narrow panel (e.g. window snapped to half a screen): item properties move to a second
+   line under the name, so the name and note stay readable. */
+@container (max-width: 720px) {
+  .list-item-row {
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      'handle main subtotal actions'
+      '. props props props';
+    row-gap: 6px;
+  }
+  .list-item-props {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+}
+
+@container (max-width: 480px) {
+  .vault-item-row {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'handle main actions'
+      '. props props';
+    row-gap: 6px;
+  }
+  .vault-item-props {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+}
+
+@container (max-width: 520px) {
+  .weight-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 900px) {
   .app-main {
     grid-template-columns: 1fr;
     grid-auto-rows: min-content;
     overflow-y: auto;
   }
-  .gear-lists-body {
-    grid-template-columns: 1fr;
-  }
-  .list-sidebar {
-    border-right: none;
-    border-bottom: 1px solid #262b34;
+  .panel {
+    overflow-y: visible;
   }
 }

@@ -69,34 +69,38 @@ export function GearListItemRow({ listId, item, onRequestCoreEdit, onReorder }: 
         {!linked && <span className="badge badge-unlinked">custom entry</span>}
       </div>
 
-      <InlineCategorySelect
-        categories={state.categories}
-        categoryId={linked ? vaultCategory?.id ?? null : null}
-        categoryName={item.categoryName}
-        onChange={handleCategoryChange}
-      />
+      {/* Grouped so that in a narrow panel they can wrap onto a second line under the name
+          (see .list-item-props in App.css) instead of squeezing the name to nothing. */}
+      <div className="list-item-props">
+        <InlineCategorySelect
+          categories={state.categories}
+          categoryId={linked ? vaultCategory?.id ?? null : null}
+          categoryName={item.categoryName}
+          onChange={handleCategoryChange}
+        />
 
-      <InlineNumberField
-        className="list-item-weight"
-        value={fromGrams(item.weightGrams, state.unitPreference)}
-        format={(v) => formatWeight(toGrams(v, state.unitPreference), state.unitPreference)}
-        onCommit={handleWeightCommit}
-      />
+        <InlineNumberField
+          className="list-item-weight"
+          value={fromGrams(item.weightGrams, state.unitPreference)}
+          format={(v) => formatWeight(toGrams(v, state.unitPreference), state.unitPreference)}
+          onCommit={handleWeightCommit}
+        />
 
-      <ItemFlagsToggle
-        isWorn={item.isWorn}
-        isConsumable={item.isConsumable}
-        onChange={(patch) => updateListItem(listId, item.id, patch)}
-      />
+        <ItemFlagsToggle
+          isWorn={item.isWorn}
+          isConsumable={item.isConsumable}
+          onChange={(patch) => updateListItem(listId, item.id, patch)}
+        />
 
-      <InlineNumberField
-        className="list-item-qty"
-        value={item.quantity}
-        min={1}
-        integer
-        format={(v) => `×${v}`}
-        onCommit={(quantity) => updateListItem(listId, item.id, { quantity })}
-      />
+        <InlineNumberField
+          className="list-item-qty"
+          value={item.quantity}
+          min={1}
+          integer
+          format={(v) => `×${v}`}
+          onCommit={(quantity) => updateListItem(listId, item.id, { quantity })}
+        />
+      </div>
 
       <span className="list-item-subtotal">{formatWeight(item.weightGrams * item.quantity, state.unitPreference)}</span>
 

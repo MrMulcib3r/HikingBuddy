@@ -262,27 +262,29 @@ function VaultItemRow({ item, unitPreference, categories, onCreateCategory, onEd
           onCommit={onEditNote}
         />
       </div>
-      <InlineCategorySelect
-        categories={categories}
-        categoryId={item.categoryId}
-        categoryName={categoryName}
-        onChange={(categoryId) => onEditCore({ categoryId })}
-        onCreateCategory={onCreateCategory}
-      />
-      <InlineNumberField
-        className="vault-item-weight"
-        value={fromGrams(item.weightGrams, unitPreference)}
-        format={(v) => formatWeight(toGrams(v, unitPreference), unitPreference)}
-        onCommit={(v) => onEditCore({ weightGrams: toGrams(v, unitPreference) })}
-      />
-      <InlineNumberField
-        className="vault-item-qty"
-        value={item.defaultQuantity}
-        min={1}
-        integer
-        format={(v) => `×${v}`}
-        onCommit={onEditQuantity}
-      />
+      <div className="vault-item-props">
+        <InlineCategorySelect
+          categories={categories}
+          categoryId={item.categoryId}
+          categoryName={categoryName}
+          onChange={(categoryId) => onEditCore({ categoryId })}
+          onCreateCategory={onCreateCategory}
+        />
+        <InlineNumberField
+          className="vault-item-weight"
+          value={fromGrams(item.weightGrams, unitPreference)}
+          format={(v) => formatWeight(toGrams(v, unitPreference), unitPreference)}
+          onCommit={(v) => onEditCore({ weightGrams: toGrams(v, unitPreference) })}
+        />
+        <InlineNumberField
+          className="vault-item-qty"
+          value={item.defaultQuantity}
+          min={1}
+          integer
+          format={(v) => `×${v}`}
+          onCommit={onEditQuantity}
+        />
+      </div>
       <div className="vault-item-actions">
         <button type="button" className="btn btn-ghost btn-small" onClick={onDelete}>
           Delete

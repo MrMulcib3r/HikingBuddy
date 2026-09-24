@@ -72,7 +72,6 @@ export function GearListDetail({ list, onDeleted }: GearListDetailProps) {
     <div className="list-detail">
       <header className="list-detail-header">
         <div>
-          <h3>{list.name}</h3>
           <p className="list-detail-meta">
             Always editable — live-linked to Gear Vault. Save a snapshot below before a trip to keep a record of what you packed.
           </p>
