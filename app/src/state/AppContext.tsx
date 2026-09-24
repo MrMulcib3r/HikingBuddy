@@ -31,7 +31,8 @@ type Action =
   | { type: 'SAVE_SNAPSHOT'; listId: string }
   | { type: 'REORDER_LISTS'; sourceId: string; targetId: string }
   | { type: 'DELETE_LIST'; listId: string }
-  | { type: 'SET_UNIT_PREFERENCE'; pref: UnitPreference };
+  | { type: 'SET_UNIT_PREFERENCE'; pref: UnitPreference }
+  | { type: 'REPLACE_STATE'; state: AppState };
 
 function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
@@ -185,6 +186,11 @@ function reducer(state: AppState, action: Action): AppState {
     case 'SET_UNIT_PREFERENCE': {
       return { ...state, unitPreference: action.pref };
     }
+    case 'REPLACE_STATE': {
+      // Used by BackupControls' "Import backup" — wholesale swap-in of a previously
+      // exported (and already schema-migrated) AppState.
+      return action.state;
+    }
     default:
       return state;
   }
@@ -239,6 +245,7 @@ interface AppContextValue {
   reorderLists: (sourceId: string, targetId: string) => void;
   deleteList: (listId: string) => void;
   setUnitPreference: (pref: UnitPreference) => void;
+  replaceState: (state: AppState) => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -290,6 +297,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       reorderLists: (sourceId, targetId) => dispatch({ type: 'REORDER_LISTS', sourceId, targetId }),
       deleteList: (listId) => dispatch({ type: 'DELETE_LIST', listId }),
       setUnitPreference: (pref) => dispatch({ type: 'SET_UNIT_PREFERENCE', pref }),
+      replaceState: (state) => dispatch({ type: 'REPLACE_STATE', state }),
     }),
     [state]
   );

@@ -7,10 +7,10 @@ Martin is the Product Manager and owner of this project. He is **not a developer
 - Product decisions (what the app does, how it behaves for the user) are Martin's. If a requirement is unclear or contradicts the PRD, ask him before building. Implementation details (how the code is written) are yours to decide, but tell him what you chose and why.
 
 ## Source of truth
-- **`PRDRequirements/PRD-MVP.md`** (currently v7) — what we are building and why. Read it before any feature work. Code must match it; if they disagree, flag it to Martin.
+- **`PRDRequirements/PRD-MVP.md`** (currently v8) — what we are building and why. Read it before any feature work. Code must match it; if they disagree, flag it to Martin.
 - **`PRDRequirements/build-status.md`** — log of what has been built, decided and verified. Read it at the start of a session; **append an entry after every meaningful change**.
 - `PRDRequirements/gemini-code-*.txt` — the original long-term vision (v1). Reference only, *not* the current scope.
-- If a product decision changes during work, update the PRD (bump the version, add a line to its history and to section 8 "Rozhodnutí") in the same change.
+- If a product decision changes during work, update the PRD (bump the version, add a line to its history and to section 8/8a "Rozhodnutí") in the same change.
 
 ## The app
 Single-page web app for planning hiking gear, inspired by lighterpack.com.
@@ -28,10 +28,19 @@ Single-page web app for planning hiking gear, inspired by lighterpack.com.
 - UI text is **English**. Code comments may be Czech or English.
 - Out of MVP scope (do not build unless Martin asks): accounts/login, server, offline/PWA, public sharing, charts, templates, multiple snapshots.
 
+## Data storage — read this before touching `src/types.ts` or `src/storage.ts`
+
+**Incident that made this its own section (2026-09-22 → fixed 2026-09-24):** the v7 rework changed `AppState`'s shape and, instead of migrating old data, renamed the storage key — which orphaned Martin's real browser data and looked exactly like data loss. It was recovered (see PRD section 6a and `build-status.md`, 2026-09-24 entry), but the rule below exists so it never happens again. Treat it as a hard rule, same weight as "the build must pass":
+
+1. **`STORAGE_KEY` in `src/constants.ts` never changes again.** If you're tempted to rename it, you're about to repeat the 2026-09-22 mistake — add a migration instead.
+2. Every time `AppState`, `GearItem`, `GearListItem`, `GearList`, or `Category`'s shape changes: bump `CURRENT_SCHEMA_VERSION` in `src/storage.ts` by 1, and add a migration function to the `MIGRATIONS` map, keyed by the version it migrates *from*. Look at `migrateV1ToV2` for the pattern and the level of defensiveness expected (default every field, never assume a key exists).
+3. Before calling the change done, actually run it against old-shape data: seed `localStorage['hikingbuddy-state']` (or a legacy key) with a payload in the *previous* schema via the browser console or a quick Playwright script, reload the app, and confirm the data comes back correctly — don't just trust that the migration function type-checks.
+4. `localStorage` (used via `src/storage.ts`) is still the only place data lives day-to-day — no account/server yet (see PRD section 2). Its real limit isn't the app's shape changing (rule above fixes that) but the browser's own "clear site data" wiping it outright, which no in-app code can prevent. That's what `src/components/BackupControls.tsx` (Export/Import to a `.json` file) is for — point Martin there if he's worried about losing data, don't try to solve it by switching storage APIs (IndexedDB has the exact same "browser clears it" exposure).
+5. A real database (local auto-save file via File System Access API, or eventually a server) is proposed in PRD section 6a but **not implemented** — don't build it speculatively; it's listed in `BACKLOG.md` for when it's actually next.
+
 ## Tech
 - React 19 + Vite + TypeScript, lint with oxlint. Everything lives in `app/`.
-- Data is stored only in the browser (`localStorage`) via `app/src/storage.ts` — the single place to change if a server is added later. A storage format change must either migrate old data or be explicitly agreed with Martin (v7 reset data once, with his OK).
-- Key files: `src/types.ts` (data model), `src/state/AppContext.tsx` (state + actions), `src/state/logic.ts` (weight math, affected-lists lookup), `src/components/` (UI).
+- Key files: `src/types.ts` (data model), `src/state/AppContext.tsx` (state + actions), `src/state/logic.ts` (weight math, affected-lists lookup), `src/storage.ts` (persistence + migrations — see "Data storage" above), `src/components/` (UI).
 
 ## Commands (run inside `app/`)
 - `npm install` — install dependencies (first time / after package changes)
@@ -39,11 +48,9 @@ Single-page web app for planning hiking gear, inspired by lighterpack.com.
 - `npm run build` — typecheck + production build (**must pass before you call a change done**)
 - `npm run lint` — lint
 
-There is no automated test suite in the repo yet (earlier checks were one-off Playwright smoke tests). When you add or change behaviour, verify it by running the app; adding a proper test setup is a welcome improvement — propose it to Martin first.
+There is no automated test suite in the repo yet (earlier checks were one-off Playwright smoke tests). When you add or change behaviour, verify it by running the app; adding a proper test setup is a welcome improvement — see `BACKLOG.md` Inbox, propose it to Martin first.
 
 ## Working style
 - Small, focused changes; commit each logical step to git with a clear message, so any step can be undone.
 - After finishing, give Martin a short Czech summary: what changed, why, how you verified it, and how he can try it.
-
-## Known cleanup
-- Nothing open right now.
+- See `BACKLOG.md` for how work gets prioritized and logged, and `design/` for wireframes/screenshots referenced from it.
