@@ -819,3 +819,56 @@ select {
     overflow-y: visible;
   }
 }
+
+/* Category icon tiles in the "Add item to Gear Vault" form (replaces the dropdown) */
+.category-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(76px, 1fr));
+  gap: 8px;
+}
+
+.category-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 76px;
+  padding: 10px 6px;
+  background: #10131a;
+  border: 1px solid #3a3f4a;
+  border-radius: 8px;
+  color: #b5bac4;
+}
+.category-tile:hover {
+  border-color: #565c6a;
+  color: #e8e9ec;
+}
+.category-tile.selected {
+  background: #22304f;
+  border-color: #3a6ff0;
+  color: #e8e9ec;
+}
+.category-tile-other {
+  border-style: dashed;
+}
+
+.category-tile-label {
+  font-size: 0.72rem;
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.category-tiles-new {
+  margin-top: 8px;
+}
+.category-tiles-new input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  background: #10131a;
+  border: 1px solid #3a3f4a;
+  border-radius: 6px;
+  color: #e8e9ec;
+}
