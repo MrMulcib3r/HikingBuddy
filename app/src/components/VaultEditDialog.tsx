@@ -4,6 +4,11 @@ interface VaultEditDialogProps {
   onCancel: () => void;
   onCopy: () => void;
   onContinue: () => void;
+  /** Button labels — default to the edit wording; deleting a used item reuses this dialog
+   * with its own labels (keep rows as custom entries / delete everywhere). */
+  copyLabel?: string;
+  continueLabel?: string;
+  continueDanger?: boolean;
 }
 
 /**
@@ -19,7 +24,16 @@ interface VaultEditDialogProps {
  *   old, unchanged item — except the specific row being edited, which switches to the copy.
  * - Continue: applies the edit to the shared item, so it updates in every gearlist that uses it.
  */
-export function VaultEditDialog({ title, message, onCancel, onCopy, onContinue }: VaultEditDialogProps) {
+export function VaultEditDialog({
+  title,
+  message,
+  onCancel,
+  onCopy,
+  onContinue,
+  copyLabel = 'Create a copy of the item',
+  continueLabel = 'Continue',
+  continueDanger = false,
+}: VaultEditDialogProps) {
   return (
     <div className="dialog-backdrop" role="presentation" onClick={onCancel}>
       <div className="dialog" role="dialog" aria-modal="true" aria-labelledby="vault-edit-title" onClick={(e) => e.stopPropagation()}>
@@ -30,10 +44,10 @@ export function VaultEditDialog({ title, message, onCancel, onCopy, onContinue }
             Cancel
           </button>
           <button type="button" className="btn btn-secondary" onClick={onCopy}>
-            Create a copy of the item
+            {copyLabel}
           </button>
-          <button type="button" className="btn btn-primary" onClick={onContinue}>
-            Continue
+          <button type="button" className={continueDanger ? 'btn btn-danger' : 'btn btn-primary'} onClick={onContinue}>
+            {continueLabel}
           </button>
         </div>
       </div>

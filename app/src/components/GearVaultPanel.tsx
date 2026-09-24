@@ -193,18 +193,35 @@ export function GearVaultPanel() {
         />
       )}
 
-      {pendingDelete && (
+      {/* Deleting an item that gearlists use is the same kind of change as editing it
+          (FR-5): blocking 3-way choice, never silent. */}
+      {pendingDelete && pendingDelete.affectedCount > 0 && (
+        <VaultEditDialog
+          title="This item is used in existing gearlists"
+          message={`"${pendingDelete.name}" is used in ${pendingDelete.affectedCount} gearlist(s). Do you want to remove it from those gearlists too, or keep it there as a custom entry that is no longer linked to Gear Vault? Saved snapshots are never changed.`}
+          copyLabel="Keep in gearlists"
+          continueLabel="Delete everywhere"
+          continueDanger
+          onCancel={() => setPendingDelete(null)}
+          onCopy={() => {
+            deleteGearItem(pendingDelete.id, false);
+            setPendingDelete(null);
+          }}
+          onContinue={() => {
+            deleteGearItem(pendingDelete.id, true);
+            setPendingDelete(null);
+          }}
+        />
+      )}
+
+      {pendingDelete && pendingDelete.affectedCount === 0 && (
         <ConfirmDialog
           title="Delete item from Gear Vault"
           danger
-          message={
-            pendingDelete.affectedCount > 0
-              ? `"${pendingDelete.name}" is used in ${pendingDelete.affectedCount} gearlist(s). After deletion it will stay there with its last known values, but will no longer be linked to Gear Vault. Continue?`
-              : `Delete "${pendingDelete.name}" from Gear Vault?`
-          }
+          message={`Delete "${pendingDelete.name}" from Gear Vault?`}
           confirmLabel="Delete"
           onConfirm={() => {
-            deleteGearItem(pendingDelete.id);
+            deleteGearItem(pendingDelete.id, false);
             setPendingDelete(null);
           }}
           onCancel={() => setPendingDelete(null)}

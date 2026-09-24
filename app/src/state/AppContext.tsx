@@ -19,7 +19,7 @@ type Action =
   | { type: 'REORDER_CATEGORIES'; sourceId: string; targetId: string }
   | { type: 'ADD_GEAR_ITEM'; id: string; item: GearItemPatch }
   | { type: 'UPDATE_GEAR_ITEM'; id: string; patch: GearItemPatch }
-  | { type: 'DELETE_GEAR_ITEM'; id: string }
+  | { type: 'DELETE_GEAR_ITEM'; id: string; removeFromLists: boolean }
   | { type: 'REORDER_GEAR_ITEMS'; sourceId: string; targetId: string; targetCategoryId: string | null }
   | { type: 'CREATE_LIST'; id: string; name: string }
   | { type: 'ADD_ITEM_TO_LIST'; listId: string; gearItemId: string; quantity: number }
@@ -70,9 +70,12 @@ function reducer(state: AppState, action: Action): AppState {
     }
     case 'DELETE_GEAR_ITEM': {
       const gearItems = state.gearItems.filter((g) => g.id !== action.id);
-      // Odpojí (detach) položky ve všech gearlistech, které na smazanou položku odkazovaly —
-      // zůstanou tam s posledními známými hodnotami, ale dál nezávisle editovatelné.
-      const gearLists = state.gearLists.map((list) => detachDeletedItem(list, action.id));
+      // Uživatel volí v dialogu (FR-5): buď se řádky odkazující na smazanou položku ze všech
+      // gearlistů odstraní ("Delete everywhere"), nebo se jen odpojí (detach) — zůstanou tam
+      // s posledními známými hodnotami jako custom entry. Snapshoty se nemění nikdy.
+      const gearLists = state.gearLists.map((list) =>
+        action.removeFromLists ? removeDeletedItem(list, action.id) : detachDeletedItem(list, action.id)
+      );
       return { ...state, gearItems, gearLists };
     }
     case 'REORDER_GEAR_ITEMS': {
@@ -211,6 +214,11 @@ function detachDeletedItem(list: GearList, deletedGearItemId: string): GearList 
   return { ...list, items };
 }
 
+function removeDeletedItem(list: GearList, deletedGearItemId: string): GearList {
+  const items = sortByOrder(list.items.filter((item) => item.gearItemId !== deletedGearItemId));
+  return { ...list, items: withSequentialOrder(items) };
+}
+
 function syncLinkedItemsAfterCategoryRename(list: GearList, gearItems: GearItem[], categories: Category[]): GearList {
   const items = list.items.map((item) => {
     if (!item.gearItemId) return item;
@@ -229,7 +237,9 @@ interface AppContextValue {
   reorderCategories: (sourceId: string, targetId: string) => void;
   addGearItem: (item: GearItemPatch) => string;
   updateGearItem: (id: string, patch: GearItemPatch) => void;
-  deleteGearItem: (id: string) => void;
+  /** removeFromLists: true = also remove its rows from every gearlist ("Delete everywhere");
+   * false = keep those rows as unlinked custom entries. Snapshots are never touched. */
+  deleteGearItem: (id: string, removeFromLists: boolean) => void;
   reorderGearItems: (sourceId: string, targetId: string, targetCategoryId: string | null) => void;
   createList: (name: string) => string;
   addItemToList: (listId: string, gearItemId: string, quantity: number) => void;
@@ -274,7 +284,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         return id;
       },
       updateGearItem: (id, patch) => dispatch({ type: 'UPDATE_GEAR_ITEM', id, patch }),
-      deleteGearItem: (id) => dispatch({ type: 'DELETE_GEAR_ITEM', id }),
+      deleteGearItem: (id, removeFromLists) => dispatch({ type: 'DELETE_GEAR_ITEM', id, removeFromLists }),
       reorderGearItems: (sourceId, targetId, targetCategoryId) =>
         dispatch({ type: 'REORDER_GEAR_ITEMS', sourceId, targetId, targetCategoryId }),
       createList: (name) => {
