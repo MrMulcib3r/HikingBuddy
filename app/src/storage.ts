@@ -14,7 +14,7 @@ import type { AppState } from './types';
  * loadState() below applies every migration in sequence up to CURRENT_SCHEMA_VERSION, so a
  * user who hasn't opened the app in months still gets their data upgraded correctly.
  */
-export const CURRENT_SCHEMA_VERSION = 2;
+export const CURRENT_SCHEMA_VERSION = 3;
 
 interface StoredPayload {
   schemaVersion: number;
@@ -86,8 +86,31 @@ const migrateV1ToV2: Migration = (raw) => {
   };
 };
 
+/**
+ * Schema 3 = same shape as schema 2; the only change is content. "Backpack" joined the
+ * default category template (FR-2) after Martin's first data was created, so data from
+ * before that never got it. Adds it once, at the top (its place in the template), unless
+ * a category with that name already exists. Runs only once per data set, so if the user
+ * later deletes Backpack it stays deleted.
+ */
+const migrateV2ToV3: Migration = (raw) => {
+  const state = (raw ?? {}) as Record<string, any>;
+  const categories: any[] = Array.isArray(state.categories) ? state.categories : [];
+  const backpack = DEFAULT_CATEGORIES.find((c) => c.id === 'cat-backpack')!;
+  const hasBackpack = categories.some(
+    (c) => c.id === backpack.id || String(c.name).trim().toLowerCase() === backpack.name.toLowerCase()
+  );
+  if (hasBackpack || categories.length === 0) return state; // empty → normalizeState fills in defaults
+  const sorted = [...categories].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+  return {
+    ...state,
+    categories: [backpack, ...sorted].map((c, i) => ({ ...c, order: i })),
+  };
+};
+
 const MIGRATIONS: Record<number, Migration> = {
   1: migrateV1ToV2,
+  2: migrateV2ToV3,
 };
 
 function runMigrations(state: unknown, fromVersion: number): AppState {
