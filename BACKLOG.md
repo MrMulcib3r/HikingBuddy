@@ -65,9 +65,14 @@ Template (nemazat): - [TYP] Krátký název – co se děje / co chci (datum)
 - [ ] [FEATURE] Nasazení na hosting (Vercel/Netlify) – appka dostupná přes odkaz i z mobilu, bez spouštění na počítači. Proč: testování v reálu a sdílení s lidmi pro feedback. (2026-09-23, navrhl Claude)
 - [ ] [FEATURE] Lokální auto-save do souboru na disku (File System Access API) – appka by si jednou vybrala složku a pak do ní automaticky ukládala zálohu při každé změně, bez nutnosti ručně klikat na Export. Proč: dnešní Export/Import (viz Hotovo, 2026-09-24) vyžaduje, aby si na to Martin sám vzpomněl – tohle by bylo bez námahy. Viz PRD sekce 6a, bod 1. (2026-09-24, navrhl Claude)
 - [ ] [FEATURE] Skutečná databáze na serveru – appka s účtem, data uložená na serveru místo jen v prohlížeči. Proč: jediné řešení bez ručních kroků a zároveň technický základ pro sync mezi zařízeními (PRD sekce 7, bod 2) i komunitní sdílení (PRD sekce 9). Větší krok, dává smysl řešit až s těmito featurami, ne samostatně kvůli záloze. Viz PRD sekce 6a, bod 2. (2026-09-24, navrhl Claude)
-- [ ] - [CR] When updating gear items in a gearlist(-s) the user needs to know which gear lists are affected.
+- [ ] - [CR] When updating gear items in a gearlist(-s) the user needs to know which gear lists are affected. (24.9.2026)
 ![[Pasted image 20260924165604.png|376]]
-- [ ] - [] Krátký název – co se děje / co chci (datum)
+- [ ] - [BUG] Categories cannot be edited. It should be possible to edit all categories including the template one. (24.9.2026)
+![[Pasted image 20260924170230.png|360]]
+- [Bug] When creating new item and clicking out of the dialogue window whole window is closed. (24.9.2026)
+![[Pasted image 20260924174122.png|361]]
+
+- [CR] Rename Shelter to "Shelter system" (24.9.2026).
 
 ## 🔴 Teď
 
