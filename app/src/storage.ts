@@ -14,7 +14,7 @@ import type { AppState } from './types';
  * loadState() below applies every migration in sequence up to CURRENT_SCHEMA_VERSION, so a
  * user who hasn't opened the app in months still gets their data upgraded correctly.
  */
-export const CURRENT_SCHEMA_VERSION = 3;
+export const CURRENT_SCHEMA_VERSION = 5;
 
 interface StoredPayload {
   schemaVersion: number;
@@ -108,9 +108,61 @@ const migrateV2ToV3: Migration = (raw) => {
   };
 };
 
+/**
+ * Schema 4 = same shape as schema 3; content only. The default "Shelter" category was
+ * renamed to "Shelter System" (BACKLOG CR, 2026-09-24; done 2026-10-08) to match "Sleep
+ * System". Existing data gets the same rename once — exactly what renaming it by hand would
+ * do: the category's name changes, and live gearlist rows linked to Vault items in that
+ * category show the new name. Unlinked custom rows and snapshots are left untouched
+ * (snapshots are a frozen record and must never change). Skipped if the user has no
+ * Shelter category or already has a "Shelter System" one. Runs once, so a later manual
+ * rename back to "Shelter" sticks.
+ */
+const migrateV3ToV4: Migration = (raw) => {
+  const state = (raw ?? {}) as Record<string, any>;
+  const categories: any[] = Array.isArray(state.categories) ? state.categories : [];
+  const NEW_NAME = 'Shelter System';
+  const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();
+  if (categories.some((c) => norm(c?.name) === norm(NEW_NAME))) return state;
+  const shelter =
+    categories.find((c) => c?.id === 'cat-shelter' && norm(c?.name) === 'shelter') ??
+    categories.find((c) => norm(c?.name) === 'shelter');
+  if (!shelter) return state;
+
+  const gearItems: any[] = Array.isArray(state.gearItems) ? state.gearItems : [];
+  const shelterItemIds = new Set(gearItems.filter((g) => g?.categoryId === shelter.id).map((g) => g.id));
+  const gearLists: any[] = Array.isArray(state.gearLists) ? state.gearLists : [];
+  return {
+    ...state,
+    categories: categories.map((c) => (c === shelter ? { ...c, name: NEW_NAME } : c)),
+    gearLists: gearLists.map((l) => ({
+      ...l,
+      items: (Array.isArray(l?.items) ? l.items : []).map((it: any) =>
+        it?.gearItemId && shelterItemIds.has(it.gearItemId) ? { ...it, categoryName: NEW_NAME } : it
+      ),
+    })),
+  };
+};
+
+/**
+ * Schema 5 = Gearlist Template (PRD section 7, point 5). New fields `templates` (list of
+ * templates, gearlist-shaped) and `templateBannerDismissed`. Existing data simply gets
+ * "no template yet" and the banner not dismissed — nothing else changes.
+ */
+const migrateV4ToV5: Migration = (raw) => {
+  const state = (raw ?? {}) as Record<string, any>;
+  return {
+    ...state,
+    templates: Array.isArray(state.templates) ? state.templates : [],
+    templateBannerDismissed: state.templateBannerDismissed === true,
+  };
+};
+
 const MIGRATIONS: Record<number, Migration> = {
   1: migrateV1ToV2,
   2: migrateV2ToV3,
+  3: migrateV3ToV4,
+  4: migrateV4ToV5,
 };
 
 function runMigrations(state: unknown, fromVersion: number): AppState {
@@ -131,6 +183,8 @@ function normalizeState(raw: unknown): AppState {
     categories: s.categories ?? DEFAULT_CATEGORIES,
     gearItems: s.gearItems ?? [],
     gearLists: s.gearLists ?? [],
+    templates: Array.isArray(s.templates) ? s.templates : [],
+    templateBannerDismissed: s.templateBannerDismissed === true,
     unitPreference: s.unitPreference ?? 'metric',
   };
 }
@@ -140,6 +194,8 @@ function defaultState(): AppState {
     categories: DEFAULT_CATEGORIES,
     gearItems: [],
     gearLists: [],
+    templates: [],
+    templateBannerDismissed: false,
     unitPreference: 'metric',
   };
 }

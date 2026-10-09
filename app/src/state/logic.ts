@@ -42,3 +42,17 @@ export function computeBreakdown(items: GearListItem[]): WeightBreakdown {
 export function findAffectedLists(state: AppState, gearItemId: string): GearList[] {
   return state.gearLists.filter((list) => list.items.some((i) => i.gearItemId === gearItemId));
 }
+
+/** Templates containing the Vault item. The template counts as "used elsewhere" (PRD 7.5,
+ * T-5/T-6), so edits and deletes of such an item always go through a dialog. */
+export function findAffectedTemplates(state: AppState, gearItemId: string): GearList[] {
+  return state.templates.filter((t) => t.items.some((i) => i.gearItemId === gearItemId));
+}
+
+/** Plain-language "where is it used" for dialog messages, e.g. "2 gearlist(s) and your template". */
+export function describeUsage(listCount: number, templateCount: number): string {
+  const parts: string[] = [];
+  if (listCount > 0) parts.push(`${listCount} gearlist(s)`);
+  if (templateCount > 0) parts.push('your template');
+  return parts.join(' and ');
+}

@@ -3,6 +3,7 @@ import { loadState, saveState } from '../storage';
 import { newId } from '../utils/id';
 import { reorderById, sortByOrder, withSequentialOrder } from '../utils/reorder';
 import { categoryNameFor, mirrorFromVault } from './logic';
+import { TEMPLATE_NAME } from '../constants';
 import type { AppState, Category, GearItem, GearList, GearListItem, UnitPreference } from '../types';
 
 type GearItemPatch = Omit<GearItem, 'id' | 'order'>;
@@ -31,6 +32,10 @@ type Action =
   | { type: 'SAVE_SNAPSHOT'; listId: string }
   | { type: 'REORDER_LISTS'; sourceId: string; targetId: string }
   | { type: 'DELETE_LIST'; listId: string }
+  | { type: 'SAVE_AS_TEMPLATE'; listId: string; templateId: string }
+  | { type: 'DELETE_TEMPLATE'; templateId: string }
+  | { type: 'CREATE_LIST_FROM_TEMPLATE'; id: string; name: string; templateId: string }
+  | { type: 'DISMISS_TEMPLATE_BANNER' }
   | { type: 'SET_UNIT_PREFERENCE'; pref: UnitPreference }
   | { type: 'REPLACE_STATE'; state: AppState };
 
@@ -45,14 +50,12 @@ function reducer(state: AppState, action: Action): AppState {
       // Přejmenování kategorie se u "linked" položek v gearlistech promítne hned
       // (categoryName je jen zrcadlo, dokud item odkazuje na Vault). U odpojených
       // (unlinked) položek zůstává zmrazené jméno — to je záměr.
-      const gearLists = state.gearLists.map((list) => syncLinkedItemsAfterCategoryRename(list, state.gearItems, categories));
-      return { ...state, categories, gearLists };
+      return mapAllLists({ ...state, categories }, (list) => syncLinkedItemsAfterCategoryRename(list, state.gearItems, categories));
     }
     case 'DELETE_CATEGORY': {
       const categories = state.categories.filter((c) => c.id !== action.id);
       const gearItems = state.gearItems.map((item) => (item.categoryId === action.id ? { ...item, categoryId: null } : item));
-      const gearLists = state.gearLists.map((list) => syncLinkedItemsAfterCategoryRename(list, gearItems, categories));
-      return { ...state, categories, gearItems, gearLists };
+      return mapAllLists({ ...state, categories, gearItems }, (list) => syncLinkedItemsAfterCategoryRename(list, gearItems, categories));
     }
     case 'REORDER_CATEGORIES': {
       const reordered = reorderById(sortByOrder(state.categories), action.sourceId, action.targetId);
@@ -65,8 +68,7 @@ function reducer(state: AppState, action: Action): AppState {
     case 'UPDATE_GEAR_ITEM': {
       const gearItems = state.gearItems.map((g) => (g.id === action.id ? { ...g, ...action.patch } : g));
       const updated = gearItems.find((g) => g.id === action.id)!;
-      const gearLists = state.gearLists.map((list) => syncLinkedItemsAfterVaultEdit(list, updated, state.categories));
-      return { ...state, gearItems, gearLists };
+      return mapAllLists({ ...state, gearItems }, (list) => syncLinkedItemsAfterVaultEdit(list, updated, state.categories));
     }
     case 'DELETE_GEAR_ITEM': {
       const gearItems = state.gearItems.filter((g) => g.id !== action.id);
@@ -76,7 +78,10 @@ function reducer(state: AppState, action: Action): AppState {
       const gearLists = state.gearLists.map((list) =>
         action.removeFromLists ? removeDeletedItem(list, action.id) : detachDeletedItem(list, action.id)
       );
-      return { ...state, gearItems, gearLists };
+      // T-6: a template may only hold Vault items, so a deleted item always leaves the
+      // template too (the dialog warns about this before it happens).
+      const templates = state.templates.map((t) => removeDeletedItem(t, action.id));
+      return { ...state, gearItems, gearLists, templates };
     }
     case 'REORDER_GEAR_ITEMS': {
       const sorted = sortByOrder(state.gearItems);
@@ -98,8 +103,7 @@ function reducer(state: AppState, action: Action): AppState {
     case 'ADD_ITEM_TO_LIST': {
       const gearItem = state.gearItems.find((g) => g.id === action.gearItemId);
       if (!gearItem) return state;
-      const gearLists = state.gearLists.map((list) => {
-        if (list.id !== action.listId) return list;
+      return mapListById(state, action.listId, (list) => {
         // Bugfix: stejná Vault položka přidaná znovu do stejného gearlistu se sloučí do
         // existujícího řádku (navýší se množství), nevytváří se duplicitní řádek.
         const existing = list.items.find((i) => i.gearItemId === action.gearItemId);
@@ -124,52 +128,40 @@ function reducer(state: AppState, action: Action): AppState {
         };
         return { ...list, items: [...list.items, listItem] };
       });
-      return { ...state, gearLists };
     }
     case 'UPDATE_LIST_ITEM': {
-      const gearLists = state.gearLists.map((list) => {
-        if (list.id !== action.listId) return list;
-        const items = list.items.map((item) => (item.id === action.itemId ? { ...item, ...action.patch } : item));
-        return { ...list, items };
-      });
-      return { ...state, gearLists };
+      return mapListById(state, action.listId, (list) => ({
+        ...list,
+        items: list.items.map((item) => (item.id === action.itemId ? { ...item, ...action.patch } : item)),
+      }));
     }
     case 'UPDATE_UNLINKED_LIST_ITEM': {
-      const gearLists = state.gearLists.map((list) => {
-        if (list.id !== action.listId) return list;
-        const items = list.items.map((item) => (item.id === action.itemId ? { ...item, ...action.patch } : item));
-        return { ...list, items };
-      });
-      return { ...state, gearLists };
+      return mapListById(state, action.listId, (list) => ({
+        ...list,
+        items: list.items.map((item) => (item.id === action.itemId ? { ...item, ...action.patch } : item)),
+      }));
     }
     case 'RELINK_LIST_ITEM': {
       const gearItem = state.gearItems.find((g) => g.id === action.gearItemId);
       if (!gearItem) return state;
       const mirror = mirrorFromVault(gearItem, state.categories);
-      const gearLists = state.gearLists.map((list) => {
-        if (list.id !== action.listId) return list;
-        const items = list.items.map((item) =>
+      return mapListById(state, action.listId, (list) => ({
+        ...list,
+        items: list.items.map((item) =>
           item.id === action.itemId
             ? { ...item, gearItemId: gearItem.id, name: mirror.name, categoryName: mirror.categoryName, weightGrams: mirror.weightGrams }
             : item
-        );
-        return { ...list, items };
-      });
-      return { ...state, gearLists };
+        ),
+      }));
     }
     case 'REMOVE_LIST_ITEM': {
-      const gearLists = state.gearLists.map((list) =>
-        list.id === action.listId ? { ...list, items: list.items.filter((i) => i.id !== action.itemId) } : list
-      );
-      return { ...state, gearLists };
+      return mapListById(state, action.listId, (list) => ({ ...list, items: list.items.filter((i) => i.id !== action.itemId) }));
     }
     case 'REORDER_LIST_ITEMS': {
-      const gearLists = state.gearLists.map((list) => {
-        if (list.id !== action.listId) return list;
+      return mapListById(state, action.listId, (list) => {
         const reordered = reorderById(sortByOrder(list.items), action.sourceId, action.targetId);
         return { ...list, items: withSequentialOrder(reordered) };
       });
-      return { ...state, gearLists };
     }
     case 'SAVE_SNAPSHOT': {
       const gearLists = state.gearLists.map((list) =>
@@ -186,6 +178,49 @@ function reducer(state: AppState, action: Action): AppState {
     case 'DELETE_LIST': {
       return { ...state, gearLists: state.gearLists.filter((l) => l.id !== action.listId) };
     }
+    case 'SAVE_AS_TEMPLATE': {
+      // T-1: the template becomes a copy of the gearlist's Vault-linked rows (quantity and
+      // Worn/Consumable included). Unlinked custom entries are skipped — a template may only
+      // reference items that exist in Gear Vault. Overwrites the existing template (the UI
+      // asks first). The gearlist itself is untouched and stays independent.
+      const source = state.gearLists.find((l) => l.id === action.listId);
+      if (!source) return state;
+      const items = withSequentialOrder(
+        sortByOrder(source.items.filter((i) => i.gearItemId)).map((i) => ({ ...i, id: newId('ti') }))
+      );
+      const existing = state.templates[0];
+      const template: GearList = {
+        id: existing?.id ?? action.templateId,
+        name: TEMPLATE_NAME,
+        createdAt: existing?.createdAt ?? new Date().toISOString(),
+        items,
+        snapshot: null,
+        order: 0,
+      };
+      return { ...state, templates: [template, ...state.templates.slice(1)] };
+    }
+    case 'DELETE_TEMPLATE': {
+      // Gearlists created from the template were independent copies — deleting it doesn't touch them.
+      return { ...state, templates: state.templates.filter((t) => t.id !== action.templateId) };
+    }
+    case 'CREATE_LIST_FROM_TEMPLATE': {
+      // T-4: a normal gearlist pre-filled with the template's rows (fresh row ids, still
+      // linked to Gear Vault). From now on it has nothing to do with the template.
+      const template = state.templates.find((t) => t.id === action.templateId);
+      if (!template) return state;
+      const list: GearList = {
+        id: action.id,
+        name: action.name,
+        createdAt: new Date().toISOString(),
+        items: sortByOrder(template.items).map((i) => ({ ...i, id: newId('li') })),
+        snapshot: null,
+        order: state.gearLists.length,
+      };
+      return { ...state, gearLists: [...state.gearLists, list] };
+    }
+    case 'DISMISS_TEMPLATE_BANNER': {
+      return { ...state, templateBannerDismissed: true };
+    }
     case 'SET_UNIT_PREFERENCE': {
       return { ...state, unitPreference: action.pref };
     }
@@ -197,6 +232,22 @@ function reducer(state: AppState, action: Action): AppState {
     default:
       return state;
   }
+}
+
+/** Applies `fn` to every gearlist AND every template — for changes that must show up
+ * everywhere a Vault item is linked (Vault edits, category rename/delete). */
+function mapAllLists(state: AppState, fn: (list: GearList) => GearList): AppState {
+  return { ...state, gearLists: state.gearLists.map(fn), templates: state.templates.map(fn) };
+}
+
+/** Applies `fn` to the one gearlist or template with this id. Row-level actions (add item,
+ * quantity, Worn/Consumable, remove, reorder, relink) work the same on a template as on a
+ * gearlist (T-3), so they all go through here. */
+function mapListById(state: AppState, listId: string, fn: (list: GearList) => GearList): AppState {
+  if (state.gearLists.some((l) => l.id === listId)) {
+    return { ...state, gearLists: state.gearLists.map((l) => (l.id === listId ? fn(l) : l)) };
+  }
+  return { ...state, templates: state.templates.map((t) => (t.id === listId ? fn(t) : t)) };
 }
 
 /** FR-5: propaguje editaci Gear Vault položky do všech gearlistů, kde je "linked". */
@@ -254,6 +305,12 @@ interface AppContextValue {
   saveSnapshot: (listId: string) => void;
   reorderLists: (sourceId: string, targetId: string) => void;
   deleteList: (listId: string) => void;
+  /** T-1: save this gearlist's Vault-linked rows as the (single) template, replacing any existing one. */
+  saveAsTemplate: (listId: string) => void;
+  deleteTemplate: (templateId: string) => void;
+  /** T-4: new gearlist pre-filled from the template. Returns the new gearlist's id. */
+  createListFromTemplate: (name: string, templateId: string) => string;
+  dismissTemplateBanner: () => void;
   setUnitPreference: (pref: UnitPreference) => void;
   replaceState: (state: AppState) => void;
 }
@@ -306,6 +363,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
       saveSnapshot: (listId) => dispatch({ type: 'SAVE_SNAPSHOT', listId }),
       reorderLists: (sourceId, targetId) => dispatch({ type: 'REORDER_LISTS', sourceId, targetId }),
       deleteList: (listId) => dispatch({ type: 'DELETE_LIST', listId }),
+      saveAsTemplate: (listId) => dispatch({ type: 'SAVE_AS_TEMPLATE', listId, templateId: newId('tpl') }),
+      deleteTemplate: (templateId) => dispatch({ type: 'DELETE_TEMPLATE', templateId }),
+      createListFromTemplate: (name, templateId) => {
+        const id = newId('list');
+        dispatch({ type: 'CREATE_LIST_FROM_TEMPLATE', id, name, templateId });
+        return id;
+      },
+      dismissTemplateBanner: () => dispatch({ type: 'DISMISS_TEMPLATE_BANNER' }),
       setUnitPreference: (pref) => dispatch({ type: 'SET_UNIT_PREFERENCE', pref }),
       replaceState: (state) => dispatch({ type: 'REPLACE_STATE', state }),
     }),

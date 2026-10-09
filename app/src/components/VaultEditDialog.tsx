@@ -9,6 +9,9 @@ interface VaultEditDialogProps {
   copyLabel?: string;
   continueLabel?: string;
   continueDanger?: boolean;
+  /** Names of the gearlists that the change would touch — listed under the message so the
+   * user knows exactly what they're agreeing to (BACKLOG CR, 2026-09-24). */
+  affectedLists?: string[];
 }
 
 /**
@@ -33,12 +36,23 @@ export function VaultEditDialog({
   copyLabel = 'Create a copy of the item',
   continueLabel = 'Continue',
   continueDanger = false,
+  affectedLists = [],
 }: VaultEditDialogProps) {
   return (
     <div className="dialog-backdrop" role="presentation" onClick={onCancel}>
       <div className="dialog" role="dialog" aria-modal="true" aria-labelledby="vault-edit-title" onClick={(e) => e.stopPropagation()}>
         <h3 id="vault-edit-title">{title}</h3>
         <p className="dialog-message">{message}</p>
+        {affectedLists.length > 0 && (
+          <div className="affected-lists">
+            <span className="affected-lists-label">Affected gearlists:</span>
+            <ul>
+              {affectedLists.map((name, i) => (
+                <li key={i}>{name}</li>
+              ))}
+            </ul>
+          </div>
+        )}
         <div className="dialog-actions dialog-actions-three">
           <button type="button" className="btn btn-ghost" onClick={onCancel}>
             Cancel

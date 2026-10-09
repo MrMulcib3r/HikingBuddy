@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useApp } from '../state/AppContext';
-import { computeBreakdown, findAffectedLists } from '../state/logic';
+import { computeBreakdown, describeUsage, findAffectedLists, findAffectedTemplates } from '../state/logic';
+import { TEMPLATE_NAME } from '../constants';
 import type { GearList, GearListItem } from '../types';
 import { formatWeight } from '../utils/weight';
 import { sortByOrder } from '../utils/reorder';
@@ -12,6 +13,9 @@ import { GearListItemRow } from './GearListItemRow';
 interface GearListDetailProps {
   list: GearList;
   onDeleted: () => void;
+  /** Showing the Gearlist Template (PRD 7.5, T-3): edited like a gearlist, but no snapshot,
+   * no "Save as template", and Delete removes the template. */
+  isTemplate?: boolean;
 }
 
 type CorePatch = { name?: string; categoryId?: string | null; weightGrams?: number };
@@ -19,11 +23,23 @@ type CorePatch = { name?: string; categoryId?: string | null; weightGrams?: numb
 interface PendingCoreEdit {
   item: GearListItem;
   patch: CorePatch;
-  affectedCount: number;
+  usage: string;
+  affectedNames: string[];
 }
 
-export function GearListDetail({ list, onDeleted }: GearListDetailProps) {
-  const { state, continueEditLinkedItem, copyAndRelinkListItem, saveSnapshot, deleteList, reorderListItems } = useApp();
+export function GearListDetail({ list, onDeleted, isTemplate = false }: GearListDetailProps) {
+  const {
+    state,
+    continueEditLinkedItem,
+    copyAndRelinkListItem,
+    saveSnapshot,
+    deleteList,
+    reorderListItems,
+    saveAsTemplate,
+    deleteTemplate,
+    dismissTemplateBanner,
+  } = useApp();
+  const [confirmTemplate, setConfirmTemplate] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmSnapshot, setConfirmSnapshot] = useState(false);
@@ -44,17 +60,30 @@ export function GearListDetail({ list, onDeleted }: GearListDetailProps) {
 
   function requestCoreEdit(item: GearListItem, patch: CorePatch) {
     if (!item.gearItemId) return;
-    const affected = findAffectedLists(state, item.gearItemId);
+    const gearItemId = item.gearItemId;
+    // Gearlists and the template both count as places where the Vault item is used (T-5).
+    const places = [...findAffectedTemplates(state, gearItemId), ...findAffectedLists(state, gearItemId)];
+    const rowsIn = (l: GearList) => l.items.filter((i) => i.gearItemId === gearItemId).length;
     // Editing directly touches only this row unless the shared Vault item is used
     // elsewhere too (including possibly more than once in this same list).
-    const othersCount = affected.reduce((n, l) => n + l.items.filter((i) => i.gearItemId === item.gearItemId).length, 0) - 1;
+    const othersCount = places.reduce((n, l) => n + rowsIn(l), 0) - 1;
     if (othersCount <= 0) {
       // Not shared anywhere else right now — just update the Vault item directly, no need
       // to ask Cancel/Copy/Continue since nothing else would be affected.
       continueEditLinkedItem(item.gearItemId, fullPatchFor(item, patch));
       return;
     }
-    setPendingCoreEdit({ item, patch, affectedCount: othersCount });
+    // Lists where the change would show up besides this row: other gearlists, plus this one
+    // if the same Vault item sits in it more than once.
+    const isTemplateId = (id: string) => state.templates.some((t) => t.id === id);
+    const others = places.filter((l) => l.id !== list.id || rowsIn(l) > 1);
+    const affectedNames = others.map((l) => {
+      const name = isTemplateId(l.id) ? TEMPLATE_NAME : l.name;
+      return l.id === list.id ? `${name} (this ${isTemplate ? 'template' : 'gearlist'})` : name;
+    });
+    const otherLists = others.filter((l) => !isTemplateId(l.id)).length;
+    const otherTemplates = others.length - otherLists;
+    setPendingCoreEdit({ item, patch, usage: describeUsage(otherLists, otherTemplates), affectedNames });
   }
 
   function fullPatchFor(item: GearListItem, patch: CorePatch) {
@@ -68,28 +97,61 @@ export function GearListDetail({ list, onDeleted }: GearListDetailProps) {
     };
   }
 
+  const hasTemplate = state.templates.length > 0;
+  const customEntryCount = list.items.filter((i) => !i.gearItemId).length;
+  // T-2: offer the template once there's a gearlist with something in it, until the user
+  // creates one or closes the banner.
+  const showTemplateBanner = !isTemplate && !hasTemplate && !state.templateBannerDismissed && list.items.length > 0;
+
   return (
     <div className="list-detail">
       <header className="list-detail-header">
         <div>
           <p className="list-detail-meta">
-            Always editable — live-linked to Gear Vault. Save a snapshot below before a trip to keep a record of what you packed.
+            {isTemplate
+              ? 'Your template — "+ New gearlist" → "From template" starts a new gearlist with these items. Changes here never affect existing gearlists.'
+              : 'Always editable — live-linked to Gear Vault. Save a snapshot below before a trip to keep a record of what you packed.'}
           </p>
         </div>
         <div className="list-detail-actions">
-          <button type="button" className="btn btn-secondary btn-small" onClick={() => setConfirmSnapshot(true)} disabled={list.items.length === 0}>
-            {list.snapshot ? 'Update snapshot' : 'Save snapshot'}
-          </button>
-          {list.snapshot && (
-            <button type="button" className="btn btn-ghost btn-small" onClick={() => setSnapshotOpen(true)}>
-              View snapshot
-            </button>
+          {!isTemplate && (
+            <>
+              <button type="button" className="btn btn-secondary btn-small" onClick={() => setConfirmSnapshot(true)} disabled={list.items.length === 0}>
+                {list.snapshot ? 'Update snapshot' : 'Save snapshot'}
+              </button>
+              {list.snapshot && (
+                <button type="button" className="btn btn-ghost btn-small" onClick={() => setSnapshotOpen(true)}>
+                  View snapshot
+                </button>
+              )}
+              <button
+                type="button"
+                className="btn btn-ghost btn-small"
+                onClick={() => setConfirmTemplate(true)}
+                disabled={list.items.length === customEntryCount}
+                title="Use this gearlist's items as the starting point for new gearlists"
+              >
+                Save as template
+              </button>
+            </>
           )}
           <button type="button" className="btn btn-danger btn-small" onClick={() => setConfirmDelete(true)}>
-            Delete
+            {isTemplate ? 'Delete template' : 'Delete'}
           </button>
         </div>
       </header>
+
+      {showTemplateBanner && (
+        <div className="template-banner" role="note">
+          <span>Use this gearlist as your template? New gearlists can then start with these items already in.</span>
+          <button type="button" className="btn btn-primary btn-small" onClick={() => setConfirmTemplate(true)}>
+            Create template
+          </button>
+          <button type="button" className="template-banner-close" aria-label="Don't show again" title="Don't show again" onClick={dismissTemplateBanner}>
+            ×
+          </button>
+        </div>
+      )}
 
       {list.snapshot && (
         <p className="snapshot-hint">
@@ -121,7 +183,9 @@ export function GearListDetail({ list, onDeleted }: GearListDetailProps) {
       </button>
 
       <div className="list-items">
-        {list.items.length === 0 && <p className="empty-hint">This gearlist is empty so far.</p>}
+        {list.items.length === 0 && (
+          <p className="empty-hint">{isTemplate ? 'The template is empty — add the gear you take on most trips.' : 'This gearlist is empty so far.'}</p>
+        )}
         {[...grouped.entries()].map(([category, items]) => (
           <div key={category} className="list-category-group">
             <h4 className="list-category-title">{category}</h4>
@@ -143,7 +207,8 @@ export function GearListDetail({ list, onDeleted }: GearListDetailProps) {
       {pendingCoreEdit && (
         <VaultEditDialog
           title="This item is used elsewhere too"
-          message={`"${pendingCoreEdit.item.name}" is also used in ${pendingCoreEdit.affectedCount} other place(s) in your gearlists. Do you want to update it everywhere, or keep those unchanged and give this row its own copy?`}
+          message={`"${pendingCoreEdit.item.name}" is also used in ${pendingCoreEdit.usage}. Do you want to update it everywhere, or keep those unchanged and give this row its own copy?`}
+          affectedLists={pendingCoreEdit.affectedNames}
           onCancel={() => setPendingCoreEdit(null)}
           onCopy={() => {
             copyAndRelinkListItem(list.id, pendingCoreEdit.item.id, fullPatchFor(pendingCoreEdit.item, pendingCoreEdit.patch));
@@ -206,14 +271,41 @@ export function GearListDetail({ list, onDeleted }: GearListDetailProps) {
         </div>
       )}
 
+      {confirmTemplate && (
+        <ConfirmDialog
+          title={hasTemplate ? 'Replace template' : 'Create template'}
+          message={[
+            hasTemplate
+              ? `This replaces your current template with the items of "${list.name}" (quantities and Worn/Consumable included). Continue?`
+              : `This saves the items of "${list.name}" (quantities and Worn/Consumable included) as your template. New gearlists can then start from it. Continue?`,
+            customEntryCount > 0
+              ? `${customEntryCount} custom entr${customEntryCount === 1 ? 'y' : 'ies'} no longer linked to Gear Vault will be skipped.`
+              : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+          confirmLabel={hasTemplate ? 'Replace template' : 'Create template'}
+          onConfirm={() => {
+            saveAsTemplate(list.id);
+            setConfirmTemplate(false);
+          }}
+          onCancel={() => setConfirmTemplate(false)}
+        />
+      )}
+
       {confirmDelete && (
         <ConfirmDialog
-          title={`Delete gearlist "${list.name}"`}
+          title={isTemplate ? 'Delete template' : `Delete gearlist "${list.name}"`}
           danger
-          message="Are you sure you want to delete this gearlist? This cannot be undone."
+          message={
+            isTemplate
+              ? 'Delete your template? Gearlists created from it are not affected. This cannot be undone.'
+              : 'Are you sure you want to delete this gearlist? This cannot be undone.'
+          }
           confirmLabel="Delete"
           onConfirm={() => {
-            deleteList(list.id);
+            if (isTemplate) deleteTemplate(list.id);
+            else deleteList(list.id);
             setConfirmDelete(false);
             onDeleted();
           }}

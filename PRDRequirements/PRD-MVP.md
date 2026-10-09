@@ -1,10 +1,26 @@
-# HikingBuddy — MVP PRD (v10)
+# HikingBuddy — MVP PRD (v16)
 
-**Status:** Implementováno, aligned s Martinem 2026-09-24 (v10)
+**Status:** Implementováno do v10 (aligned s Martinem 2026-09-24). v11 (2026-10-07) jen doplňuje specifikaci budoucí feature Gearlist Template — zatím neimplementováno. v12 (2026-10-08) přesouvá "+ Add item" v Gear Vaultu na konec každé kategorie — implementováno. v13 (2026-10-08) upravuje přidávání položek, přejmenování kategorií a dotčené gearlisty v dialogu — implementováno, čeká na Martinův test. v14 (2026-10-08) implementuje Gearlist Template (sekce 7, bod 5), velké tlačítko "+ Add gear" dole ve Vaultu a mazání vlastních kategorií z formuláře — čeká na Martinův test. v15 (2026-10-08): kategorie z výchozí šablony nejdou smazat nikde. **v16 (2026-10-09): finální scope appky** — Martin rozhodl, že HikingBuddy zůstane osobním nástrojem a ukázkou do portfolia, ne produktem k monetizaci. Scope je uzavřený (sekce 0 a 2). Nové požadavky FR-16 až FR-20: automatické ukládání do datového souboru, demo data, sdílení gearlistu přes URL, design + vizualizace váhy batohem, veřejné nasazení na web. Ostatní body ze sekce 7 a vize ze sekce 9 jsou vyřazené. FR-16 až FR-20 jsou zatím jen specifikace, nic z nich není implementováno.
 **Nahrazuje:** `gemini-code-1789054094052.txt` (v1, plný rozsah) — ten zůstává jako referenční "vize appky do budoucna", tohle je co skutečně stavíme teď.
-**Historie:** v2 = základní MVP (Gear Vault + gearlisty + snapshot). v3 = rozpad váhy, vyhledatelnost kategorií, layout. v4 = Draft/Finalize životní cyklus gearlistu (nahrazuje okamžitý snapshot), přejmenování "Gear closet" → "Gear Vault", detaily formuláře položky. v5 = doplněn "Gearlist Template" jako feature beyond MVP. v6 = doplněna dlouhodobá produktová vize — komunitní sdílení gearlistů (sekce 9). v7 = zásadní přepracování životního cyklu gearlistu (Draft/Finalized zrušen, nahrazen vždy editovatelným gearlistem + snapshotem), Worn/Consumable přesunuto na gearlist item, plně inline editace, drag & drop. **v8 = řešení trvanlivosti dat:** Martin správně upozornil, že appka dosud neměla žádnou ochranu proti tomu, že si uživatel v prohlížeči smaže data stránek — což by nenávratně smazalo úplně všechno. Přidána (a zpětně aplikována) **politika migrace dat** (žádná budoucí změna datového modelu už nesmí tiše smazat existující data — přesně tohle se omylem stalo přechodem na v7) + **Export/Import zálohy do souboru** jako skutečná ochrana nezávislá na prohlížeči + navržený plán skutečné databáze (lokální a budoucí serverová) — viz sekce 6a. **v9 = smazání Gear Vault položky použité v gearlistech má stejný blokující třívolbový dialog jako její editace** (Cancel / Keep in gearlists / Delete everywhere) — dřív se řádky v gearlistech jen tiše odpojily. Zároveň **zrušen sloupec se seznamem gearlistů** — přepínání gearlistů je teď rozbalovací výběr v jeho názvu, a řádky položek se v úzkém okně zalamují do dvou řádků, aby byl gearlist použitelný i s oknem na půl obrazovky. **v10 = výběr kategorie při přidání položky do Gear Vaultu přes dlaždice s ikonkami** místo rozbalovacího menu.
+**Historie:** v2 = základní MVP (Gear Vault + gearlisty + snapshot). v3 = rozpad váhy, vyhledatelnost kategorií, layout. v4 = Draft/Finalize životní cyklus gearlistu (nahrazuje okamžitý snapshot), přejmenování "Gear closet" → "Gear Vault", detaily formuláře položky. v5 = doplněn "Gearlist Template" jako feature beyond MVP. v6 = doplněna dlouhodobá produktová vize — komunitní sdílení gearlistů (sekce 9). v7 = zásadní přepracování životního cyklu gearlistu (Draft/Finalized zrušen, nahrazen vždy editovatelným gearlistem + snapshotem), Worn/Consumable přesunuto na gearlist item, plně inline editace, drag & drop. **v8 = řešení trvanlivosti dat:** Martin správně upozornil, že appka dosud neměla žádnou ochranu proti tomu, že si uživatel v prohlížeči smaže data stránek — což by nenávratně smazalo úplně všechno. Přidána (a zpětně aplikována) **politika migrace dat** (žádná budoucí změna datového modelu už nesmí tiše smazat existující data — přesně tohle se omylem stalo přechodem na v7) + **Export/Import zálohy do souboru** jako skutečná ochrana nezávislá na prohlížeči + navržený plán skutečné databáze (lokální a budoucí serverová) — viz sekce 6a. **v9 = smazání Gear Vault položky použité v gearlistech má stejný blokující třívolbový dialog jako její editace** (Cancel / Keep in gearlists / Delete everywhere) — dřív se řádky v gearlistech jen tiše odpojily. Zároveň **zrušen sloupec se seznamem gearlistů** — přepínání gearlistů je teď rozbalovací výběr v jeho názvu, a řádky položek se v úzkém okně zalamují do dvou řádků, aby byl gearlist použitelný i s oknem na půl obrazovky. **v10 = výběr kategorie při přidání položky do Gear Vaultu přes dlaždice s ikonkami** místo rozbalovacího menu. **v11 = Gearlist Template rozpracován do podoby připravené k implementaci** (sekce 7, bod 5, podle Martinových rozhodnutí z 2026-10-07): jedna hlavní šablona, vytvoření přes "Save as template" a nabídku po prvním gearlistu, volba "Blank / From template" při zakládání gearlistu, varování při úpravě a smazání Vault položky, která je v šabloně. Přidán "Duplicate gearlist" jako budoucí feature (sekce 7, bod 8). Obojí zatím mimo MVP, nic se neimplementovalo. **v12 = "+ Add item" v Gear Vaultu přesunuto z hlavičky panelu přímo do seznamu, na konec každé kategorie** (jako na lighterpack.com) — formulář se otevře s danou kategorií předvybranou. **v13 = úpravy po Martinově testu v12:** prázdné kategorie se ve Vaultu nezobrazují; vždy viditelné tlačítko "+ Add gear" v hlavičce Vaultu otevře formulář s předvybranou dlaždicí "Other"; dlaždice kategorií jsou vzájemně výlučné (oprava bugu, kdy šlo mít vybrané "Other" i jinou kategorii); kategorie lze přejmenovat kliknutím na jejich nadpis ve Vaultu; dialog Cancel / Create a copy / Continue (i u mazání) vypisuje názvy dotčených gearlistů; formulář "Add item" se nezavře kliknutím mimo okno; výchozí kategorie "Shelter" přejmenována na "Shelter System" (i v existujících datech, migrací). **v14 = Gearlist Template implementován** (sekce 7, bod 5 — Martin ho přesunul do "Teď"), **"+ Add gear" přesunuto z hlavičky do velkého tlačítka přes celou šířku, připnutého dole v Gear Vaultu** (dominantnější, blíž palci na mobilu), **vlastní kategorie (vytvořené přes "Other") lze smazat křížkem přímo na dlaždici** ve formuláři přidání položky. **v15 = kategorie z výchozí šablony nejdou smazat.** **v16 = uzavření scope:** cíl projektu (sekce 0), finální rozsah (sekce 2), FR-16 až FR-20, rozhodnutí v sekci 8i.
 
 ---
+
+## 0. Cíl projektu a finální scope (v16, 2026-10-09)
+
+**Rozhodnutí:** HikingBuddy je **osobní nástroj pro Martina a ukázka práce do portfolia** pro pohovory na PM pozice. Není to produkt určený k monetizaci.
+
+**Proč:**
+- Trh nástrojů na gearlisty je plný bezplatných appek: LighterPack, Packstack (financovaný přes Patreon), PackWizard (plánuje vydělávat na affiliate odkazech do obchodů), PackLight. Cílová skupina (ultralight hikeři) je malá a za software neplatí.
+- Každý monetizační model (affiliate odkazy, placená verze, komunita podle sekce 9) by nejdřív vyžadoval server, účty a tisíce uživatelů. To je násobek dosavadní práce a výsledek je nejistý.
+- Proto appku dotáhneme do stavu, kdy (1) řeší Martinův problém a (2) jde ukázat komukoli přes odkaz. Pak se Martin věnuje jinému projektu, který řeší reálný problém s možností monetizace.
+
+**Co appka musí na konci splnit:**
+1. **Pro Martina:** spolehlivě řeší problémy ze sekce 1 a jeho data nezmizí ani při smazání dat prohlížeče (FR-16: automatické ukládání do souboru na disku).
+2. **Pro prezentaci:** běží veřejně na webu (FR-20), návštěvník si jedním klikem nahraje ukázková data (FR-17), appka vypadá dobře (FR-19) a gearlist jde poslat odkazem (FR-18).
+3. **Bez serveru, účtů a provozních nákladů.** Appka je statická: hosting jen posílá soubory, všechno se počítá a ukládá u uživatele. Každý návštěvník má vlastní oddělenou kopii dat a nikdo nevidí data nikoho jiného.
+
+**Pořadí:** nejdřív dodělat a vyzkoušet lokálně (FR-16 až FR-19), teprve potom nasadit na web (FR-20).
 
 ## 1. Problém, který řešíme (MVP)
 
@@ -13,32 +29,36 @@
 3. **Ultralight hikeři sledují konkrétní váhovou metriku — "base weight".** Aby Martin věděl, jestli spadá do kategorie "ultralight", potřebuje vidět rozpad váhy gearlistu, ne jen jedno celkové číslo.
 4. **Rozsáhlý Gear Vault je nepřehledný.** S desítkami až stovkami položek vybavení je těžké v jednom dlouhém seznamu něco najít, pokud položky nejdou filtrovat/seskupovat podle kategorie.
 5. **Během přípravy na trek chce Martin gearlist průběžně ladit** (opravit špatně zadanou váhu, doplnit položku) — a to i po tom, co ho "sbalí" na cestu. Zároveň ale chce mít možnost si kdykoliv uložit "otisk" toho, co si konkrétně vzal, aby to zůstalo zaznamenané.
-6. **Sestavení nového gearlistu od nuly zabírá zbytečně moc času a hrozí opomenutí.** Martin si na trek opakovaně bere stejný okruh základního vybavení (stan, spacák, vařič...). Přesto při zakládání nového gearlistu dnes musí každou takovou položku znovu ručně vyhledat v Gear Vaultu a přidat ji — to je zdlouhavé a hlavně riskantní: pokud na některou opakovaně používanou položku při ručním skládání zapomene, gearlist bude neúplný, aniž by o tom Martin věděl (viz riziko v bodě 1). Tohle je motivace pro Gearlist Template popsaný v sekci 7 — je to ale rozšíření nad rámec MVP, ne požadavek na první verzi appky.
+6. **Sestavení nového gearlistu od nuly zabírá zbytečně moc času a hrozí opomenutí.** Martin si na trek opakovaně bere stejný okruh základního vybavení (stan, spacák, vařič...). Přesto při zakládání nového gearlistu dnes musí každou takovou položku znovu ručně vyhledat v Gear Vaultu a přidat ji — to je zdlouhavé a hlavně riskantní: pokud na některou opakovaně používanou položku při ručním skládání zapomene, gearlist bude neúplný, aniž by o tom Martin věděl (viz riziko v bodě 1). Tohle je motivace pro Gearlist Template popsaný v sekci 7, bod 5 (od v11 plně rozpracovaný) — je to ale rozšíření nad rámec MVP, ne požadavek na první verzi appky.
 7. **Ruční přeznačování skupiny položek (např. "kterých 10 věcí je dnes na mně, ne v batohu") musí jít rychle**, jednu položku po druhé, jedním kliknutím — appka záměrně nemá hromadné (batch) úpravy více položek najednou (viz sekce 3).
-8. **Data nesmí zmizet — ani proto, že appka sama změní datový model, ani proto, že uživatel omylem/úmyslně smaže data prohlížeče.** MVP appka zatím nemá účet ani server (viz sekce 2), takže všechna data žijí jen v jednom prohlížeči na jednom počítači — to appku dělá zranitelnou vůči oběma těmhle rizikům. Řešení viz sekce 6a.
+8. **Data nesmí zmizet — ani proto, že appka sama změní datový model, ani proto, že uživatel omylem/úmyslně smaže data prohlížeče.** MVP appka zatím nemá účet ani server (viz sekce 2), takže všechna data žijí jen v jednom prohlížeči na jednom počítači — to appku dělá zranitelnou vůči oběma těmhle rizikům. Řešení viz sekce 6a a od v16 FR-16 (automatické ukládání do souboru).
 
-## 2. Co MVP řeší a co ne
+## 2. Co appka řeší a co ne (finální scope, v16)
 
 **Řeší:**
-- Uložení vybavení do osobní databáze (**Gear Vault**).
-- Sestavení gearlistu (seznam vybavení pro konkrétní trek) z Gear Vaultu — gearlist je **vždy editovatelný**, nemá žádný "uzamčený" stav.
-- Možnost kdykoliv uložit **snapshot** aktuálního obsahu gearlistu jako záznam toho, co si Martin vzal — nezávisle na tom, že gearlist samotný jde dál upravovat.
-- Rozpad váhy gearlistu na Base Weight / Worn Weight / Consumables / Total Weight, kde Worn a Consumable jsou vlastnosti konkrétního řádku v gearlistu (ne vlastnost položky v Gear Vaultu).
-- Kategorizaci vybavení pro snadnou orientaci ve velkém Gear Vaultu.
-- Plně "inline" editaci — Gear Vault i gearlisty se ovládají kliknutím přímo na hodnotu (název, kategorie, váha, množství), podobně jako buňky v Excelu / na lighterpack.com — bez samostatných formulářů/tlačítek "Edit" pro běžné úpravy.
-- Ruční přeřazování pořadí (drag & drop) položek, kategorií a gearlistů.
-- **Trvanlivost dat napříč změnami appky samotné** (automatická migrace při každé změně datového modelu, viz sekce 6a) **a záloha nezávislá na prohlížeči** (Export/Import do skutečného souboru, viz sekce 6a) — obojí od v8.
+- Uložení vybavení do osobní databáze (**Gear Vault**), s kategoriemi pro orientaci ve velkém Vaultu, vyhledáváním a filtrem (FR-1, FR-2, FR-8, FR-11).
+- Sestavení gearlistu (seznam vybavení pro konkrétní trek) z Gear Vaultu. Gearlist je **vždy editovatelný**, nemá žádný „uzamčený“ stav (FR-4).
+- **Ochranu starých gearlistů před tichou změnou:** blokující dialog Cancel / Create a copy / Continue při úpravě nebo smazání položky použité i jinde (sekce 3, FR-5). Tohle je hlavní důvod, proč appka existuje, a hlavní věc, kterou se liší od LighterPacku.
+- Možnost kdykoli uložit **snapshot** aktuálního obsahu gearlistu jako záznam toho, co si Martin vzal, nezávisle na tom, že gearlist jde dál upravovat (FR-6).
+- Rozpad váhy gearlistu na Base Weight / Worn Weight / Consumables / Total Weight, kde Worn a Consumable jsou vlastnosti konkrétního řádku v gearlistu, ne položky v Gear Vaultu (FR-9, FR-10).
+- Přepínání jednotek g/kg a oz/lb (FR-3).
+- Plně „inline“ editaci: Gear Vault i gearlisty se ovládají kliknutím přímo na hodnotu (název, kategorie, váha, množství), jako buňky v Excelu nebo na lighterpack.com, bez tlačítek „Edit“ (FR-12).
+- Ruční přeřazování pořadí (drag & drop) položek, kategorií a gearlistů (FR-13).
+- **Gearlist Template:** nový gearlist předvyplněný ze šablony. Implementováno ve v14, zůstává (sekce 7, bod 5).
+- **Trvanlivost dat napříč změnami appky** (automatická migrace, FR-15) **a záloha nezávislá na prohlížeči** (Export/Import do souboru, FR-14), obojí od v8. Export/Import zůstává i ve v16, i jako způsob, jak poslat data někomu jinému.
+- **Nové ve v16:**
+  - **Lokální databáze = automatické ukládání do souboru na disku** (FR-16).
+  - **Load demo data** a uvítací obrazovka pro prázdnou appku (FR-17).
+  - **Veřejné sdílení gearlistu přes URL**, jen pro čtení a bez serveru (FR-18).
+  - **UI design podle Martinova design systému** a **vizualizace váhy jako batoh** místo koláčového grafu (FR-19).
+  - **Veřejné nasazení na web jako statická appka** kvůli prezentaci na pohovorech (FR-20).
 
-**Neřeší (vědomě odloženo na později):**
-- Přihlašování / účty — appka je zatím jednouživatelská, data jen v prohlížeči (+ souborová záloha, viz sekce 6a).
-- Offline režim — appka v MVP vyžaduje připojení k internetu. (Zdůvodnění: hlavní problém je nekompletnost gearlistu zjištěná *před* odjezdem, ne přístup k datům v terénu bez signálu — když už je Martin v terénu, offline appka mu chybějící vybavení stejně nedoveze.)
-- Veřejné sdílení gearlistu přes URL.
-- Grafy/vizualizace váhy (číselný rozpad ano, koláčový graf jako na lighterpack.com zatím ne).
-- Hromadné (batch) úpravy více položek najednou — záměrně vynecháno, viz sekce 3.
-- Víc než jeden uložený snapshot na gearlist (historie snapshotů) — viz sekce 3.
-- **Skutečná databáze na serveru** (s automatickou synchronizací mezi zařízeními, bez nutnosti ručního Exportu/Importu) — navrženo v sekci 6a jako budoucí fáze, zatím neimplementováno.
-- **Gearlist Template** (předdefinovaná sada výchozího vybavení pro nový gearlist) — viz sekce 7, bod 5.
-- **Komunitní sdílení gearlistů** — dlouhodobá vize appky, viz sekce 9.
+**Neřeší (ve v16 vyřazeno ze scope, už ne jen odloženo):**
+- Přihlašování, účty, databázi na serveru a synchronizaci mezi zařízeními. Důvod: pro jednoho uživatele zbytečná složitost a provozní náklady; trvanlivost dat řeší FR-16.
+- Offline PWA a optimalizaci pro mobil. Na telefonu se appka zobrazí (panely pod sebou), ale automatické ukládání do souboru funguje jen na počítači (FR-16).
+- Komunitní sdílení gearlistů a monetizaci (sekce 0 a 9).
+- Víc snapshotů na gearlist, Duplicate gearlist, víc šablon.
+- Hromadné (batch) úpravy více položek najednou (záměrně, viz sekce 3).
 
 ## 3. Klíčové rozhodnutí: gearlist je vždy editovatelný + snapshot (nahrazuje dřívější Draft/Finalized)
 
@@ -60,8 +80,12 @@ Tenhle dialog se **nikdy** nezobrazuje při přepínání příznaků Worn/Consu
 ## 4. Funkční požadavky (MVP)
 
 - **FR-1. Gear Vault (CRUD):** Vytvořit, zobrazit, upravit a smazat položku vybavení. Položka má: Název, Kategorii (nepovinná), Poznámku/popis (nepovinné — např. "Snickers s bílou čokoládou"), Váhu, Výchozí množství (Quantity). *(Typ váhy Base/Worn/Consumable od v7 není vlastností Gear Vault položky — viz FR-9.)*
-- **FR-2. Kategorie — předdefinovaný template s vlastní úpravou:** Appka nabídne předdefinovaný seznam kategorií (Backpack, Shelter, Sleep System, Clothing, Cooking, Food, Water, Electronics, Hygiene, Misc) jako výchozí "template". Uživatel může kteroukoli kategorii přejmenovat, smazat, přidat vlastní novou, nebo přeřadit jejich pořadí drag & dropem.
+- **FR-2. Kategorie — předdefinovaný template s vlastní úpravou:** Appka nabídne předdefinovaný seznam kategorií (Backpack, Shelter, Sleep System, Clothing, Cooking, Food, Water, Electronics, Hygiene, Misc) jako výchozí "template". Uživatel může kteroukoli kategorii přejmenovat, přidat vlastní novou, nebo přeřadit jejich pořadí drag & dropem. **Smazat lze jen kategorie, které si uživatel vytvořil sám** (v15 — dřív šlo smazat kteroukoli). Kategorie z výchozí šablony smazat nejdou: jejich smazání by zhoršilo UX (ikony, mřížka dlaždic ve formuláři) a smazání všech kategorií by rozbilo UI. Smazání vlastní kategorie vždy s potvrzením; její položky zůstanou ve Vaultu jako "Uncategorized".
   - **Výběr kategorie ve formuláři "Add item to Gear Vault" (v10):** místo rozbalovacího menu mřížka dlaždic s ikonkou a názvem — jedna dlaždice pro každou kategorii uživatele v jeho pořadí (výchozí kategorie mají vlastní ikonku, vlastní kategorie obecnou), vybírá se jedním kliknutím. Druhé kliknutí na vybranou dlaždici výběr zruší (kategorie je nepovinná, FR-8). Poslední dlaždice **"Other"** založí novou kategorii (napíše se název) a rovnou ji vybere. Důvod: ušetří jedno kliknutí a procházení menu. Změna kategorie u existující položky (inline v řádku) zůstává beze změny.
+  - **Přejmenování kategorie (v13):** kliknutím na název kategorie v nadpisu skupiny v Gear Vaultu (stejná inline editace jako jinde: Enter/blur uloží, Escape zruší), nebo kliknutím na název v dialogu "Categories". Platí pro všechny kategorie včetně těch z výchozí šablony. Přejmenování se propíše do všech řádků gearlistů napojených na Vault; odpojené "custom entry" řádky a snapshoty se nemění.
+  - **Smazání vlastní kategorie z formuláře (v14):** dlaždice kategorií, které si uživatel sám vytvořil (přes "Other" nebo v dialogu "Categories"), mají v rohu křížek ×. Po potvrzení se kategorie smaže; položky, které ji používaly, zůstanou ve Vaultu jako "Uncategorized" (dialog řekne kolik). Kategorie z výchozí šablony křížek nemají. V dialogu "Categories" platí totéž (v15): tlačítko Delete mají jen vlastní kategorie, s potvrzením.
+  - **Výchozí šablona (v13):** "Shelter" přejmenován na **"Shelter System"** (sjednocení se "Sleep System"). Existující data se jednorázově převedou migrací (schemaVersion 4) — stejně, jako kdyby uživatel kategorii přejmenoval ručně.
+  - **Výběr kategorie ve formuláři (v13):** vždy je aktivní nejvýš jedna dlaždice — výběr kategorie zavře "Other", klik na "Other" zruší vybranou kategorii; druhý klik na "Other" ho zavře. Když je "Other" aktivní a uživatel napíše název nové kategorie, ale potvrdí rovnou celý formulář, kategorie se založí a položka se do ní uloží (nic se tiše neztratí).
 - **FR-3. Jednotky:** Přepínání zobrazení mezi metrickými (g/kg) a imperiálními (oz/lb) jednotkami. Interně se váha ukládá v jedné jednotce (gramy), aby nevznikaly zaokrouhlovací chyby.
 - **FR-4. Gearlisty — vytvoření a editace:** Vytvořit pojmenovaný gearlist, přidat do něj položky z Gear Vaultu, upravit množství konkrétně pro tento gearlist (nezávisle na výchozím množství v Gear Vaultu). Gearlist je vždy editovatelný (viz sekce 3). Přidání položky z Gear Vaultu, která už v gearlistu je, **navýší množství existujícího řádku**, nevytvoří duplicitní řádek.
 - **FR-5. Živé propojení s Gear Vaultem + potvrzovací dialog (Cancel / Create a copy / Continue):** Položky v gearlistu, které odkazují na položku v Gear Vaultu ("linked"), zrcadlí její název/kategorii/váhu. Úprava těchto polí — ať už přímo v Gear Vaultu, nebo přímo kliknutím na položku uvnitř gearlistu — kde je položka použita i jinde, vyžaduje explicitní volbu uživatele mezi Cancel / Create a copy of the item / Continue (viz sekce 3). Vždy blokující dialog, nikdy toast. **Totéž platí pro smazání (v9):** smazání Gear Vault položky, která je použitá v nějakém gearlistu, vždy zobrazí blokující dialog **Cancel / Keep in gearlists / Delete everywhere** — "Keep in gearlists" smaže položku jen z Gear Vaultu a řádky v gearlistech nechá jako odpojené "custom entry" s posledními známými hodnotami (obdoba "Create a copy"); "Delete everywhere" položku odstraní z Gear Vaultu i ze všech gearlistů (obdoba "Continue"). Uložené snapshoty (FR-6) se nemění nikdy. Položka nepoužitá v žádném gearlistu se maže po jednoduchém potvrzení.
@@ -76,6 +100,51 @@ Tenhle dialog se **nikdy** nezobrazuje při přepínání příznaků Worn/Consu
 - **FR-14. Export / Import zálohy (nová, v8):** Tlačítko "Export backup" v hlavičce appky uloží veškerý obsah (Gear Vault, kategorie, gearlisty, snapshoty) jako `.json` soubor na disk uživatele. Tlačítko "Import backup" umožní vybrat dřívě exportovaný soubor a appku jím kompletně nahradit — appka před nahrazením vždy zobrazí potvrzovací dialog s přehledem, kolik položek/gearlistů se aktuálně přepíše a kolik jich přijde ze zálohy. Tohle je jediný mechanismus v MVP, který ochrání data i před tím, že uživatel v prohlížeči smaže data stránek (viz sekce 6a — appka samotná to jinak ovlivnit nemůže).
 - **FR-15. Automatická migrace dat při každé změně datového modelu (nová, v8):** Appka si u uložených dat pamatuje číslo verze datového modelu (`schemaVersion`). Při otevření appky s daty starší verze appka automaticky, bez zásahu uživatele, převede data na aktuální tvar (viz sekce 6a — politika migrace). Uživatel o tom nemusí vůbec vědět — prostě uvidí svoje staré gearlisty a vybavení tak, jak je nechal.
 
+- **FR-16. Automatické ukládání do datového souboru – „lokální databáze“ (v16):**
+  - **Proč:** Data dnes žijí jen v prohlížeči a smazání dat prohlížeče je smaže (Slabina B, sekce 6a). Export/Import chrání, jen když si na něj Martin vzpomene. Tohle chrání automaticky, bez serveru.
+  - **Pro uživatele:** V hlavičce je tlačítko **„Connect data file“**. Uživatel jednou vybere soubor (nový, nebo existující `.json`). Od té chvíle appka po každé změně sama uloží aktuální stav do souboru (s krátkým zpožděním kolem 1 s, aby nezapisovala při každém stisku klávesy). V hlavičce je vidět stav, např. „Saved to hikingbuddy-data.json · 16:42“, „Saving…“, nebo srozumitelná chyba.
+  - **Připojení souboru, který už obsahuje data:** blokující dialog **Cancel / Load data from file / Overwrite file with current data** s počty položek a gearlistů v appce a v souboru (obdoba Importu, FR-14). Nic se nepřepíše bez explicitní volby.
+  - **Po znovuotevření appky:** appka si pamatuje, který soubor byl připojený. Když prohlížeč vyžaduje znovu potvrdit přístup, zobrazí se nápadný pruh **„Reconnect to your data file“** (jedno kliknutí a potvrzení v prohlížeči). Dokud přístup není potvrzený, appka do souboru nic nezapisuje a jasně ukazuje, že se změny zatím ukládají jen v prohlížeči. Po připojení je **zdrojem pravdy soubor**. Pokud se data v prohlížeči od souboru liší (Martin mezitím pracoval bez připojení), zobrazí se stejný dialog jako výše.
+  - **„Disconnect“** soubor odpojí. Data zůstanou v prohlížeči i v souboru.
+  - **Soubor zmizel nebo se přesunul:** srozumitelná chyba a nabídka připojit jiný soubor. Data v prohlížeči zůstávají.
+  - **Kde má soubor ležet (doporučení):** ve složce synchronizované do cloudu (OneDrive nebo Google Drive). Tím je zároveň zálohovaný a dostupný i na jiném počítači. Appka cestu neřeší, vybírá se v dialogu prohlížeče. Pokud by Martin chtěl soubor v repozitáři HikingBuddy, pak jen ve složce `data/`, která je v `.gitignore`. Osobní data nepatří do gitu, zvlášť pokud bude repozitář veřejný (FR-20).
+  - **Formát souboru:** stejný jako Export (`{ schemaVersion, state }`). Na data ze souboru se tak uplatní stejné migrace (FR-15) a soubor jde kdykoli použít i jako záloha pro Import.
+  - **Kde to funguje:** Chrome a Edge na počítači (File System Access API). Ve Firefoxu, Safari a na mobilu se místo tlačítka zobrazí krátká informace, že tento prohlížeč automatické ukládání neumí. Appka tam funguje jako dnes (data v prohlížeči + Export/Import).
+  - **`localStorage` zůstává** jako pracovní kopie a jako úložiště pro návštěvníky bez připojeného souboru.
+  - **Technická poznámka pro Claude Code:** `showSaveFilePicker` / `showOpenFilePicker`; odkaz na soubor (file handle) uložit do IndexedDB, protože do `localStorage` ho uložit nejde; `queryPermission` / `requestPermission` (vyžaduje kliknutí uživatele). Zapisovat jen při změně stavu. Ověřit scénáře: nový soubor, existující soubor s daty, znovuotevření prohlížeče, odepřený přístup, smazaný soubor, data ve starším `schemaVersion`.
+- **FR-17. Load demo data (v16):**
+  - **Proč:** Prázdná appka na pohovoru nic neukáže.
+  - **Uvítací stav:** Když je appka úplně prázdná (žádné položky ve Vaultu ani gearlisty), zobrazí se místo prázdných panelů uvítací karta: jedna dvě věty o tom, co appka řeší, a tlačítka **„Load demo data“** a **„Start empty“**.
+  - **„Load demo data“ jde použít i později** (v hlavičce u Export/Import). Pokud appka už obsahuje data, zobrazí se potvrzovací dialog jako u Importu (co se přepíše).
+  - **Je-li připojený datový soubor (FR-16), demo data nejdou nahrát.** Tlačítko je neaktivní s vysvětlením „Disconnect your data file first“, aby si Martin omylem nepřepsal skutečná data.
+  - **Obsah demo dat:** základem je Martinův LighterPack export „Weekend Hikes“ (31 položek, už převedený v `Claude outputs/Weekend_Hikes-HikingBuddy-import.json`). Doplnit tak, aby demo ukázalo hlavní funkce: aspoň 2 gearlisty sdílející některé položky (kvůli ukázce dialogu Cancel / Create a copy / Continue), jeden gearlist s uloženým snapshotem, šablonu a položky Worn i Consumable. Martin před nasazením zkontroluje, že demo neobsahuje nic osobního.
+  - Demo data jsou přímo součástí appky (soubor v kódu), nic se nestahuje odjinud.
+- **FR-18. Sdílení gearlistu přes URL, jen pro čtení, bez serveru (v16):**
+  - **Proč:** Poslat gearlist kamarádovi nebo na fórum a ukázat ho na pohovoru.
+  - **Jak to funguje bez serveru:** Obsah gearlistu se zkomprimuje a zakóduje přímo do odkazu, do části adresy za `#`. Odkaz tedy data sám nese a nikam se neukládají. Část za `#` prohlížeč neposílá ani na server hostingu.
+  - **Pro uživatele:** Tlačítko **„Share“** na gearlistu otevře dialog s odkazem, tlačítkem „Copy link“ a vysvětlením: „This link contains a copy of the gearlist as it is now. Later changes won't appear in it.“
+  - **Co se sdílí:** aktuální obsah gearlistu v okamžiku kliknutí: název gearlistu, položky (název, kategorie, váha, množství, poznámka, Worn/Consumable) a pořadí kategorií. Nic jiného z Gear Vaultu, žádné další gearlisty, žádný snapshot.
+  - **Kdo odkaz otevře:** uvidí stránku jen pro čtení s názvem, položkami po kategoriích, rozpadem váhy (FR-10), vizualizací batohem (FR-19) a přepínačem jednotek. Jeho vlastní data v appce se nezmění. Na stránce je odkaz „Open HikingBuddy“ do appky.
+  - **Vědomá omezení:** Odkaz je dlouhý (u běžného gearlistu řádově tisíce znaků). Nejde později aktualizovat ani zrušit: kdo ho má, vidí obsah. Proto se sdílí jen jeden gearlist. Krátké nebo aktualizovatelné odkazy by vyžadovaly server, který je mimo scope.
+  - **Mimo scope:** „Importovat tento gearlist do mé appky“ (případné pozdější rozšíření).
+  - **Technická poznámka pro Claude Code:** komprese např. knihovnou `lz-string`; formát odkazu verzovat (např. `#share=v1:…`), aby staré odkazy fungovaly i po budoucí změně datového modelu.
+- **FR-19. UI design a vizualizace váhy batohem (v16):**
+  - **Závislost:** Čeká na Martina. Ten si vytvoří design system (v Claude, Artifacts → Design System) a ten se pak aplikuje na appku. Do té doby Claude Code tuto položku nezačíná.
+  - **Design system** se aplikuje na celou appku (barvy, typografie, rozestupy, komponenty) bez změny chování.
+  - **Vizualizace „batoh“ místo koláčového grafu (ten má LighterPack):** silueta batohu, jejíž objem je odspodu vyplněný barevnými vrstvami. Jedna vrstva za každou kategorii, výška vrstvy odpovídá podílu kategorie na váze. Vedle legenda: barva, kategorie, váha, procento. Najetí myší na vrstvu nebo řádek legendy zvýrazní obojí. Zobrazuje se u gearlistu vedle rozpadu váhy, v šabloně a na sdílené stránce (FR-18).
+  - **Otevřené otázky (Martin rozhodne při návrhu designu):**
+    - **Co je v batohu.** Návrh: jen věci, které se v batohu nesou (Base + Consumables). Worn (věci na těle) zobrazit zvlášť vedle batohu, protože v batohu fyzicky nejsou. Alternativa: všechno včetně Worn, jako koláč na LighterPacku.
+    - **Pořadí vrstev:** podle pořadí kategorií uživatele, nebo nejtěžší dole?
+    - **Barvy kategorií:** z design systému; stejná barva kategorie všude v appce.
+- **FR-20. Veřejné nasazení na web (v16):**
+  - **Proč:** prezentace na pohovorech, tedy odkaz, který kdokoli otevře.
+  - Appka se nasadí jako statický web na bezplatný hosting (Cloudflare Pages, Netlify nebo Vercel umí i soukromý repozitář; GitHub Pages je zdarma jen pro veřejný). Po každém pushi do hlavní větve se automaticky nasadí znovu.
+  - Žádný server, databáze ani účty. Nulové náklady (volitelně jen vlastní doména).
+  - Každý návštěvník má vlastní oddělenou kopii dat v prohlížeči. Sdílené odkazy (FR-18) vedou na veřejnou adresu.
+  - Martin může na veřejné adrese používat appku se svým datovým souborem (FR-16): stačí na ní připojit stejný soubor a zvolit „Load data from file“.
+  - **Rozhodnout při nasazení:** veřejný, nebo soukromý repozitář na GitHubu. Veřejný znamená, že recruiter uvidí i kód, PRD a BACKLOG (dobrá ukázka procesu); předtím je potřeba zkontrolovat, že v repozitáři není nic osobního.
+  - **Až po** dokončení FR-16 až FR-19 a Martinově testu lokálně.
+
 ### Příklad (pro ověření návrhu): přidání položky "Snickers" do Gear Vaultu
 Martin přidá do Gear Vaultu novou položku: Název "Snickers", Kategorie "Food", Váha 60 g, Quantity 5, Poznámka "bílá čokoláda". Tuhle položku pak přidá do libovolného gearlistu a tam u ní zaškrtne Consumable (nepočítá se do Base Weight) — to je vlastnost jen tohoto konkrétního gearlistu. Pokud Martin později v Gear Vaultu upraví váhu na 62 g a položka je použitá i jinde, dostane dialog Cancel / Create a copy / Continue — může se rozhodnout, jestli se to má promítnout všude, nebo jestli vznikne oddělená kopie jen pro tuhle úpravu.
 
@@ -84,15 +153,19 @@ Martin přidá do Gear Vaultu novou položku: Název "Snickers", Kategorie "Food
 Inspirováno rozložením lighterpack.com (ověřeno i přímým průzkumem appky):
 - **Rozdělení obrazovky na dva panely:**
   - **Levý panel — Gear Vault:** správa osobní databáze vybavení, seskupená podle kategorie (s možností drag & drop přeřazení), vyhledávací pole a filtr kategorie nahoře. Každý řádek je inline editovatelný (FR-12), s "úchytem" (⠿) pro přetažení.
+    - **Přidání položky (v12, upraveno ve v13):** na konci každé kategorie v seznamu je "+ Add item" (jako na lighterpack.com) — otevře formulář "Add item to Gear Vault" s danou kategorií už vybranou (lze ji změnit). Skupina "Uncategorized" (pokud existuje) má tlačítko také, bez předvybrané kategorie. **Ve Vaultu se zobrazují jen kategorie, které obsahují nějakou položku** (v13 — prázdné kategorie byly jen šum). Pro přidání do kategorie, která ve Vaultu zatím není, nebo do úplně nové, slouží **vždy viditelné velké tlačítko "+ Add gear" přes celou šířku, připnuté dole v panelu Gear Vault** (v14; ve v13 bylo malé v hlavičce — Martin chtěl, aby bylo dominantnější, lépe vidět na desktopu a blíž palci na mobilu; zůstává vidět i při posouvání seznamu) — otevře formulář s **předvybranou dlaždicí "Other"** (pole pro název nové kategorie je otevřené, kurzor ale začíná v poli Name); jinou kategorii lze vybrat jedním klikem.
+    - **Formulář "Add item to Gear Vault" se nezavírá kliknutím mimo okno (v13)** — dřív to zahodilo vše napsané. Zavírá se tlačítkem Cancel nebo klávesou Escape.
   - **Pravý panel — Gearlisty (v9):** nahoře název otevřeného gearlistu, který je zároveň rozbalovacím výběrem pro přepnutí na jiný gearlist (seznam v něm je přetažitelný, FR-13), vedle tlačítko "+ New gearlist". Samostatný sloupec se seznamem gearlistů byl ve v9 zrušen, aby celá šířka panelu patřila položkám gearlistu. Pod tím detail otevřeného gearlistu — položky seskupené podle kategorie s mezisoučtem váhy, celkový souhrn (Total / Consumable / Worn / Base Weight) nahoře, tlačítka "Save snapshot" / "View snapshot" / "Delete".
   - **Hlavička appky (nová, v8):** vedle přepínače jednotek přibyla tlačítka "Export backup" / "Import backup" (FR-14) — jsou vidět odkudkoliv v appce, protože záloha dat je důležitá dost na to, aby nebyla schovaná v podmenu.
 - **Úzké okno (v9):** appka musí být plně použitelná i s oknem přichyceným na polovinu obrazovky monitoru. Když je panel úzký, řádek položky se zalomí: nahoře úchyt, název a poznámka, celková váha řádku a "Remove"; pod tím kategorie, váha, Worn/Consumable a počet kusů. Totéž platí pro řádky v Gear Vaultu. Dlaždice rozpadu váhy se v úzkém panelu skládají 2×2. Pod šířkou okna 900 px se oba panely skládají pod sebe.
-- Koláčový graf rozložení váhy podle kategorie (jak ho má lighterpack.com) je vizuálně hezký, ale zůstává mimo MVP — číselný přehled (FR-10) stačí pro první verzi.
+- Koláčový graf rozložení váhy podle kategorie (jak ho má lighterpack.com) appka mít nebude. **Od v16 ho nahrazuje vizualizace batohem** vedle číselného rozpadu váhy (FR-19).
+- **Nové prvky ve v16:** stav datového souboru a tlačítka Connect/Reconnect/Disconnect (FR-16), „Load demo data“ a uvítací karta (FR-17), tlačítko „Share“ na gearlistu a stránka sdíleného gearlistu (FR-18). Přesné rozmístění určí design (FR-19).
 
 ## 6. Technické poznámky (v prostém jazyce)
 
 - **Tech stack:** React + Vite + TypeScript. Vite je nástroj, který appku při vývoji rychle spouští a sestavuje; TypeScript pomáhá odchytit chyby dřív, než se appka spustí.
 - **Jak funguje propojení s Gear Vaultem na úrovni dat (v7):** Položka v gearlistu si drží odkaz (ID) na položku v Gear Vaultu, dokud existuje — proto se schválené úpravy Gear Vaultu (FR-5, "Continue") do gearlistu promítají. Když uživatel zvolí "Create a copy", appka vytvoří novou položku v Gear Vaultu a přepojí na ni jen ten jeden konkrétní řádek gearlistu — zbytek zůstává na staré položce. Smazání položky v Gear Vaultu (v9) se řídí volbou v dialogu z FR-5: buď řádky, které na ni odkazovaly, odpojí (zůstanou v gearlistu se svými posledními známými hodnotami jako "custom entry", dál nezávisle editovatelné), nebo je ze všech gearlistů odstraní. Snapshot (FR-6) je čistě "hluboká kopie" aktuálního seznamu položek gearlistu uložená vedle něj, bez jakéhokoli odkazu na Gear Vault.
+- **Hosting (v16):** statický web na bezplatném hostingu, bez serveru (FR-20). „Statický“ znamená, že hosting jen posílá soubory appky; všechno ostatní běží v prohlížeči uživatele.
 - **Ukládání dat — podrobně viz sekce 6a**, protože je to teď dost důležité téma na to, aby mělo vlastní sekci, ne jen jednu odrážku.
 
 ## 6a. Trvanlivost dat — co appka řeší teď (v8) a co je navržené na později
@@ -110,21 +183,40 @@ Inspirováno rozložením lighterpack.com (ověřeno i přímým průzkumem appk
   2. **Skutečná databáze na serveru** (např. Postgres nebo podobná), appka by měla účet/přihlášení a ukládala by data přes internet — to je zároveň technický předpoklad pro plány už dřív zapsané v sekci 7 (sync mezi zařízeními, offline PWA) a pro dlouhodobou vizi v sekci 9 (komunitní sdílení gearlistů). Tohle je "opravdová" databáze v tom smyslu, v jakém to Martin pravděpodobně myslel — ale je to zásadně větší krok (vyžaduje backend, hosting, správu uživatelských účtů), ne něco, co dává smysl udělat mimochodem v rámci MVP opravy.
   - **Doporučení:** Pro MVP zůstat u Exportu/Importu (jednoduché, funguje všude, nic nestojí) a zvážit bod 1 (lokální auto-save soubor) jako další krok, pokud se Export/Import v praxi ukáže jako nepohodlný. Bod 2 (serverová databáze) dává smysl řešit ve chvíli, kdy se appka posouvá směrem k bodům 1–2 v sekci 7 (přihlašování, sync) nebo k sekci 9 (komunitní sdílení) — do té doby by to byla investice bez odpovídajícího přínosu pro jednoho uživatele.
 
-**Politika pro budoucí vývoj appky (důležité i pro Claude Code / jakéhokoli agenta, co na appce dál pracuje):** Tahle politika je teď zapsaná přímo v repozitáři appky (`README.md`, sekce "Data storage"), aby ji viděl kdokoli, kdo na kódu pracuje, ne jen v tomhle PRD. V kostce: **žádná budoucí změna tvaru dat (`AppState`, `GearItem`, `GearListItem`, `GearList`, `Category`) nesmí projít bez migrace ze staré verze** — přesně tenhle krok chyběl u v7 a způsobil dojem ztráty dat.
+**Rozhodnutí ve v16:** zvolena cesta 1, lokální soubor spravovaný appkou (FR-16). Cesta 2, serverová databáze, je vyřazená ze scope (sekce 0 a 2). Export/Import zůstává jako ruční záloha a způsob, jak poslat data někomu jinému.
 
-## 7. Co bude následovat po MVP (z původního PRD, nezavrženo, jen odloženo)
+**Politika pro budoucí vývoj appky (důležité i pro Claude Code / jakéhokoli agenta, co na appce dál pracuje):** Tahle politika je teď zapsaná přímo v repozitáři appky (`README.md`, sekce "Data storage"), aby ji viděl kdokoli, kdo na kódu pracuje, ne jen v tomhle PRD. V kostce: **žádná budoucí změna tvaru dat (`AppState`, `GearItem`, `GearListItem`, `GearList`, `Category`) nesmí projít bez migrace ze staré verze** — přesně tenhle krok chyběl u v7 a způsobil dojem ztráty dat. Od v16 platí totéž i pro datový soubor (FR-16), který má stejný formát jako Export, a pro sdílené odkazy (FR-18), které mají vlastní číslo verze formátu.
 
-1. Offline PWA (instalace na plochu telefonu, přístup bez signálu).
-2. Přihlašování a synchronizace mezi zařízeními — **technicky totéž jako "skutečná databáze na serveru" ze sekce 6a, bod 2**; obě sekce popisují stejný budoucí krok z různých úhlů (sekce 6a z pohledu ochrany dat, tahle sekce z pohledu multi-device UX).
-3. Veřejné sdílení gearlistu přes URL.
-4. Grafy/vizualizace váhy podle kategorie (koláčový graf jako na lighterpack.com).
-5. **Gearlist Template (šablona výchozího vybavení).**
+## 7. Rozšíření nad původní MVP — stav po uzavření scope (v16)
+
+*Ve v16 (2026-10-09) Martin o každém bodu rozhodl: buď je součástí finálního scope, nebo je vyřazený (už ne jen odložený). Číslování bodů zůstává kvůli odkazům z jiných sekcí.*
+
+
+1. **Vyřazeno (v16).** Offline PWA (instalace na plochu telefonu, přístup bez signálu).
+2. **Vyřazeno (v16).** Přihlašování a synchronizace mezi zařízeními — **technicky totéž jako "skutečná databáze na serveru" ze sekce 6a, bod 2**; obě sekce popisují stejný budoucí krok z různých úhlů (sekce 6a z pohledu ochrany dat, tahle sekce z pohledu multi-device UX).
+3. Veřejné sdílení gearlistu přes URL. **Ve scope (v16), bez serveru, viz FR-18.**
+4. Grafy/vizualizace váhy podle kategorie (koláčový graf jako na lighterpack.com). **Ve scope (v16), ale jako batoh místo koláče, viz FR-19.**
+5. **Gearlist Template (šablona výchozího vybavení)** — **ve scope (v16).** *rozpracováno ve v11 (2026-10-07), **implementováno ve v14 (2026-10-08)**, čeká na Martinův test. Drobná upřesnění při implementaci: (a) u "+ New gearlist" je při existující šabloně předvybraná volba "From template" (lze přepnout na "Blank gearlist") — potvrzeno Martinem; (b) úprava z řádku samotné šablony vyvolá dialog stejně jako z řádku gearlistu — tedy jen když je položka použitá ještě jinde (gearlist, nebo podruhé v šabloně); pokud je jen v tomto řádku šablony, uloží se rovnou, stejně jako u jediného výskytu v gearlistu; (c) "Save as template" je neaktivní, pokud gearlist obsahuje jen odpojené custom entries.*
    - **Problém, který řeší:** Martin si na drtivou většinu treků bere stejný okruh základního vybavení (stan, spacák, vařič, lékárnička...). Bez šablony musí při založení každého nového gearlistu tyto položky znovu ručně dohledávat a přidávat z Gear Vaultu — to zabírá čas a hlavně hrozí, že na některou opakovaně používanou položku při ručním skládání zapomene (viz problém č. 6 v sekci 1).
-   - **Návrh řešení:** Martin si v appce může předdefinovat jednu nebo víc šablon — každá je pojmenovaný seznam položek z Gear Vaultu (podobně jako gearlist, ale bez konkrétního treku). Při vytváření nového gearlistu appka nabídne založit ho buď prázdný, nebo z vybrané šablony — v tom případě se gearlist rovnou vytvoří předvyplněný všemi položkami ze šablony (a jejich výchozím množstvím z Gear Vaultu), které Martin dál jen doladí pro konkrétní trek (přidá/ubere specifické věci, upraví množství).
-   - **Proč beyond MVP:** Nejde o řešení nejkritičtějšího rizika (neúplný gearlist kvůli zpětné úpravě Gear Vaultu — to řeší sekce 3), ale o zrychlení a pohodlí při zakládání nového gearlistu.
-   - **Otevřené otázky pro budoucí rozpracování:** Může mít uživatel víc šablon najednou (např. "Léto", "Zima", "Vícedenní trek")? Jde šablonu upravovat stejně jako Gear Vault položku (živě, s dopadem na budoucí gearlisty založené z ní), nebo je šablona jen jednorázový "otisk" v momentě založení gearlistu?
-6. **Historie víc než jednoho snapshotu na gearlist** (pojmenované/více uložených otisků v čase, ne jen jeden přepisovaný) — zvažováno u v7, ale zatím vynecháno, aby MVP zůstalo jednoduché; Martin explicitně potvrdil, že pro MVP stačí jeden.
-7. **Lokální auto-save do souboru na disku** (File System Access API) — viz sekce 6a, bod 1. Krok mezi dnešním ručním Exportem/Importem a plnou serverovou databází.
+   - **Princip:** Uživatel má **jednu hlavní šablonu** ("Template"). Šablona je seznam odkazů na položky z Gear Vaultu; každý řádek si navíc pamatuje **množství** a příznaky **Worn / Consumable**. Šablona slouží **jen k automatickému "vyskládání" položek při založení nového gearlistu**: jakmile gearlist vznikne, je na šabloně úplně nezávislý — pozdější úpravy šablony do něj nijak nezasahují (a naopak).
+   - **T-1. Vytvoření šablony — "Save as template":** Na každém gearlistu je tlačítko "Save as template". Uloží aktuální obsah gearlistu jako šablonu (položky, množství, Worn/Consumable). Pokud šablona už existuje, appka se nejdřív potvrzovacím dialogem zeptá, jestli ji přepsat (obdoba opakovaného "Save snapshot"). Do šablony se dostanou jen řádky propojené s Gear Vaultem — odpojené "custom entry" řádky (položka už ve Vaultu neexistuje) se přeskočí a dialog řekne, kolik jich bylo.
+   - **T-2. Nabídka po prvním gearlistu:** Dokud šablona neexistuje, zobrazí se v gearlistu, který obsahuje aspoň jednu položku, nenápadný zavíratelný pruh (banner) "Use this gearlist as your template?" s tlačítkem "Create template" (= totéž co "Save as template") a křížkem. Nic neblokuje. Po zavření křížkem se už nezobrazuje (appka si to pamatuje); tlačítko "Save as template" zůstává dostupné vždy.
+   - **T-3. Zobrazení a úprava šablony:** Šablona je v rozbalovacím výběru gearlistů (sekce 5) jako zvláštní položka "Template", připnutá nahoře (nepřetahuje se mezi gearlisty). Po otevření se upravuje stejně jako gearlist: přidání položek z Gear Vaultu (přidání položky, která už v šabloně je, navýší množství — žádné duplicitní řádky), odebrání, změna množství, přepínání Worn/Consumable, drag & drop pořadí, rozpad váhy. Na rozdíl od gearlistu nemá snapshot. Název je pevný ("Template"), dokud existuje jen jedna šablona. Šablonu lze smazat (s potvrzením); gearlistů, které z ní vznikly, se to nijak nedotkne.
+   - **T-4. Založení gearlistu ze šablony:** Pokud šablona existuje, tlačítko "+ New gearlist" nabídne dvě volby — **"Blank gearlist"** a **"From template"**. "From template" vytvoří gearlist předvyplněný všemi položkami šablony s jejich množstvím a Worn/Consumable; řádky jsou běžně propojené s Gear Vaultem (stejně jako ručně přidané položky). Martin pak gearlist jen doladí pro konkrétní trek. Pokud šablona neexistuje, "+ New gearlist" funguje jako dnes (rovnou prázdný gearlist).
+   - **T-5. Úprava Vault položky, která je v šabloně (rozhodnutí Martina):** Šablona se počítá jako **"použito jinde"**. Úprava názvu / kategorie / váhy takové položky — ať vyjde z Gear Vaultu, z gearlistu, nebo z řádku šablony samotné — vždy zobrazí blokující dialog **Cancel / Create a copy of the item / Continue** (sekce 3, FR-5), i když položka není v žádném gearlistu. Dialog uvádí, že je položka v šabloně (souvisí s CR v BACKLOG Inbox, aby dialog ukazoval, čeho všeho se úprava týká).
+     - "Continue" = změna se uloží do Vault položky, a tím se projeví i v šabloně.
+     - "Create a copy" = šablona zůstane napojená na původní položku. Pokud úprava vyšla přímo z řádku šablony, přepojí se na novou kopii jen tento řádek (stejně jako u řádku gearlistu).
+     - Změna množství nebo Worn/Consumable v řádku šablony je vlastnost jen šablony a dialog nikdy nevyvolá (obdoba FR-9).
+   - **T-6. Smazání Vault položky, která je v šabloně:** Šablona smí obsahovat jen položky existující v Gear Vaultu, takže smazání položky z Vaultu ji vždy odebere i ze šablony. Proto vždy varování, nikdy tiché smazání:
+     - Položka je jen v šabloně (v žádném gearlistu): blokující dialog "This item is in your template. Deleting it will also remove it from the template." — **Cancel / Delete**.
+     - Položka je v šabloně i v gearlistech: stávající dialog **Cancel / Keep in gearlists / Delete everywhere** (FR-5), doplněný o informaci, že se položka v obou případech odebere i ze šablony.
+     - Snapshoty se nemění nikdy (beze změny oproti FR-5).
+   - **Co šablona zatím neumí:** Víc šablon najednou (např. "Léto", "Zima") — Martin rozhodl, že zatím stačí jedna. Datově se ale připraví tak, aby šlo později přidat další bez přestavby.
+   - **Technická poznámka:** Šablona je nová část uložených dat, takže podle politiky v sekci 6a bude potřeba zvýšit `schemaVersion` a přidat migraci (stávající data dostanou "žádná šablona" a nic se neztratí). Export/Import zálohy (FR-14) musí šablonu zahrnovat.
+   - **Proč beyond MVP:** Nejde o řešení nejkritičtějšího rizika (neúplný gearlist kvůli zpětné úpravě Gear Vaultu — to řeší sekce 3), ale o zrychlení a pohodlí při zakládání nového gearlistu. Kdy se začne stavět, rozhoduje Martin přesunem v `BACKLOG.md`.
+6. **Vyřazeno (v16).** **Historie víc než jednoho snapshotu na gearlist** (pojmenované/více uložených otisků v čase, ne jen jeden přepisovaný) — zvažováno u v7, ale zatím vynecháno, aby MVP zůstalo jednoduché; Martin explicitně potvrdil, že pro MVP stačí jeden.
+7. **Lokální auto-save do souboru na disku** (File System Access API) — viz sekce 6a, bod 1. Krok mezi dnešním ručním Exportem/Importem a plnou serverovou databází. **Ve scope (v16), viz FR-16.**
+8. **Vyřazeno (v16).** **Duplicate gearlist** (přidáno ve v11) — založit nový gearlist jako kopii existujícího (položky, množství, Worn/Consumable; bez snapshotu). Martin 2026-10-07: dobrý nápad, ale až na později — hlavní cestou k rychlému založení gearlistu je šablona (bod 5). Rozdíl: kopie přenese i věci specifické pro minulý trek, které je pak potřeba ručně odebrat, kdežto šablona je "čistý základ".
 
 ## 8. Rozhodnutí uzavřená v předchozích kolech (v7)
 
@@ -158,7 +250,58 @@ Inspirováno rozložením lighterpack.com (ověřeno i přímým průzkumem appk
 
 - **Kategorie při přidání položky do Gear Vaultu se vybírá dlaždicemi s ikonkami, ne rozbalovacím menu** (návrh Martina, Excalidraw skica 2026-09-24) — viz FR-2. Dlaždice "Other" = založit novou kategorii (potvrzeno Martinem); dlaždice mají pod ikonkou i název kategorie, aby se daly rozlišit i podobné ikonky.
 
-## 9. Dlouhodobá produktová vize: komunitní sdílení gearlistů
+## 8d. Rozhodnutí uzavřená v tomto kole (v11)
+
+- **Gearlist Template rozpracován** (sekce 7, bod 5) — Martin rozhodl otevřené otázky z v5:
+  - **Zatím jen jedna hlavní šablona.** Při zakládání gearlistu volba "Blank gearlist" / "From template".
+  - **Šablona slouží jen k automatickému vyskládání položek** z Gear Vaultu při založení gearlistu. Hotový gearlist na ní dál nezávisí.
+  - **Šablona si pamatuje množství a Worn/Consumable** u každé položky (např. bunda může být rovnou Worn).
+  - **Vytvoření:** tlačítko "Save as template" na gearlistu + zavíratelný banner s nabídkou "Create template", dokud šablona neexistuje (Martinův nápad: nabídnout šablonu po vytvoření prvního gearlistu). Šablona se pak upravuje stejně jako gearlist, jako zvláštní položka v rozbalovacím výběru gearlistů.
+  - **Úprava Vault položky, která je v šabloně, spouští dialog Cancel / Create a copy / Continue** — šablona se počítá jako "použito jinde". Martin zvolil tuto variantu místo tiché aktualizace šablony, v souladu s pravidlem, že se data nemají měnit bez vědomí uživatele.
+  - **Smazání Vault položky, která je v šabloně, vždy s varováním** (Martinův požadavek), protože se tím odebere i ze šablony.
+- **Duplicate gearlist odložen na později** (sekce 7, bod 8).
+- Feature zůstává **mimo MVP scope**, dokud ji Martin nepřesune v `BACKLOG.md` do "Teď".
+
+## 8e. Rozhodnutí uzavřená v tomto kole (v12)
+
+- **"+ Add item" v Gear Vaultu na konci každé kategorie místo v hlavičce panelu** (požadavek Martina, 2026-10-08, podle lighterpack.com). Důvod: tlačítko je co nejblíž místu, kam položka přibude, a kategorie se rovnou předvybere. Optimalizace pro mobil zatím neřešena (Martinovo rozhodnutí). Gearlist panel ("+ Add item from Gear Vault") beze změny.
+
+## 8f. Rozhodnutí uzavřená v tomto kole (v13)
+
+- **Prázdné kategorie se ve Vaultu nezobrazují; místo nich vždy viditelné "+ Add gear" v hlavičce s předvybraným "Other"** (Martin, 2026-10-08, po testu v12). Per-category "+ Add item" zůstává.
+- **Kategorie jdou přejmenovat kliknutím na nadpis ve Vaultu** (Martin; zároveň BACKLOG bug z 2026-09-24).
+- **Dialog Cancel / Create a copy / Continue (i u mazání) vypisuje názvy dotčených gearlistů** (BACKLOG CR z 2026-09-24). Při editaci z gearlistu se uvádějí ostatní gearlisty, a tentýž gearlist jen pokud v něm položka je víckrát.
+- **Formulář přidání položky se nezavírá klikem mimo okno** (BACKLOG bug z 2026-09-24); Cancel nebo Escape.
+- **"Shelter" → "Shelter System"** (BACKLOG CR z 2026-09-24) — Claude zvolil velké "S" kvůli shodě se "Sleep System"; Martin může změnit přejmenováním. Existující data převedena migrací (schemaVersion 3 → 4).
+- **BACKLOG má nový stav 🧪 Test** — hotové věci čekají na Martinovo ověření, teprve pak jdou do ✅ Hotovo.
+
+## 8g. Rozhodnutí uzavřená v tomto kole (v14)
+
+- **Gearlist Template implementován** podle specifikace v sekci 7, bod 5 (Martin přesunul do "Teď" 2026-10-08). Upřesnění viz tamtéž. Data: nová pole `templates` a `templateBannerDismissed`, `schemaVersion` 4 → 5 s migrací; šablona je součástí Export/Import.
+- **"+ Add gear" = velké tlačítko přes celou šířku, připnuté dole v panelu Gear Vault** (Martin). Z hlavičky odstraněno.
+- **Vlastní kategorie lze smazat křížkem na dlaždici ve formuláři** (Martin: jen kategorie vytvořené uživatelem). Kategorie ze šablony tam křížek nemají; dialog "Categories" zatím beze změny — otevřená otázka.
+
+## 8h. Rozhodnutí uzavřená v tomto kole (v15)
+
+- **Kategorie z výchozí šablony nejdou smazat — ani v dialogu "Categories", ani ve formuláři** (Martin, 2026-10-08). Smazat jde jen vlastní kategorie. Důvod: dopad na UX a riziko rozbití UI (např. smazání všech kategorií). Přejmenovat a přeřadit lze dál všechny.
+- **"From template" jako výchozí volba u "+ New gearlist" potvrzeno** (Martin).
+- **Úprava z řádku šablony jen s dialogem, když je položka použitá i jinde, potvrzeno** (Martin) — upřesnění v sekci 7, bod 5 (b) platí.
+
+## 8i. Rozhodnutí uzavřená v tomto kole (v16, 2026-10-09)
+
+- **HikingBuddy je osobní nástroj a ukázka do portfolia, ne produkt k monetizaci** (Martin, po rozboru trhu a monetizačních možností; sekce 0). Scope je tímto uzavřený.
+- **Lokální databáze = automatické ukládání do souboru na disku** přes File System Access API (FR-16). Serverová databáze a účty jsou vyřazené. Soubor doporučeně leží v cloud-sync složce; v repozitáři jen v `data/` mimo git (Martin nechal umístění na Claudovi).
+- **Export/Import zůstává** jako ruční záloha a způsob, jak poslat data někomu jinému (Martin).
+- **Sdílení gearlistu přes URL bez serveru:** data jsou zakódovaná v odkazu, stránka je jen pro čtení a odkaz je „otisk“ okamžiku sdílení (FR-18). Zvolil Claude, protože je to jediná varianta bez serveru; Martin může změnit.
+- **Koláčový graf nahrazen vizualizací batohem** (Martinův nápad, FR-19). Design čeká na Martinův design system; otevřené otázky jsou ve FR-19.
+- **Load demo data a uvítací karta** (FR-17). Nejde použít, když je připojený datový soubor (Claude, ochrana Martinových dat).
+- **Veřejné nasazení jako statický web zdarma** (FR-20), až po dokončení a otestování lokálně (Martin).
+- **Gearlist Template zůstává** (už implementováno ve v14).
+- **Vyřazeno ze scope:** offline PWA, přihlašování a sync, serverová databáze, víc snapshotů, Duplicate gearlist, víc šablon, komunitní sdílení a monetizace (sekce 9).
+
+## 9. Dlouhodobá produktová vize: komunitní sdílení gearlistů — VYŘAZENO (v16)
+
+**Stav (v16, 2026-10-09):** Vyřazeno spolu s monetizací, důvody jsou v sekci 0. Text níže zůstává jen jako záznam původních úvah; nic z něj se nestaví.
 
 **Martinova vize appky:** HikingBuddy jako komunitní místo, kde hikeři řeší výbavu pro svá outdoorová dobrodružství — appka není jen osobní nástroj na sestavení gearlistu, ale i místo, kde se dá vidět a inspirovat výbavou ostatních.
 
@@ -166,7 +309,7 @@ Inspirováno rozložením lighterpack.com (ověřeno i přímým průzkumem appk
 
 **Návrh řešení (hrubě, k rozpracování):** Hiker může svůj gearlist (typicky jeho uložený snapshot, viz sekce 3/FR-6 — stabilní "otisk", ne rozpracovaná verze) zveřejnit ostatním uživatelům appky. Ostatní si zveřejněné gearlisty mohou procházet/prohlížet a vybraný gearlist naimportovat do svého Gear Vaultu a gearlistů jako výchozí bod — a dál si ho upravit pro vlastní potřebu.
 
-**Proč je to dlouhodobá vize, ne "beyond MVP" bod jako Gearlist Template:** Na rozdíl od ostatních bodů v sekci 7 tahle feature mění základní předpoklad appky ze single-user (data jen v prohlížeči jednoho člověka, viz sekce 2 a 6/6a) na multi-user — tedy vyžaduje účty/přihlašování a server/databázi, kde jsou gearlisty uložené a přístupné napříč uživateli (obojí je dnes v sekci 2 vědomě mimo MVP, i když sekce 6a už navrhuje, jak by taková databáze mohla vypadat, až na ni dojde řada). Přirozeně navazuje na body 1–2 ze sekce 7 (offline PWA, přihlašování a synchronizace), které jsou jejím technickým předpokladem.
+**Proč je to dlouhodobá vize, ne "beyond MVP" bod jako Gearlist Template (sekce 7, bod 5):** Na rozdíl od ostatních bodů v sekci 7 tahle feature mění základní předpoklad appky ze single-user (data jen v prohlížeči jednoho člověka, viz sekce 2 a 6/6a) na multi-user — tedy vyžaduje účty/přihlašování a server/databázi, kde jsou gearlisty uložené a přístupné napříč uživateli (obojí je dnes v sekci 2 vědomě mimo MVP, i když sekce 6a už navrhuje, jak by taková databáze mohla vypadat, až na ni dojde řada). Přirozeně navazuje na body 1–2 ze sekce 7 (offline PWA, přihlašování a synchronizace), které jsou jejím technickým předpokladem.
 
 **Monetizační potenciál:** Tahle vize je i potenciální cesta k monetizaci appky — např. placený přístup ke komunitním/kurátorovaným gearlistům, prémiový obsah od zkušených/expertních hikerů, nebo možnost sledovat oblíbené přispěvatele. Zatím jde o směr k prozkoumání, ne o rozhodnutý business model.
 

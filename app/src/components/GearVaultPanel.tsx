@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useApp } from '../state/AppContext';
-import { findAffectedLists } from '../state/logic';
+import { describeUsage, findAffectedLists, findAffectedTemplates } from '../state/logic';
+import { TEMPLATE_NAME } from '../constants';
 import type { GearItem } from '../types';
 import { UNCATEGORIZED } from '../types';
 import { fromGrams, formatWeight, toGrams } from '../utils/weight';
@@ -22,17 +23,30 @@ type CoreFieldPatch = Pick<GearItem, 'name' | 'categoryId' | 'weightGrams'>;
 interface PendingCoreEdit {
   item: GearItem;
   patch: CoreFieldPatch;
-  affectedCount: number;
+  /** e.g. "2 gearlist(s) and your template" */
+  usage: string;
+  affectedNames: string[];
+}
+
+interface PendingDelete {
+  id: string;
+  name: string;
+  listCount: number;
+  inTemplate: boolean;
+  affectedNames: string[];
 }
 
 export function GearVaultPanel() {
-  const { state, addGearItem, updateGearItem, deleteGearItem, addCategory, reorderGearItems, reorderCategories } = useApp();
+  const { state, addGearItem, updateGearItem, deleteGearItem, addCategory, renameCategory, deleteCategory, reorderGearItems, reorderCategories } = useApp();
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
-  const [formOpen, setFormOpen] = useState(false);
+  // null = form closed. Otherwise the form is open: from a category's own "+ Add item" with
+  // that category preselected (null = Uncategorized group), or from the general
+  // "+ Add gear" button with the "Other" (new category) tile preselected.
+  const [addForm, setAddForm] = useState<{ categoryId: string | null; newCategory?: boolean } | null>(null);
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
   const [pendingCoreEdit, setPendingCoreEdit] = useState<PendingCoreEdit | null>(null);
-  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string; affectedCount: number } | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
 
   const filteredItems = useMemo(() => {
     return state.gearItems.filter((item) => {
@@ -42,6 +56,12 @@ export function GearVaultPanel() {
       return matchesSearch && matchesCategory;
     });
   }, [state.gearItems, search, categoryFilter]);
+
+  const itemCountsByCategory = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const g of state.gearItems) if (g.categoryId) counts[g.categoryId] = (counts[g.categoryId] ?? 0) + 1;
+    return counts;
+  }, [state.gearItems]);
 
   const sortedCategories = useMemo(() => sortByOrder(state.categories), [state.categories]);
 
@@ -55,6 +75,9 @@ export function GearVaultPanel() {
     return map;
   }, [filteredItems]);
 
+  /** Only categories that actually contain gear are shown (empty ones would just be noise).
+   * Adding into a category that isn't in the Vault yet goes through "+ Add gear" in the
+   * header, which is always visible. */
   const orderedGroupKeys = useMemo(() => {
     const keys = sortedCategories.map((c) => c.id).filter((id) => grouped.has(id));
     if (grouped.has(UNCATEGORIZED_FILTER)) keys.push(UNCATEGORIZED_FILTER);
@@ -75,16 +98,30 @@ export function GearVaultPanel() {
       weightGrams: patch.weightGrams ?? item.weightGrams,
     };
     const affected = findAffectedLists(state, item.id);
-    if (affected.length === 0) {
+    const templates = findAffectedTemplates(state, item.id);
+    // The template counts as "used elsewhere" too (T-5).
+    if (affected.length === 0 && templates.length === 0) {
       updateGearItem(item.id, { ...fullPatch, defaultQuantity: item.defaultQuantity, note: item.note });
       return;
     }
-    setPendingCoreEdit({ item, patch: fullPatch, affectedCount: affected.length });
+    setPendingCoreEdit({
+      item,
+      patch: fullPatch,
+      usage: describeUsage(affected.length, templates.length),
+      affectedNames: [...templates.map(() => TEMPLATE_NAME), ...affected.map((l) => l.name)],
+    });
   }
 
   function requestDelete(item: GearItem) {
     const affected = findAffectedLists(state, item.id);
-    setPendingDelete({ id: item.id, name: item.name, affectedCount: affected.length });
+    const templates = findAffectedTemplates(state, item.id);
+    setPendingDelete({
+      id: item.id,
+      name: item.name,
+      listCount: affected.length,
+      inTemplate: templates.length > 0,
+      affectedNames: [...templates.map(() => TEMPLATE_NAME), ...affected.map((l) => l.name)],
+    });
   }
 
   return (
@@ -94,9 +131,6 @@ export function GearVaultPanel() {
         <div className="panel-header-actions">
           <button type="button" className="btn btn-ghost btn-small" onClick={() => setCategoryManagerOpen(true)}>
             Categories
-          </button>
-          <button type="button" className="btn btn-primary btn-small" onClick={() => setFormOpen(true)}>
-            + Add item
           </button>
         </div>
       </header>
@@ -122,8 +156,11 @@ export function GearVaultPanel() {
 
       <div className="vault-list">
         {state.gearItems.length === 0 && <p className="empty-hint">Gear Vault is empty — add your first item.</p>}
+        {state.gearItems.length > 0 && orderedGroupKeys.length === 0 && (
+          <p className="empty-hint">No gear matches your search or filter.</p>
+        )}
         {orderedGroupKeys.map((key) => {
-          const items = grouped.get(key)!;
+          const items = grouped.get(key) ?? [];
           const category = key === UNCATEGORIZED_FILTER ? null : state.categories.find((c) => c.id === key) ?? null;
           return (
             <div
@@ -131,9 +168,23 @@ export function GearVaultPanel() {
               className="vault-category-group"
               {...(category ? makeDragHandlers(category.id, reorderCategories) : {})}
             >
-              <h3 className="vault-category-title" title={category ? 'Drag to reorder categories' : undefined}>
-                {category ? '⠿ ' : ''}
-                {categoryName(key)}
+              <h3 className="vault-category-title">
+                {category ? (
+                  <>
+                    <span className="vault-category-handle" title="Drag to reorder categories">
+                      ⠿
+                    </span>
+                    {/* Click the name to rename the category (FR-2) — same inline editing as
+                        everywhere else; renaming updates every gearlist row linked to it. */}
+                    <InlineTextField
+                      className="vault-category-name"
+                      value={category.name}
+                      onCommit={(name) => renameCategory(category.id, name)}
+                    />
+                  </>
+                ) : (
+                  categoryName(key)
+                )}
               </h3>
               {items.map((item) => (
                 <VaultItemRow
@@ -149,21 +200,40 @@ export function GearVaultPanel() {
                   onReorder={(sourceId, targetId) => reorderGearItems(sourceId, targetId, item.categoryId)}
                 />
               ))}
+              <AddItemButton onClick={() => setAddForm({ categoryId: category?.id ?? null })} />
             </div>
           );
         })}
       </div>
 
-      {formOpen && (
+      {/* Main "add gear" action: a big full-width button pinned to the bottom of the Gear
+          Vault panel — always visible while scrolling, easy to hit, and where a thumb
+          reaches on a phone (BACKLOG, 2026-10-08). Opens the form with "Other" preselected,
+          for categories that aren't in the Vault yet or brand-new ones. */}
+      <div className="vault-add-gear-bar">
+        <button
+          type="button"
+          className="btn btn-primary vault-add-gear"
+          onClick={() => setAddForm({ categoryId: null, newCategory: true })}
+        >
+          + Add gear
+        </button>
+      </div>
+
+      {addForm && (
         <GearItemFormDialog
           categories={state.categories}
           unitPreference={state.unitPreference}
+          initialCategoryId={addForm.categoryId}
+          startWithNewCategory={addForm.newCategory}
+          onDeleteCategory={deleteCategory}
+          itemCounts={itemCountsByCategory}
           onSubmit={(data) => {
             addGearItem(data);
-            setFormOpen(false);
+            setAddForm(null);
           }}
           onCreateCategory={addCategory}
-          onCancel={() => setFormOpen(false)}
+          onCancel={() => setAddForm(null)}
         />
       )}
 
@@ -171,8 +241,9 @@ export function GearVaultPanel() {
 
       {pendingCoreEdit && (
         <VaultEditDialog
-          title="This item is used in existing gearlists"
-          message={`"${pendingCoreEdit.item.name}" is used in ${pendingCoreEdit.affectedCount} gearlist(s). Do you want to update it everywhere it's used, or keep those unchanged and create a separate copy with the new values?`}
+          title="This item is used elsewhere"
+          message={`"${pendingCoreEdit.item.name}" is used in ${pendingCoreEdit.usage}. Do you want to update it everywhere it's used, or keep those unchanged and create a separate copy with the new values?`}
+          affectedLists={pendingCoreEdit.affectedNames}
           onCancel={() => setPendingCoreEdit(null)}
           onCopy={() => {
             addGearItem({
@@ -195,10 +266,13 @@ export function GearVaultPanel() {
 
       {/* Deleting an item that gearlists use is the same kind of change as editing it
           (FR-5): blocking 3-way choice, never silent. */}
-      {pendingDelete && pendingDelete.affectedCount > 0 && (
+      {pendingDelete && pendingDelete.listCount > 0 && (
         <VaultEditDialog
           title="This item is used in existing gearlists"
-          message={`"${pendingDelete.name}" is used in ${pendingDelete.affectedCount} gearlist(s). Do you want to remove it from those gearlists too, or keep it there as a custom entry that is no longer linked to Gear Vault? Saved snapshots are never changed.`}
+          message={`"${pendingDelete.name}" is used in ${pendingDelete.listCount} gearlist(s). Do you want to remove it from those gearlists too, or keep it there as a custom entry that is no longer linked to Gear Vault? Saved snapshots are never changed.${
+            pendingDelete.inTemplate ? ' In both cases it is also removed from your template.' : ''
+          }`}
+          affectedLists={pendingDelete.affectedNames}
           copyLabel="Keep in gearlists"
           continueLabel="Delete everywhere"
           continueDanger
@@ -214,11 +288,16 @@ export function GearVaultPanel() {
         />
       )}
 
-      {pendingDelete && pendingDelete.affectedCount === 0 && (
+      {/* T-6: only in the template → still always a warning, never a silent delete. */}
+      {pendingDelete && pendingDelete.listCount === 0 && (
         <ConfirmDialog
-          title="Delete item from Gear Vault"
+          title={pendingDelete.inTemplate ? 'This item is in your template' : 'Delete item from Gear Vault'}
           danger
-          message={`Delete "${pendingDelete.name}" from Gear Vault?`}
+          message={
+            pendingDelete.inTemplate
+              ? `"${pendingDelete.name}" is in your template. Deleting it will also remove it from the template.`
+              : `Delete "${pendingDelete.name}" from Gear Vault?`
+          }
           confirmLabel="Delete"
           onConfirm={() => {
             deleteGearItem(pendingDelete.id, false);
@@ -228,6 +307,16 @@ export function GearVaultPanel() {
         />
       )}
     </section>
+  );
+}
+
+/** "+ Add item" at the end of a category group (like lighterpack.com) — opens the add form
+ * with that category already selected, so the button sits right where the item will land. */
+function AddItemButton({ onClick }: { onClick: () => void }) {
+  return (
+    <button type="button" className="vault-add-item" onClick={onClick}>
+      + Add item
+    </button>
   );
 }
 

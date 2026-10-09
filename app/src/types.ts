@@ -82,5 +82,14 @@ export interface AppState {
   categories: Category[];
   gearItems: GearItem[];
   gearLists: GearList[];
+  /**
+   * Gearlist Template(s) — PRD section 7, point 5 (T-1…T-6). Same shape as a gearlist so it's
+   * edited with the same rows and actions, but `snapshot` is always null, every row is
+   * linked to Gear Vault, and its name is fixed ("Template"). An array so more templates can
+   * be added later without another data rework; for now there's at most one.
+   */
+  templates: GearList[];
+  /** T-2: the user closed the "Use this gearlist as your template?" banner — don't show it again. */
+  templateBannerDismissed: boolean;
   unitPreference: UnitPreference;
 }

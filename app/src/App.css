@@ -872,3 +872,162 @@ select {
   border-radius: 6px;
   color: #e8e9ec;
 }
+
+/* "+ Add item" at the end of each Gear Vault category (lighterpack.com style): a quiet
+   text button aligned with the item names, so it's close by but doesn't compete with them. */
+.vault-add-item {
+  display: block;
+  background: transparent;
+  border: none;
+  color: #6f9bff;
+  font-size: 0.82rem;
+  font-weight: 500;
+  padding: 6px 6px 6px 32px;
+  margin-top: 2px;
+  border-radius: 6px;
+  text-align: left;
+}
+.vault-add-item:hover {
+  color: #9db9ff;
+  background: #1f232b;
+}
+
+/* Category title in Gear Vault: drag handle + click-to-rename name (FR-2, PRD v13). */
+.vault-category-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.vault-category-handle {
+  cursor: grab;
+}
+.vault-category-title .inline-edit-input {
+  text-transform: none;
+  letter-spacing: normal;
+  font-size: 0.85rem;
+  padding: 2px 6px;
+}
+
+/* List of gearlists a Vault change would touch, inside the Cancel/Copy/Continue dialog. */
+.affected-lists {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #b5bac4;
+}
+.affected-lists-label {
+  font-weight: 600;
+  color: #dfe2e8;
+}
+.affected-lists ul {
+  margin: 6px 0 0;
+  padding-left: 20px;
+  max-height: 160px;
+  overflow-y: auto;
+}
+.affected-lists li {
+  margin: 2px 0;
+  color: #e8e9ec;
+}
+
+/* Big "+ Add gear" pinned to the bottom of the Gear Vault panel (PRD v14). Sticky inside the
+   panel's own scroll area; margin-top:auto keeps it at the bottom when the list is short. */
+.vault-add-gear-bar {
+  position: sticky;
+  bottom: -16px; /* cancels the panel's bottom padding so it sits flush */
+  margin: auto -20px -16px;
+  padding: 12px 20px 16px;
+  background: linear-gradient(to bottom, rgba(25, 28, 34, 0), #191c22 14px);
+  z-index: 2;
+}
+.vault-add-gear {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(58, 111, 240, 0.25);
+}
+
+/* Delete (×) on user-created category tiles in the add-item form. */
+.category-tile-wrap {
+  position: relative;
+  display: flex;
+}
+.category-tile-wrap > .category-tile {
+  flex: 1;
+}
+.category-tile-delete {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: #2a2e36;
+  color: #9aa0ab;
+  padding: 0;
+}
+.category-tile-delete:hover {
+  background: #5c2727;
+  color: #ff9b9b;
+}
+
+/* Gearlist Template (PRD 7.5) */
+.template-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border: 1px dashed #3a6ff0;
+  border-radius: 8px;
+  background: #1a2133;
+  color: #cfd3da;
+  font-size: 0.88rem;
+}
+.template-banner > span {
+  flex: 1;
+  min-width: 200px;
+}
+.template-banner-close {
+  background: transparent;
+  border: none;
+  color: #9aa0ab;
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 2px 6px;
+}
+.template-banner-close:hover {
+  color: #e8e9ec;
+}
+.gearlist-switcher-template {
+  border-bottom: 1px solid #2a2e36;
+  margin-bottom: 4px;
+}
+.new-list-form {
+  flex-wrap: wrap;
+}
+.segmented {
+  display: flex;
+  width: 100%;
+  border: 1px solid #3a3f4a;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.segmented button {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #9aa0ab;
+  padding: 7px 10px;
+  font-size: 0.85rem;
+}
+.segmented button.active {
+  background: #22304f;
+  color: #e8e9ec;
+}

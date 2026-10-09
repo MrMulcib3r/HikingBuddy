@@ -7,7 +7,7 @@ import type { Category } from './types';
  */
 export const DEFAULT_CATEGORIES: Category[] = [
   { id: 'cat-backpack', name: 'Backpack', order: 0 },
-  { id: 'cat-shelter', name: 'Shelter', order: 1 },
+  { id: 'cat-shelter', name: 'Shelter System', order: 1 },
   { id: 'cat-sleep', name: 'Sleep System', order: 2 },
   { id: 'cat-clothing', name: 'Clothing', order: 3 },
   { id: 'cat-cooking', name: 'Cooking', order: 4 },
@@ -17,6 +17,18 @@ export const DEFAULT_CATEGORIES: Category[] = [
   { id: 'cat-hygiene', name: 'Hygiene', order: 8 },
   { id: 'cat-misc', name: 'Misc', order: 9 },
 ];
+
+/** Categories from the default template can be renamed and reordered, but not deleted —
+ * only categories the user created themselves can be (PRD v15). Deleting defaults would
+ * hurt the UX (icons, the add-item tile grid) and deleting all of them would leave the
+ * UI without any category to pick. */
+const TEMPLATE_CATEGORY_IDS = new Set(DEFAULT_CATEGORIES.map((c) => c.id));
+export function isTemplateCategory(categoryId: string): boolean {
+  return TEMPLATE_CATEGORY_IDS.has(categoryId);
+}
+
+/** Fixed display name of the gearlist template while there is only one (PRD 7.5, T-3). */
+export const TEMPLATE_NAME = 'Template';
 
 /**
  * Storage key policy (see PRD-MVP.md section 6 "Data migration policy"): this key never

@@ -3,23 +3,28 @@ import { useApp } from '../state/AppContext';
 import { sortByOrder } from '../utils/reorder';
 import { makeDragHandlers } from '../utils/dnd';
 import type { GearList } from '../types';
+import { TEMPLATE_NAME } from '../constants';
 import { GearListDetail } from './GearListDetail';
 
 export function GearListsPanel() {
-  const { state, createList } = useApp();
+  const { state, createList, createListFromTemplate } = useApp();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState('');
+  const template = state.templates[0] ?? null;
+  // T-4: with a template, a new gearlist can start blank or pre-filled from it.
+  const [fromTemplate, setFromTemplate] = useState(true);
 
   const sortedLists = useMemo(() => sortByOrder(state.gearLists), [state.gearLists]);
   // Bez postranního seznamu musí být vždy něco vybrané — když vybraný gearlist neexistuje
   // (start appky, smazání), ukáže se první v pořadí.
-  const selected = sortedLists.find((l) => l.id === selectedId) ?? sortedLists[0] ?? null;
+  const selectedTemplate = template && template.id === selectedId ? template : null;
+  const selected = selectedTemplate ?? sortedLists.find((l) => l.id === selectedId) ?? sortedLists[0] ?? null;
 
   function handleCreate() {
     const trimmed = newName.trim();
     if (!trimmed) return;
-    const id = createList(trimmed);
+    const id = template && fromTemplate ? createListFromTemplate(trimmed, template.id) : createList(trimmed);
     setSelectedId(id);
     setNewName('');
     setCreating(false);
@@ -29,17 +34,34 @@ export function GearListsPanel() {
     <section className="panel gear-lists-panel">
       <header className="panel-header">
         {selected ? (
-          <GearlistSwitcher lists={sortedLists} selected={selected} onSelect={setSelectedId} />
+          <GearlistSwitcher lists={sortedLists} template={template} selected={selected} onSelect={setSelectedId} />
         ) : (
           <h2>Gearlists</h2>
         )}
-        <button type="button" className="btn btn-primary btn-small" onClick={() => setCreating(true)}>
+        <button
+          type="button"
+          className="btn btn-primary btn-small"
+          onClick={() => {
+            setFromTemplate(true);
+            setCreating(true);
+          }}
+        >
           + New gearlist
         </button>
       </header>
 
       {creating && (
         <div className="new-list-form">
+          {template && (
+            <div className="segmented" role="radiogroup" aria-label="Start from">
+              <button type="button" role="radio" aria-checked={!fromTemplate} className={!fromTemplate ? 'active' : ''} onClick={() => setFromTemplate(false)}>
+                Blank gearlist
+              </button>
+              <button type="button" role="radio" aria-checked={fromTemplate} className={fromTemplate ? 'active' : ''} onClick={() => setFromTemplate(true)}>
+                From template ({template.items.length})
+              </button>
+            </div>
+          )}
           <input
             autoFocus
             value={newName}
@@ -60,7 +82,7 @@ export function GearListsPanel() {
       )}
 
       {selected ? (
-        <GearListDetail key={selected.id} list={selected} onDeleted={() => setSelectedId(null)} />
+        <GearListDetail key={selected.id} list={selected} isTemplate={selected === selectedTemplate} onDeleted={() => setSelectedId(null)} />
       ) : (
         <p className="empty-hint">No gearlists yet — create your first one with "+ New gearlist".</p>
       )}
@@ -70,6 +92,7 @@ export function GearListsPanel() {
 
 interface GearlistSwitcherProps {
   lists: GearList[];
+  template: GearList | null;
   selected: GearList;
   onSelect: (id: string) => void;
 }
@@ -77,7 +100,7 @@ interface GearlistSwitcherProps {
 /** The open gearlist's name doubles as a dropdown for switching to another gearlist —
  * replaces the old sidebar column so the list itself gets the full panel width. Gearlists
  * can still be reordered by dragging inside the dropdown (FR-13). */
-function GearlistSwitcher({ lists, selected, onSelect }: GearlistSwitcherProps) {
+function GearlistSwitcher({ lists, template, selected, onSelect }: GearlistSwitcherProps) {
   const { reorderLists } = useApp();
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -108,7 +131,7 @@ function GearlistSwitcher({ lists, selected, onSelect }: GearlistSwitcherProps) 
         title="Switch gearlist"
         onClick={() => setOpen((o) => !o)}
       >
-        <span className="gearlist-switcher-name">{selected.name}</span>
+        <span className="gearlist-switcher-name">{selected === template ? `📋 ${TEMPLATE_NAME}` : selected.name}</span>
         <span className="gearlist-switcher-caret" aria-hidden="true">
           ▾
         </span>
@@ -116,6 +139,23 @@ function GearlistSwitcher({ lists, selected, onSelect }: GearlistSwitcherProps) 
 
       {open && (
         <ul className="gearlist-switcher-menu" role="listbox" aria-label="Gearlists">
+          {/* T-3: the template is pinned on top and isn't draggable among the gearlists. */}
+          {template && (
+            <li
+              role="option"
+              aria-selected={template.id === selected.id}
+              className={`gearlist-switcher-item gearlist-switcher-template ${template.id === selected.id ? 'active' : ''}`}
+              onClick={() => {
+                onSelect(template.id);
+                setOpen(false);
+              }}
+            >
+              <span className="drag-handle" aria-hidden="true">
+                📋
+              </span>
+              <span className="gearlist-switcher-item-name">{TEMPLATE_NAME}</span>
+            </li>
+          )}
           {lists.map((list) => (
             <li
               key={list.id}
