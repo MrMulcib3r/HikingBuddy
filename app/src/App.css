@@ -1118,3 +1118,41 @@ select {
   color: #e8e9ec;
   padding: 4px 0;
 }
+
+/* FR-17 — welcome card + demo data */
+.btn-looks-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.welcome {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  overflow-y: auto;
+}
+.welcome-card {
+  max-width: 520px;
+  background: #1b1e24;
+  border: 1px solid #2f333c;
+  border-radius: 12px;
+  padding: 28px;
+  color: #cfd3da;
+  line-height: 1.5;
+}
+.welcome-card h2 {
+  margin: 0 0 12px;
+  font-size: 1.4rem;
+  color: #e8e9ec;
+}
+.welcome-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+.welcome-hint {
+  margin: 12px 0 0;
+  font-size: 0.85rem;
+  color: #f0c060;
+}
