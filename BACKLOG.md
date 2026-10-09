@@ -66,25 +66,13 @@ Template (nemazat): - [TYP] Krátký název – co se děje / co chci (datum)
 - [ ] [FEATURE] Automatické testy – přidat do projektu sadu testů, které po každé změně ověří klíčová pravidla z PRD (dialog Cancel/Copy/Continue, žádné duplicitní řádky, snapshot…). Proč: dnes se vše ověřuje ručně a chyba se může vloudit nepozorovaně. (2026-09-23, navrhl Claude)
 - [ ] ~~[FEATURE] Skutečná databáze na serveru – appka s účtem, data uložená na serveru místo jen v prohlížeči. Proč: jediné řešení bez ručních kroků a zároveň technický základ pro sync mezi zařízeními (PRD sekce 7, bod 2) i komunitní sdílení (PRD sekce 9). Větší krok, dává smysl řešit až s těmito featurami, ne samostatně kvůli záloze. Viz PRD sekce 6a, bod 2. (2026-09-24, navrhl Claude)~~ **Vyřazeno ve v16 (2026-10-09)**, data řeší auto-save do souboru (FR-16).
 
+- [ ] [CR] `npm audit` hlásí 1 „high“ zranitelnost v `source-map-js` — balíček používá jen sestavovací nástroj (Vite) při vývoji, do appky v prohlížeči se nedostane. Opravit `npm audit fix` před nasazením (FR-20). (2026-10-09, našel Claude)
+
 ## 🔴 Teď
 
 _Finální scope appky je v PRD v16 (sekce 0 a 2). Položky níže jsou seřazené: nejdřív všechno dodělat a vyzkoušet lokálně, nasazení na web až nakonec (viz 🟡 Brzy). Souběžně s tím Martin prochází položky v 🧪 Test._
 
-- [ ] [FEATURE] Automatické ukládání do datového souboru („lokální databáze“) – PRD FR-16. Proč: data dnes žijí jen v prohlížeči a smazání dat prohlížeče je smaže; Export/Import chrání, jen když si na něj Martin vzpomene. (2026-10-09, Martin)
-  - „Connect data file“ v hlavičce → appka po každé změně sama ukládá do vybraného `.json` souboru; stav ukládání vidět v hlavičce.
-  - Připojení souboru s daty → dialog Cancel / Load data from file / Overwrite file with current data (s počty).
-  - Po znovuotevření prohlížeče pruh „Reconnect to your data file“; bez potvrzení se do souboru nic nezapisuje.
-  - Formát stejný jako Export (`{ schemaVersion, state }`) → platí migrace (FR-15).
-  - Jen Chrome/Edge na počítači; jinde krátká informace a appka funguje jako dnes.
-  - Do `.gitignore` přidat `data/` (pro případ, že by Martin chtěl soubor v repu).
-- [ ] [FEATURE] Load demo data + uvítací karta pro prázdnou appku – PRD FR-17. Proč: prezentace na pohovorech; prázdná appka nic neukáže. (2026-10-09, Martin)
-  - Prázdná appka → karta s „Load demo data“ / „Start empty“; tlačítko i v hlavičce (s potvrzením, pokud appka obsahuje data).
-  - Při připojeném datovém souboru (FR-16) nejde použít, aby si Martin nepřepsal skutečná data.
-  - Demo postavit na `Claude outputs/Weekend_Hikes-HikingBuddy-import.json` a doplnit: 2 gearlisty se sdílenými položkami, snapshot, šablona, Worn i Consumable. Obsah dema ukázat Martinovi ke schválení.
-- [ ] [FEATURE] Sdílení gearlistu přes URL, jen pro čtení, bez serveru – PRD FR-18. Proč: poslat gearlist kamarádovi nebo na fórum, ukázka na pohovoru. (2026-10-09, Martin)
-  - Tlačítko „Share“ → odkaz s gearlistem zakódovaným za `#` + „Copy link“ + upozornění, že odkaz je kopie a pozdější změny v něm nebudou.
-  - Stránka sdíleného gearlistu: položky po kategoriích, rozpad váhy, přepínač jednotek; data otevírajícího se nemění.
-  - Formát odkazu verzovaný (`v1`), aby staré odkazy fungovaly i po změně datového modelu.
+_Prázdné — FR-16, FR-17 a FR-18 jsou hotové a čekají v 🧪 Test. Další na řadě je design (FR-19, 🟡 Brzy), až bude Martinův design system._
 
 
 ## 🟡 Brzy
@@ -132,6 +120,27 @@ _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, př
   4. Změň ve Vaultu váhu položky, která je v šabloně → dialog Cancel / Copy / Continue uvádí „Template“ i u položky, která není v žádném gearlistu.
   5. Smaž ve Vaultu položku, která je jen v šabloně → varování „…will also remove it from the template“.
   6. „Delete template“ smaže šablonu, gearlisty z ní vytvořené zůstanou.
+- [ ] [FEATURE] Automatické ukládání do datového souboru – PRD FR-16. (implementováno 2026-10-09) → **Jak otestovat** (v Chrome nebo Edge):
+  1. Doporučuji nejdřív „Export backup“ (pro jistotu).
+  2. „Connect data file“ → „Create new file“ → ulož např. do OneDrive jako `hikingbuddy-data.json`. V hlavičce se objeví „Saved to hikingbuddy-data.json · čas“.
+  3. Něco změň (váhu, název) → do ~1 s se čas v hlavičce aktualizuje. Soubor jde otevřít v Poznámkovém bloku.
+  4. Zavři prohlížeč úplně a otevři appku znovu → pruh „Reconnect to your data file“ → Reconnect → prohlížeč se zeptá na povolení → povol. (Chrome někdy nabídne „povolit při každé návštěvě“, pak se pruh už neukazuje.)
+  5. Dokud nedáš Reconnect, udělej změnu → po Reconnect přijde dialog Cancel / Load data from file / Overwrite file with current data s počty.
+  6. Přesuň nebo smaž soubor a udělej změnu → červený pruh „Can't find your data file“ + „Connect another file“.
+  7. „Choose existing file“ → vyber třeba starší Export → dialog s počty; „Load data from file“ načte data (i ze starší verze).
+  8. Ve Firefoxu se místo tlačítka ukáže „Auto-save to file: Chrome / Edge only“.
+- [ ] [FEATURE] Load demo data + uvítací karta – PRD FR-17. (implementováno 2026-10-09) → **Jak otestovat** (nejlépe v anonymním okně, ať nesáhneš na svá data):
+  1. Prázdná appka → uvítací karta → „Load demo data“ → 46 položek, gearlisty „Weekend Hikes“ (se snapshotem) a „Kungsleden – 7 days“, šablona.
+  2. Ve Vaultu změň váhu „SMD Gatewood cape“ → dialog vypíše Template + oba gearlisty.
+  3. Tlačítko „Load demo data“ v hlavičce s daty → potvrzení, co se přepíše.
+  4. S připojeným datovým souborem je tlačítko zašedlé a po kliknutí vysvětlí „Disconnect your data file first“.
+  5. **Prosím schval obsah dema** (popis v PRD FR-17, „Upřesnění v17“; data jsou v `app/src/demo/demo-data.json`) — hlavně jestli v něm nechceš něco změnit nebo odebrat jako osobní.
+- [ ] [FEATURE] Sdílení gearlistu přes URL – PRD FR-18. (implementováno 2026-10-09) → **Jak otestovat:**
+  1. Na gearlistu „Share“ → „Copy link“ → vlož odkaz do jiného prohlížeče nebo anonymního okna.
+  2. Uvidíš gearlist jen pro čtení: kategorie, váhy, rozpad váhy, přepínač kg/lb a „Open HikingBuddy“.
+  3. Ve svém okně pak gearlist změň → už odeslaný odkaz změnu neukáže (je to kopie).
+  4. Otevření odkazu ve vlastním prohlížeči nic nezmění na tvých datech.
+  5. Pozn.: lokálně odkaz začíná `http://localhost:5173`, takže funguje jen na tvém počítači. Skutečně poslat ho půjde až po nasazení na web (FR-20).
 
 ## ✅ Hotovo
 
