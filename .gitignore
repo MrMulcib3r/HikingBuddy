@@ -1,2 +1,5 @@
 # Obsidian vault settings (local notes app config)
 .obsidian/
+
+# Personal HikingBuddy data files (FR-16) — never commit personal data
+data/

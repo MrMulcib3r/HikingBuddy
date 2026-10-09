@@ -213,7 +213,7 @@ function defaultState(): AppState {
 /** True when a state has no user-entered content at all (no gear, no gearlists) — i.e. it
  * is indistinguishable from a just-created defaultState(). Categories don't count: the
  * default template categories are always present even in a genuinely empty vault. */
-function isEmptyState(state: AppState): boolean {
+export function isEmptyState(state: AppState): boolean {
   return state.gearItems.length === 0 && state.gearLists.length === 0;
 }
 
@@ -292,6 +292,34 @@ export interface BackupFile {
 
 export function buildBackup(state: AppState): BackupFile {
   return { app: 'hikingbuddy', schemaVersion: CURRENT_SCHEMA_VERSION, exportedAt: new Date().toISOString(), state };
+}
+
+/** JSON with object keys sorted, so two states with the same content always produce the same
+ * text no matter in which order their fields were created. Used to compare the app's data
+ * with the data file's (FR-16) — never for storing. */
+function stableStringify(value: unknown): string {
+  return JSON.stringify(value, (_key, v) =>
+    v && typeof v === 'object' && !Array.isArray(v)
+      ? Object.fromEntries(Object.entries(v).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)))
+      : v
+  );
+}
+
+/** Short fingerprint of a state's content (cyrb53 hash of its stable JSON). The data file
+ * (FR-16) remembers the fingerprint of what was last saved to / loaded from the file, so it
+ * can tell later whether the browser's copy or the file changed since. */
+export function stateFingerprint(state: AppState): string {
+  const text = stableStringify(state);
+  let h1 = 0xdeadbeef;
+  let h2 = 0x41c6ce57;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return `${(4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36)}:${text.length}`;
 }
 
 /** Parses an imported backup file's text, migrating it forward if it's from an older

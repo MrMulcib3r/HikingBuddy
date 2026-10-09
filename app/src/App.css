@@ -1031,3 +1031,90 @@ select {
   background: #22304f;
   color: #e8e9ec;
 }
+
+/* FR-16 — data file (auto-save) */
+.app-header {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.app-header-actions {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.data-file-connected {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.data-file-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: #b5bac4;
+  white-space: nowrap;
+}
+.data-file-status-muted {
+  color: #7f8798;
+}
+.data-file-status-warning {
+  color: #f0c060;
+}
+.data-file-status-error {
+  color: #ff9b9b;
+}
+.data-file-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4cc38a;
+}
+.data-file-dot-saving {
+  background: #f0c060;
+}
+.data-file-dot-error {
+  background: #ff6b6b;
+}
+.data-file-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 20px;
+  background: #33290f;
+  border-bottom: 1px solid #5a4818;
+  color: #f3e3b5;
+  font-size: 0.88rem;
+  flex-shrink: 0;
+}
+.data-file-banner > span {
+  flex: 1;
+  min-width: 240px;
+}
+.data-file-banner-error {
+  background: #3a1d1d;
+  border-bottom-color: #6b2b2b;
+  color: #ffc9c9;
+}
+.data-file-banner-info {
+  background: #1a2133;
+  border-bottom-color: #2c3a5c;
+  color: #cfd3da;
+}
+.data-compare {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 4px 0 8px;
+  font-size: 0.88rem;
+}
+.data-compare th {
+  text-align: left;
+  color: #9aa0ab;
+  font-weight: 500;
+  padding: 4px 12px 4px 0;
+  white-space: nowrap;
+}
+.data-compare td {
+  color: #e8e9ec;
+  padding: 4px 0;
+}
