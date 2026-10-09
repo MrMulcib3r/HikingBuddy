@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { AppProvider, useApp } from './state/AppContext';
 import { DataFileProvider } from './state/DataFileContext';
 import { isEmptyState } from './storage';
@@ -8,9 +8,23 @@ import { UnitToggle } from './components/UnitToggle';
 import { BackupControls } from './components/BackupControls';
 import { DataFileBanner, DataFileControls } from './components/DataFileControls';
 import { LoadDemoButton, WelcomeCard } from './components/DemoData';
+import { SharedGearlistPage } from './components/SharedGearlistPage';
+import { isShareHash, parseShareHash } from './share';
 import './App.css';
 
 function App() {
+  // FR-18: a share link (#share=…) opens the read-only shared gearlist page instead of the
+  // app. It deliberately sits outside AppProvider, so the visitor's own data is never
+  // loaded, changed or saved by opening a link.
+  const [hash, setHash] = useState(() => window.location.hash);
+  useEffect(() => {
+    const onHashChange = () => setHash(window.location.hash);
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+  const shared = useMemo(() => (isShareHash(hash) ? parseShareHash(hash) : undefined), [hash]);
+  if (shared !== undefined) return <SharedGearlistPage key={hash} shared={shared} />;
+
   return (
     <AppProvider>
       <DataFileProvider>

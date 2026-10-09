@@ -9,6 +9,8 @@ import { AddItemToListDialog } from './AddItemToListDialog';
 import { ConfirmDialog } from './ConfirmDialog';
 import { VaultEditDialog } from './VaultEditDialog';
 import { GearListItemRow } from './GearListItemRow';
+import { WeightSummary } from './WeightSummary';
+import { ShareDialog } from './ShareDialog';
 
 interface GearListDetailProps {
   list: GearList;
@@ -44,6 +46,7 @@ export function GearListDetail({ list, onDeleted, isTemplate = false }: GearList
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [confirmSnapshot, setConfirmSnapshot] = useState(false);
   const [snapshotOpen, setSnapshotOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
   const [pendingCoreEdit, setPendingCoreEdit] = useState<PendingCoreEdit | null>(null);
 
   const breakdown = useMemo(() => computeBreakdown(list.items), [list.items]);
@@ -127,6 +130,15 @@ export function GearListDetail({ list, onDeleted, isTemplate = false }: GearList
               <button
                 type="button"
                 className="btn btn-ghost btn-small"
+                onClick={() => setShareOpen(true)}
+                disabled={list.items.length === 0}
+                title="Get a read-only link to this gearlist"
+              >
+                Share
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost btn-small"
                 onClick={() => setConfirmTemplate(true)}
                 disabled={list.items.length === customEntryCount}
                 title="Use this gearlist's items as the starting point for new gearlists"
@@ -159,24 +171,7 @@ export function GearListDetail({ list, onDeleted, isTemplate = false }: GearList
         </p>
       )}
 
-      <div className="weight-summary">
-        <div className="weight-tile">
-          <span className="weight-tile-label">Base Weight</span>
-          <span className="weight-tile-value">{formatWeight(breakdown.base, state.unitPreference)}</span>
-        </div>
-        <div className="weight-tile">
-          <span className="weight-tile-label">Worn Weight</span>
-          <span className="weight-tile-value">{formatWeight(breakdown.worn, state.unitPreference)}</span>
-        </div>
-        <div className="weight-tile">
-          <span className="weight-tile-label">Consumables</span>
-          <span className="weight-tile-value">{formatWeight(breakdown.consumable, state.unitPreference)}</span>
-        </div>
-        <div className="weight-tile weight-tile-total">
-          <span className="weight-tile-label">Total</span>
-          <span className="weight-tile-value">{formatWeight(breakdown.total, state.unitPreference)}</span>
-        </div>
-      </div>
+      <WeightSummary breakdown={breakdown} unit={state.unitPreference} />
 
       <button type="button" className="btn btn-secondary" onClick={() => setAddOpen(true)}>
         + Add item from Gear Vault
@@ -201,6 +196,8 @@ export function GearListDetail({ list, onDeleted, isTemplate = false }: GearList
           </div>
         ))}
       </div>
+
+      {shareOpen && <ShareDialog list={list} onClose={() => setShareOpen(false)} />}
 
       {addOpen && <AddItemToListDialog listId={list.id} onClose={() => setAddOpen(false)} />}
 
