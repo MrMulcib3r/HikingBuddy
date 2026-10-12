@@ -76,7 +76,7 @@ export function CategoryTilePicker({
                 onChange(selected ? '' : c.id);
               }}
             >
-              <CategoryIcon category={c} />
+              <CategoryIcon id={c.id} name={c.name} />
               <span className="category-tile-label">{c.name}</span>
             </button>
             {deletable && (
