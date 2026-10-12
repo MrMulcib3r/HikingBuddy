@@ -311,9 +311,10 @@ export function GearListDetail({ list, onDeleted, isTemplate = false }: GearList
       {confirmTemplate && (
         <ConfirmDialog
           title={hasTemplate ? 'Update template' : 'Create template'}
+          danger={hasTemplate}
           message={[
             hasTemplate
-              ? `This replaces your current template with the items of "${list.name}" (quantities and Worn/Consumable included). Gearlists already created from it don't change. Tip: to change just a few items, open 📋 Template in the gearlist menu and edit it directly. Continue?`
+              ? `This replaces everything in your current template (${state.templates[0]?.items.length ?? 0} item(s)) with the items of "${list.name}" (${list.items.length - customEntryCount} item(s), quantities and Worn/Consumable included). The current template contents can't be restored. Gearlists already created from it don't change. Tip: to change just a few items, open 📋 Template in the gearlist menu and edit it directly. Continue?`
               : `This saves the items of "${list.name}" (quantities and Worn/Consumable included) as your template. New gearlists can then start from it. Continue?`,
             customEntryCount > 0
               ? `${customEntryCount} custom entr${customEntryCount === 1 ? 'y' : 'ies'} no longer linked to Gear Vault will be skipped.`
@@ -321,7 +322,7 @@ export function GearListDetail({ list, onDeleted, isTemplate = false }: GearList
           ]
             .filter(Boolean)
             .join(' ')}
-          confirmLabel={hasTemplate ? 'Update template' : 'Create template'}
+          confirmLabel={hasTemplate ? 'Replace template' : 'Create template'}
           onConfirm={() => {
             saveAsTemplate(list.id);
             setConfirmTemplate(false);
