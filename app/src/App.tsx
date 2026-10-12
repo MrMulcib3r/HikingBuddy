@@ -9,6 +9,7 @@ import { BackupControls } from './components/BackupControls';
 import { DataFileBanner, DataFileControls } from './components/DataFileControls';
 import { LoadDemoButton, WelcomeCard } from './components/DemoData';
 import { SharedGearlistPage } from './components/SharedGearlistPage';
+import { AppFrame } from './components/AppFrame';
 import { isShareHash, parseShareHash } from './share';
 import './App.css';
 
@@ -42,18 +43,18 @@ function AppShell() {
   const showWelcome = isEmptyState(state) && !startedEmpty;
 
   return (
-    <div className="app-shell">
-      <header className="app-header">
-        <h1>HikingBuddy</h1>
-        <div className="app-header-actions">
+    <AppFrame
+      actions={
+        <>
           <DataFileControls />
-          <div className="backup-controls">
+          <div className="header-group">
             <LoadDemoButton />
             <BackupControls />
           </div>
           <UnitToggle />
-        </div>
-      </header>
+        </>
+      }
+    >
       <DataFileBanner />
       {showWelcome ? (
         <WelcomeCard onStartEmpty={() => setStartedEmpty(true)} />
@@ -63,7 +64,7 @@ function AppShell() {
           <GearListsPanel />
         </main>
       )}
-    </div>
+    </AppFrame>
   );
 }
 
