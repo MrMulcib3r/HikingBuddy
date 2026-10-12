@@ -5,6 +5,7 @@ import { ConfirmDialog } from './ConfirmDialog';
 import type { Category } from '../types';
 import { sortByOrder } from '../utils/reorder';
 import { CategoryIcon } from './CategoryIcon';
+import { categoryColor, categoryColorKey } from '../utils/categoryStyle';
 
 interface CategoryTilePickerProps {
   categories: Category[];
@@ -76,6 +77,7 @@ export function CategoryTilePicker({
                 onChange(selected ? '' : c.id);
               }}
             >
+              <span className="category-dot" style={{ background: categoryColor(categoryColorKey(c.id, categories)) }} aria-hidden="true" />
               <CategoryIcon id={c.id} name={c.name} />
               <span className="category-tile-label">{c.name}</span>
             </button>
@@ -84,7 +86,7 @@ export function CategoryTilePicker({
                 type="button"
                 className="category-tile-delete"
                 aria-label={`Delete category ${c.name}`}
-                title={`Delete category "${c.name}"`}
+                data-tip={`Delete category "${c.name}"`}
                 onClick={() => setPendingDelete(c)}
               >
                 <X size={12} strokeWidth={2.5} aria-hidden="true" />
@@ -103,7 +105,7 @@ export function CategoryTilePicker({
             onCreatingChange(!creating);
           }}
         >
-          <Plus size={26} strokeWidth={1.75} aria-hidden="true" />
+          <Plus size={24} strokeWidth={1.75} aria-hidden="true" />
           <span className="category-tile-label">Other</span>
         </button>
       </div>
@@ -126,7 +128,7 @@ export function CategoryTilePicker({
               }
             }}
           />
-          <button type="button" className="btn btn-primary btn-small" onClick={confirmNewCategory}>
+          <button type="button" className="btn btn-secondary btn-small" onClick={confirmNewCategory}>
             Add
           </button>
           <button type="button" className="btn btn-ghost btn-small" onClick={() => onCreatingChange(false)}>

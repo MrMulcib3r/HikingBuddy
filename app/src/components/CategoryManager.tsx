@@ -2,7 +2,11 @@ import { useState } from 'react';
 import { useApp } from '../state/AppContext';
 import { InlineTextField } from './InlineField';
 import { ConfirmDialog } from './ConfirmDialog';
+import { CategoryIcon } from './CategoryIcon';
+import { ActionIcon } from './icons/actionIcons';
+import { Dialog, DialogActions, Icon, IconButton } from './ui';
 import { isTemplateCategory } from '../constants';
+import { categoryColor, categoryColorKey } from '../utils/categoryStyle';
 import type { Category } from '../types';
 
 /** FR-2: categories are fully editable from the start — rename, delete, add your own. */
@@ -20,59 +24,58 @@ export function CategoryManager({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="dialog-backdrop" role="presentation" onClick={onClose}>
-      <div className="dialog" role="dialog" aria-modal="true" onClick={(e) => e.stopPropagation()}>
-        <h3>Categories</h3>
-        <p className="dialog-hint">The predefined list is just a starting point — make it your own. Click a name to rename it. Categories you created yourself can also be deleted.</p>
+    <>
+      <Dialog title="Categories" labelledBy="categories-title" onBackdropClick={onClose}>
+        <p className="dialog-hint">
+          The predefined list is just a starting point — make it your own. Click a name to rename it. Categories you created yourself can also be
+          deleted.
+        </p>
         <ul className="category-list">
           {state.categories.map((c) => (
             <li key={c.id} className="category-row">
+              <span className="category-dot" style={{ background: categoryColor(categoryColorKey(c.id, state.categories)) }} aria-hidden="true" />
+              <span className="category-heading-icon">
+                <CategoryIcon id={c.id} name={c.name} size={18} />
+              </span>
               <InlineTextField className="category-name" value={c.name} onCommit={(name) => renameCategory(c.id, name)} />
               {/* Default categories can't be deleted (PRD v15) — only your own. */}
               {!isTemplateCategory(c.id) && (
-                <button type="button" className="btn btn-ghost btn-small" onClick={() => setPendingDelete(c)}>
-                  Delete
-                </button>
+                <IconButton label={`Delete category ${c.name}`} icon={ActionIcon.delete} danger small onClick={() => setPendingDelete(c)} />
               )}
             </li>
           ))}
         </ul>
         <div className="field-row">
-          <input
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            placeholder="New category"
-            onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
-          />
-          <button type="button" className="btn btn-primary btn-small" onClick={handleAdd}>
+          <input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="New category" onKeyDown={(e) => e.key === 'Enter' && handleAdd()} />
+          <button type="button" className="btn btn-secondary" onClick={handleAdd}>
+            <Icon icon={ActionIcon.add} />
             Add
           </button>
         </div>
-        <div className="dialog-actions">
+        <DialogActions>
           <button type="button" className="btn btn-ghost" onClick={onClose}>
             Close
           </button>
-        </div>
-      </div>
+        </DialogActions>
+      </Dialog>
       {pendingDelete && (
-        <div onClick={(e) => e.stopPropagation()}>
-          <ConfirmDialog
-            title="Delete category"
-            danger
-            message={
-              usedBy(pendingDelete.id) > 0
-                ? `Delete "${pendingDelete.name}"? ${usedBy(pendingDelete.id)} item(s) in Gear Vault use it and will become Uncategorized (the items themselves stay).`
-                : `Delete "${pendingDelete.name}"? No items use it.`
-            }
-            confirmLabel="Delete"
-            onConfirm={() => {
-              deleteCategory(pendingDelete.id);
-              setPendingDelete(null);
-            }}
-            onCancel={() => setPendingDelete(null)}
-          />
-        </div>
+        <ConfirmDialog
+          title="Delete category"
+          danger
+          confirmIcon={ActionIcon.delete}
+          message={
+            usedBy(pendingDelete.id) > 0
+              ? `Delete "${pendingDelete.name}"? ${usedBy(pendingDelete.id)} item(s) in Gear Vault use it and will become Uncategorized (the items themselves stay).`
+              : `Delete "${pendingDelete.name}"? No items use it.`
+          }
+          confirmLabel="Delete"
+          onConfirm={() => {
+            deleteCategory(pendingDelete.id);
+            setPendingDelete(null);
+          }}
+          onCancel={() => setPendingDelete(null)}
+        />
       )}
-    </div>
+    </>
   );
 }

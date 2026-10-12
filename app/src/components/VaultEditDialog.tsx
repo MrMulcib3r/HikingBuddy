@@ -1,3 +1,9 @@
+import { List } from 'lucide-react';
+import { TEMPLATE_NAME } from '../constants';
+import { ActionIcon } from './icons/actionIcons';
+import { CarabinerIcon } from './icons/HikerIcons';
+import { Dialog, DialogActions, Icon } from './ui';
+
 interface VaultEditDialogProps {
   title: string;
   message: string;
@@ -39,32 +45,34 @@ export function VaultEditDialog({
   affectedLists = [],
 }: VaultEditDialogProps) {
   return (
-    <div className="dialog-backdrop" role="presentation" onClick={onCancel}>
-      <div className="dialog" role="dialog" aria-modal="true" aria-labelledby="vault-edit-title" onClick={(e) => e.stopPropagation()}>
-        <h3 id="vault-edit-title">{title}</h3>
-        <p className="dialog-message">{message}</p>
-        {affectedLists.length > 0 && (
-          <div className="affected-lists">
-            <span className="affected-lists-label">Affected gearlists:</span>
-            <ul>
-              {affectedLists.map((name, i) => (
-                <li key={i}>{name}</li>
-              ))}
-            </ul>
-          </div>
-        )}
-        <div className="dialog-actions dialog-actions-three">
-          <button type="button" className="btn btn-ghost" onClick={onCancel}>
-            Cancel
-          </button>
-          <button type="button" className="btn btn-secondary" onClick={onCopy}>
-            {copyLabel}
-          </button>
-          <button type="button" className={continueDanger ? 'btn btn-danger' : 'btn btn-primary'} onClick={onContinue}>
-            {continueLabel}
-          </button>
+    <Dialog title={title} titleIcon={CarabinerIcon} labelledBy="vault-edit-title" onBackdropClick={onCancel}>
+      <p className="dialog-message">{message}</p>
+      {affectedLists.length > 0 && (
+        <div className="affected-lists">
+          <span className="label">Affected gearlists:</span>
+          <ul>
+            {affectedLists.map((name, i) => (
+              <li key={i}>
+                <Icon icon={name.startsWith(TEMPLATE_NAME) ? ActionIcon.template : List} size={16} />
+                {name}
+              </li>
+            ))}
+          </ul>
         </div>
-      </div>
-    </div>
+      )}
+      <DialogActions>
+        <button type="button" className="btn btn-ghost dialog-cancel" onClick={onCancel}>
+          Cancel
+        </button>
+        <button type="button" className="btn btn-secondary" onClick={onCopy}>
+          <Icon icon={continueDanger ? ActionIcon.keepInGearlists : ActionIcon.createCopy} />
+          {copyLabel}
+        </button>
+        <button type="button" className={continueDanger ? 'btn btn-danger' : 'btn btn-primary'} onClick={onContinue}>
+          <Icon icon={continueDanger ? ActionIcon.delete : ActionIcon.confirm} />
+          {continueLabel}
+        </button>
+      </DialogActions>
+    </Dialog>
   );
 }

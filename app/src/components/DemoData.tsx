@@ -4,6 +4,7 @@ import { useDataFile } from '../state/DataFileContext';
 import { isEmptyState, parseBackup } from '../storage';
 import demoFileText from '../demo/demo-data.json?raw';
 import { ConfirmDialog } from './ConfirmDialog';
+import { LogoMark } from './icons/HikerIcons';
 
 /**
  * FR-17 — "Load demo data" for presenting the app (an empty app shows nothing). The demo is
@@ -63,7 +64,8 @@ export function LoadDemoButton() {
         className={`btn btn-ghost btn-small ${fileInUse ? 'btn-looks-disabled' : ''}`}
         aria-disabled={fileInUse}
         onClick={start}
-        title={fileInUse ? BLOCKED_MESSAGE : 'Fill the app with example gear and gearlists to try it out'}
+        data-tip={fileInUse ? BLOCKED_MESSAGE : 'Fill the app with example gear and gearlists to try it out'}
+        data-tip-pos="below"
       >
         Load demo data
       </button>
@@ -78,6 +80,7 @@ export function WelcomeCard({ onStartEmpty }: { onStartEmpty: () => void }) {
   return (
     <main className="welcome">
       <div className="welcome-card">
+        <LogoMark size={48} />
         <h2>Welcome to HikingBuddy</h2>
         <p>
           Keep all the gear you own in one <strong>Gear Vault</strong>, build a <strong>gearlist</strong> for every trip from it, and see your

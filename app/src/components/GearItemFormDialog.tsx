@@ -2,6 +2,8 @@ import { useEffect, useRef, useState, type FormEvent } from 'react';
 import type { Category, GearItem, UnitPreference } from '../types';
 import { inputUnitLabel, toGrams } from '../utils/weight';
 import { CategoryTilePicker } from './CategoryTilePicker';
+import { ActionIcon } from './icons/actionIcons';
+import { DialogActions, Icon } from './ui';
 
 interface GearItemFormDialogProps {
   categories: Category[];
@@ -42,7 +44,7 @@ export function GearItemFormDialog({ categories, unitPreference, onSubmit, onCan
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       if (e.key !== 'Escape') return;
-      if (dialogRef.current?.querySelector('.dialog')) return;
+      if (dialogRef.current?.querySelector('.dialog')) return; // a nested confirm is open
       onCancel();
     }
     document.addEventListener('keydown', onKeyDown);
@@ -85,8 +87,10 @@ export function GearItemFormDialog({ categories, unitPreference, onSubmit, onCan
     // Clicking outside the form intentionally does NOT close it — that used to throw away
     // everything typed so far (BACKLOG bug, 2026-09-24). Close with Cancel or Escape.
     <div className="dialog-backdrop" role="presentation">
-      <div ref={dialogRef} className="dialog dialog-wide" role="dialog" aria-modal="true">
-        <h3>Add item to Gear Vault</h3>
+      <div ref={dialogRef} className="dialog dialog-wide" role="dialog" aria-modal="true" aria-labelledby="add-item-title">
+        <h3 id="add-item-title" className="dialog-title">
+          Add item to Gear Vault
+        </h3>
         <form onSubmit={handleSubmit} className="form">
           <label className="field">
             <span>Name</span>
@@ -139,14 +143,15 @@ export function GearItemFormDialog({ categories, unitPreference, onSubmit, onCan
             <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. white chocolate" />
           </label>
           {error && <p className="form-error">{error}</p>}
-          <div className="dialog-actions">
-            <button type="button" className="btn btn-ghost" onClick={onCancel}>
+          <DialogActions>
+            <button type="button" className="btn btn-ghost dialog-cancel" onClick={onCancel}>
               Cancel
             </button>
             <button type="submit" className="btn btn-primary">
+              <Icon icon={ActionIcon.add} />
               Add
             </button>
-          </div>
+          </DialogActions>
         </form>
       </div>
     </div>

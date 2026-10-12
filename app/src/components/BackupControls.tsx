@@ -2,6 +2,8 @@ import { useRef, useState } from 'react';
 import { useApp } from '../state/AppContext';
 import { buildBackup, parseBackup } from '../storage';
 import { ConfirmDialog } from './ConfirmDialog';
+import { ActionIcon } from './icons/actionIcons';
+import { IconButton } from './ui';
 
 /**
  * The only thing in this MVP (no account/server yet, see PRD section 2/6) that makes data
@@ -51,18 +53,9 @@ export function BackupControls() {
   }
 
   return (
-    <div className="backup-controls">
-      <button type="button" className="btn btn-ghost btn-small" onClick={handleExport} title="Save all your data as a file on this computer">
-        Export backup
-      </button>
-      <button
-        type="button"
-        className="btn btn-ghost btn-small"
-        onClick={() => fileInputRef.current?.click()}
-        title="Restore data from a previously exported backup file"
-      >
-        Import backup
-      </button>
+    <div className="backup-controls header-group">
+      <IconButton label="Export backup" icon={ActionIcon.exportBackup} onClick={handleExport} tipBelow />
+      <IconButton label="Import backup" icon={ActionIcon.importBackup} onClick={() => fileInputRef.current?.click()} tipBelow />
       <input ref={fileInputRef} type="file" accept="application/json" className="visually-hidden" onChange={handleFileChange} />
 
       {importError && (
@@ -81,6 +74,7 @@ export function BackupControls() {
           danger
           message={`This replaces everything currently in Gear Vault and your gearlists (${state.gearItems.length} item(s), ${state.gearLists.length} gearlist(s)) with the contents of the backup file (${pendingImport.gearItems.length} item(s), ${pendingImport.gearLists.length} gearlist(s)). This can't be undone unless you have another backup. Continue?`}
           confirmLabel="Replace with backup"
+          confirmIcon={ActionIcon.importBackup}
           onConfirm={() => {
             replaceState(pendingImport);
             setPendingImport(null);

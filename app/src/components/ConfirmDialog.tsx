@@ -1,38 +1,41 @@
+import type { ComponentType } from 'react';
+import { Dialog, DialogActions, Icon } from './ui';
+
 interface ConfirmDialogProps {
   title: string;
   message: string;
   confirmLabel?: string;
   cancelLabel?: string;
   danger?: boolean;
+  /** Icon on the confirm button (dialog buttons carry icon + label, design system). */
+  confirmIcon?: ComponentType<{ size?: number; strokeWidth?: number }>;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
-/** Obecné potvrzovací okno — používá se pro FR-5 (editace Vault položky použité v Draftech),
- * FR-7 (úprava/smazání Finalized gearlistu) i další destruktivní akce. */
+/** Generic yes/no confirmation — snapshot overwrite, deletes, import, template… */
 export function ConfirmDialog({
   title,
   message,
   confirmLabel = 'Confirm',
   cancelLabel = 'Cancel',
   danger = false,
+  confirmIcon,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
   return (
-    <div className="dialog-backdrop" role="presentation" onClick={onCancel}>
-      <div className="dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-title" onClick={(e) => e.stopPropagation()}>
-        <h3 id="confirm-title">{title}</h3>
-        <p className="dialog-message">{message}</p>
-        <div className="dialog-actions">
-          <button type="button" className="btn btn-ghost" onClick={onCancel}>
-            {cancelLabel}
-          </button>
-          <button type="button" className={danger ? 'btn btn-danger' : 'btn btn-primary'} onClick={onConfirm}>
-            {confirmLabel}
-          </button>
-        </div>
-      </div>
-    </div>
+    <Dialog title={title} labelledBy="confirm-title" onBackdropClick={onCancel}>
+      <p className="dialog-message">{message}</p>
+      <DialogActions>
+        <button type="button" className="btn btn-ghost dialog-cancel" onClick={onCancel}>
+          {cancelLabel}
+        </button>
+        <button type="button" className={danger ? 'btn btn-danger' : 'btn btn-primary'} onClick={onConfirm}>
+          {confirmIcon && <Icon icon={confirmIcon} />}
+          {confirmLabel}
+        </button>
+      </DialogActions>
+    </Dialog>
   );
 }
