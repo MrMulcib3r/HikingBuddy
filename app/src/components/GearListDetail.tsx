@@ -219,6 +219,10 @@ export function GearListDetail({ list, onDeleted, isTemplate = false }: GearList
           <div key={category} className="list-category-group">
             <h4 className="list-category-title">
               <ListCategoryName name={category} items={items} />
+              {/* Category subtotal (PRD section 5) — every row's weight × quantity. */}
+              <span className="list-category-total">
+                {formatWeight(items.reduce((sum, i) => sum + i.weightGrams * i.quantity, 0), state.unitPreference)}
+              </span>
             </h4>
             {items.map((item) => (
               <GearListItemRow

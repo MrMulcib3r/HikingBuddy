@@ -1255,3 +1255,20 @@ a.btn {
   font-weight: 500;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
+
+/* Category subtotal in a gearlist group title */
+.list-category-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.list-category-total {
+  margin-left: auto;
+  padding-right: 85px; /* lines up with the row subtotals (left of the Remove button) */
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #cfd3da;
+  text-transform: none;
+  letter-spacing: 0;
+}

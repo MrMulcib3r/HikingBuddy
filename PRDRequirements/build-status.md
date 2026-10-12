@@ -149,3 +149,7 @@ Run locally: in the `app/` folder, run `npm install` then `npm run dev`. Data is
 **2026-10-12 (rename a category from a gearlist, PRD v19 — waiting for Martin's test):**
 - Martin: the category name couldn't be edited in a gearlist. Group titles in a gearlist/template are now the same click-to-edit field as in Gear Vault (`ListCategoryName` in `GearListDetail.tsx`), calling the existing `renameCategory` — one category, renamed everywhere (Vault, all gearlists, template); snapshots and unlinked custom rows keep the old name, as with a Vault rename. Not editable for "Uncategorized" or groups made only of custom entries. No data-shape change.
 - Verified with Playwright (clean browser, demo data): click opens the field, Escape cancels, Enter renames the Vault category, linked rows in both gearlists + template follow, snapshot unchanged, new name shown in both panels. `npm run build` passes.
+
+**2026-10-12 (category subtotals in a gearlist):**
+- Martin asked for each category's total weight in the gearlist. PRD section 5 already describes "položky seskupené podle kategorie s mezisoučtem váhy" — it was just missing in the code, so no PRD change. The group title in a gearlist/template now shows the sum of weight × quantity of its rows on the right, aligned with the row subtotals; follows the unit switch.
+- Verified with Playwright on demo data at 1920 px and 1100 px: Clothing subtotal 1.72 kg = sum of its rows, right edge aligned with the row subtotals. `npm run build` passes.
