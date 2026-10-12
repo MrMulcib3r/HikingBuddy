@@ -12,6 +12,7 @@ import { ConfirmDialog } from './ConfirmDialog';
 import { VaultEditDialog } from './VaultEditDialog';
 import { GearListItemRow } from './GearListItemRow';
 import { WeightSummary } from './WeightSummary';
+import { BackpackChart, packCategoriesFromItems } from './BackpackChart';
 import { InlineTextField } from './InlineField';
 import { ShareDialog } from './ShareDialog';
 import { CategoryIcon } from './CategoryIcon';
@@ -90,6 +91,17 @@ export function GearListDetail({ list, onDeleted, isTemplate = false, switcher, 
   const breakdown = useMemo(() => computeBreakdown(list.items), [list.items]);
 
   const grouped = useMemo(() => groupByCategory(list.items), [list.items]);
+
+  // FR-19 backpack: rows are grouped by category name; colour and icon come from the Vault
+  // category of that name (none for Uncategorized / custom entries of a deleted category).
+  const packCategories = useMemo(
+    () =>
+      packCategoriesFromItems(list.items, (name) => {
+        const category = categoryForName(name, state.categories);
+        return { colorKey: categoryColorKey(category?.id, state.categories), iconId: category?.id ?? null };
+      }),
+    [list.items, state.categories]
+  );
 
   function requestCoreEdit(item: GearListItem, patch: CorePatch) {
     if (!item.gearItemId) return;
@@ -228,6 +240,7 @@ export function GearListDetail({ list, onDeleted, isTemplate = false, switcher, 
           )}
 
           <div className="list-detail-overview">
+            <BackpackChart categories={packCategories} consumable={breakdown.consumable} worn={breakdown.worn} unit={state.unitPreference} />
             <WeightSummary breakdown={breakdown} unit={state.unitPreference} />
           </div>
 
