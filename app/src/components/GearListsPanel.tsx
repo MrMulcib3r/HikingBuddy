@@ -166,7 +166,7 @@ function GearlistSwitcher({ lists, template, selected, onSelect }: GearlistSwitc
                 onSelect(list.id);
                 setOpen(false);
               }}
-              {...makeDragHandlers(list.id, reorderLists)}
+              {...makeDragHandlers(list.id, reorderLists, 'gearlist')}
             >
               <span className="drag-handle" title="Drag to reorder">
                 ⠿

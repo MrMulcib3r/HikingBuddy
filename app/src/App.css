@@ -1219,3 +1219,39 @@ a.btn {
   border: 1px solid #6b5a2b;
   color: #f0c060;
 }
+
+/* Drag a Gear Vault item onto a gearlist to add it */
+.list-detail {
+  position: relative;
+  flex: 1;
+  border-radius: 8px;
+  outline: 2px dashed transparent;
+  outline-offset: 4px;
+  transition: outline-color 0.1s ease;
+}
+.list-detail-drop-active {
+  outline-color: #3a6ff0;
+  background: rgba(58, 111, 240, 0.06);
+}
+/* Zero-height sticky strip: the label floats over the list without shifting it. */
+.list-drop-hint {
+  position: sticky;
+  top: 8px;
+  height: 0;
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  pointer-events: none;
+}
+.list-drop-hint span {
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding: 8px 14px;
+  border-radius: 6px;
+  background: #3a6ff0;
+  color: white;
+  font-size: 0.88rem;
+  font-weight: 500;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}

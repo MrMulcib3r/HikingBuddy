@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type DragEvent } from 'react';
 import { useApp } from '../state/AppContext';
 import { computeBreakdown, describeUsage, findAffectedLists, findAffectedTemplates } from '../state/logic';
 import { TEMPLATE_NAME } from '../constants';
 import type { GearList, GearListItem } from '../types';
 import { formatWeight } from '../utils/weight';
 import { sortByOrder } from '../utils/reorder';
+import { dragMime, isDragging } from '../utils/dnd';
 import { AddItemToListDialog } from './AddItemToListDialog';
 import { ConfirmDialog } from './ConfirmDialog';
 import { VaultEditDialog } from './VaultEditDialog';
@@ -40,6 +41,7 @@ export function GearListDetail({ list, onDeleted, isTemplate = false }: GearList
     saveAsTemplate,
     deleteTemplate,
     dismissTemplateBanner,
+    addItemToList,
   } = useApp();
   const [confirmTemplate, setConfirmTemplate] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -47,6 +49,30 @@ export function GearListDetail({ list, onDeleted, isTemplate = false }: GearList
   const [confirmSnapshot, setConfirmSnapshot] = useState(false);
   const [snapshotOpen, setSnapshotOpen] = useState(false);
   const [shareOpen, setShareOpen] = useState(false);
+  const [dropActive, setDropActive] = useState(false);
+
+  // Drag a gear item from Gear Vault onto the gearlist (or template) to add it — same as
+  // "+ Add item from Gear Vault" with the item's default quantity; an item already in the
+  // list just gets its quantity raised (FR-4). The button stays for touch screens, where
+  // drag & drop doesn't work.
+  const dropHandlers = {
+    onDragOver: (e: DragEvent) => {
+      if (!isDragging(e, 'gear')) return;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+      if (!dropActive) setDropActive(true);
+    },
+    onDragLeave: (e: DragEvent) => {
+      if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDropActive(false);
+    },
+    onDrop: (e: DragEvent) => {
+      if (!isDragging(e, 'gear')) return;
+      e.preventDefault();
+      setDropActive(false);
+      const gearItem = state.gearItems.find((g) => g.id === e.dataTransfer.getData(dragMime('gear')));
+      if (gearItem) addItemToList(list.id, gearItem.id, gearItem.defaultQuantity);
+    },
+  };
   const [pendingCoreEdit, setPendingCoreEdit] = useState<PendingCoreEdit | null>(null);
 
   const breakdown = useMemo(() => computeBreakdown(list.items), [list.items]);
@@ -107,7 +133,12 @@ export function GearListDetail({ list, onDeleted, isTemplate = false }: GearList
   const showTemplateBanner = !isTemplate && !hasTemplate && !state.templateBannerDismissed && list.items.length > 0;
 
   return (
-    <div className="list-detail">
+    <div className={`list-detail ${dropActive ? 'list-detail-drop-active' : ''}`} {...dropHandlers}>
+      {dropActive && (
+        <div className="list-drop-hint" aria-hidden="true">
+          <span>Drop to add to {isTemplate ? 'the template' : `"${list.name}"`}</span>
+        </div>
+      )}
       <header className="list-detail-header">
         <div>
           <p className="list-detail-meta">
@@ -179,7 +210,9 @@ export function GearListDetail({ list, onDeleted, isTemplate = false }: GearList
 
       <div className="list-items">
         {list.items.length === 0 && (
-          <p className="empty-hint">{isTemplate ? 'The template is empty — add the gear you take on most trips.' : 'This gearlist is empty so far.'}</p>
+          <p className="empty-hint">{isTemplate
+              ? 'The template is empty — drag the gear you take on most trips here from Gear Vault, or use the button above.'
+              : 'This gearlist is empty so far — drag gear here from Gear Vault, or use the button above.'}</p>
         )}
         {[...grouped.entries()].map(([category, items]) => (
           <div key={category} className="list-category-group">

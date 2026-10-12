@@ -166,7 +166,7 @@ export function GearVaultPanel() {
             <div
               key={key}
               className="vault-category-group"
-              {...(category ? makeDragHandlers(category.id, reorderCategories) : {})}
+              {...(category ? makeDragHandlers(category.id, reorderCategories, 'category') : {})}
             >
               <h3 className="vault-category-title">
                 {category ? (
@@ -333,7 +333,7 @@ interface VaultItemRowProps {
 }
 
 function VaultItemRow({ item, unitPreference, categories, onCreateCategory, onEditCore, onEditQuantity, onEditNote, onDelete, onReorder }: VaultItemRowProps) {
-  const dragProps = makeDragHandlers(item.id, onReorder);
+  const dragProps = makeDragHandlers(item.id, onReorder, 'gear');
   const categoryName = categories.find((c) => c.id === item.categoryId)?.name ?? UNCATEGORIZED;
 
   return (

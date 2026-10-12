@@ -30,7 +30,7 @@ export function GearListItemRow({ listId, item, onRequestCoreEdit, onReorder }: 
   const { state, updateListItem, updateUnlinkedListItem, removeListItem } = useApp();
   const linked = item.gearItemId !== null;
   const vaultCategory = state.categories.find((c) => c.name === item.categoryName) ?? null;
-  const dragProps = makeDragHandlers(item.id, onReorder);
+  const dragProps = makeDragHandlers(item.id, onReorder, 'list-item');
 
   function handleNameCommit(name: string) {
     if (linked) onRequestCoreEdit(item, { name });

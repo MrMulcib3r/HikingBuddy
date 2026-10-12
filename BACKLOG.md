@@ -120,6 +120,11 @@ _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, př
   4. Změň ve Vaultu váhu položky, která je v šabloně → dialog Cancel / Copy / Continue uvádí „Template“ i u položky, která není v žádném gearlistu.
   5. Smaž ve Vaultu položku, která je jen v šabloně → varování „…will also remove it from the template“.
   6. „Delete template“ smaže šablonu, gearlisty z ní vytvořené zůstanou.
+- [ ] [UI] Přidání položky do gearlistu přetažením (drag & drop) přímo z Gear Vaultu; tlačítko „Add item“ zůstává kvůli mobilu. (2026-10-12, Martin; implementováno 2026-10-12) → **Jak otestovat:**
+  1. Chyť položku ve Vaultu (kdekoli na řádku) a přetáhni ji do pravého panelu → gearlist se orámuje a nahoře se ukáže „Drop to add to …“ → pusť → položka je v gearlistu.
+  2. Přetáhni položku, která už v gearlistu je → nevznikne druhý řádek, jen se zvýší počet (×2).
+  3. Totéž v šabloně (📋 Template).
+  4. Přeřazování pořád funguje: položky ve Vaultu, kategorie ve Vaultu (za nadpis), řádky v gearlistu, gearlisty v rozbalovacím výběru.
 - [ ] [FEATURE] Automatické ukládání do datového souboru – PRD FR-16. (implementováno 2026-10-09) → **Jak otestovat** (v Chrome nebo Edge):
   1. Doporučuji nejdřív „Export backup“ (pro jistotu).
   2. „Connect data file“ → „Create new file“ → ulož např. do OneDrive jako `hikingbuddy-data.json`. V hlavičce se objeví „Saved to hikingbuddy-data.json · čas“.
