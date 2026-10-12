@@ -13,6 +13,11 @@ import { GearItemFormDialog } from './GearItemFormDialog';
 import { CategoryManager } from './CategoryManager';
 import { InlineTextField, InlineNumberField } from './InlineField';
 import { InlineCategorySelect } from './InlineCategorySelect';
+import { CategoryIcon } from './CategoryIcon';
+import { ActionIcon } from './icons/actionIcons';
+import { CarabinerIcon } from './icons/HikerIcons';
+import { Badge, Icon, IconButton } from './ui';
+import { categoryColor, categoryColorKey } from '../utils/categoryStyle';
 
 const UNCATEGORIZED_FILTER = '__uncategorized__';
 
@@ -64,6 +69,16 @@ export function GearVaultPanel() {
   }, [state.gearItems]);
 
   const sortedCategories = useMemo(() => sortByOrder(state.categories), [state.categories]);
+
+  /** "Used in …" for the carabiner badge on rows (design system VaultItemRow). */
+  const usageByItem = useMemo(() => {
+    const usage = new Map<string, string>();
+    for (const g of state.gearItems) {
+      const text = describeUsage(findAffectedLists(state, g.id).length, findAffectedTemplates(state, g.id).length);
+      if (text) usage.set(g.id, text);
+    }
+    return usage;
+  }, [state]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, GearItem[]>();
@@ -127,7 +142,7 @@ export function GearVaultPanel() {
   return (
     <section className="panel gear-vault-panel">
       <header className="panel-header">
-        <h2>Gear Vault</h2>
+        <h2 className="panel-title">Gear Vault</h2>
         <div className="panel-header-actions">
           <button type="button" className="btn btn-ghost btn-small" onClick={() => setCategoryManagerOpen(true)}>
             Categories
@@ -135,75 +150,78 @@ export function GearVaultPanel() {
         </div>
       </header>
 
-      <div className="vault-filters">
-        <input
-          type="search"
-          placeholder="Search gear…"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="search-input"
-        />
-        <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
-          <option value="">All categories</option>
-          {sortedCategories.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-          <option value={UNCATEGORIZED_FILTER}>Uncategorized</option>
-        </select>
-      </div>
+      <div className="panel-body">
+        <div className="vault-filters">
+          <div className="search">
+            <Icon icon={ActionIcon.search} />
+            <input
+              type="search"
+              placeholder="Search gear…"
+              aria-label="Search gear"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="search-input"
+            />
+          </div>
+          <select className="select" aria-label="Category filter" value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+            <option value="">All categories</option>
+            {sortedCategories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+            <option value={UNCATEGORIZED_FILTER}>Uncategorized</option>
+          </select>
+        </div>
 
-      <div className="vault-list">
-        {state.gearItems.length === 0 && <p className="empty-hint">Gear Vault is empty — add your first item.</p>}
-        {state.gearItems.length > 0 && orderedGroupKeys.length === 0 && (
-          <p className="empty-hint">No gear matches your search or filter.</p>
-        )}
-        {orderedGroupKeys.map((key) => {
-          const items = grouped.get(key) ?? [];
-          const category = key === UNCATEGORIZED_FILTER ? null : state.categories.find((c) => c.id === key) ?? null;
-          return (
-            <div
-              key={key}
-              className="vault-category-group"
-              {...(category ? makeDragHandlers(category.id, reorderCategories, 'category') : {})}
-            >
-              <h3 className="vault-category-title">
-                {category ? (
-                  <>
+        <div className="vault-list">
+          {state.gearItems.length === 0 && <p className="empty-hint">Gear Vault is empty — add your first item.</p>}
+          {state.gearItems.length > 0 && orderedGroupKeys.length === 0 && <p className="empty-hint">No gear matches your search or filter.</p>}
+          {orderedGroupKeys.map((key) => {
+            const items = grouped.get(key) ?? [];
+            const category = key === UNCATEGORIZED_FILTER ? null : state.categories.find((c) => c.id === key) ?? null;
+            const total = items.reduce((sum, g) => sum + g.weightGrams * g.defaultQuantity, 0);
+            return (
+              <div key={key} className="vault-category-group" {...(category ? makeDragHandlers(category.id, reorderCategories, 'category') : {})}>
+                <h3 className="vault-category-title">
+                  {category && (
                     <span className="vault-category-handle" title="Drag to reorder categories">
-                      ⠿
+                      <Icon icon={ActionIcon.drag} size={16} />
                     </span>
-                    {/* Click the name to rename the category (FR-2) — same inline editing as
-                        everywhere else; renaming updates every gearlist row linked to it. */}
-                    <InlineTextField
-                      className="vault-category-name"
-                      value={category.name}
-                      onCommit={(name) => renameCategory(category.id, name)}
-                    />
-                  </>
-                ) : (
-                  categoryName(key)
-                )}
-              </h3>
-              {items.map((item) => (
-                <VaultItemRow
-                  key={item.id}
-                  item={item}
-                  unitPreference={state.unitPreference}
-                  categories={state.categories}
-                  onCreateCategory={addCategory}
-                  onEditCore={(patch) => requestCoreEdit(item, patch)}
-                  onEditQuantity={(defaultQuantity) => updateGearItem(item.id, { ...item, defaultQuantity })}
-                  onEditNote={(note) => updateGearItem(item.id, { ...item, note })}
-                  onDelete={() => requestDelete(item)}
-                  onReorder={(sourceId, targetId) => reorderGearItems(sourceId, targetId, item.categoryId)}
-                />
-              ))}
-              <AddItemButton onClick={() => setAddForm({ categoryId: category?.id ?? null })} />
-            </div>
-          );
-        })}
+                  )}
+                  <span className="category-dot" style={{ background: categoryColor(categoryColorKey(category?.id, state.categories)) }} aria-hidden="true" />
+                  <span className="category-heading-icon">
+                    <CategoryIcon id={category?.id} name={categoryName(key)} size={18} />
+                  </span>
+                  {/* Click the name to rename the category (FR-2) — same inline editing as
+                      everywhere else; renaming updates every gearlist row linked to it. */}
+                  {category ? (
+                    <InlineTextField className="vault-category-name" value={category.name} onCommit={(name) => renameCategory(category.id, name)} />
+                  ) : (
+                    <span className="category-heading-text">{categoryName(key)}</span>
+                  )}
+                  <span className="category-total">{formatWeight(total, state.unitPreference)}</span>
+                </h3>
+                {items.map((item) => (
+                  <VaultItemRow
+                    key={item.id}
+                    item={item}
+                    usage={usageByItem.get(item.id) ?? null}
+                    unitPreference={state.unitPreference}
+                    categories={state.categories}
+                    onCreateCategory={addCategory}
+                    onEditCore={(patch) => requestCoreEdit(item, patch)}
+                    onEditQuantity={(defaultQuantity) => updateGearItem(item.id, { ...item, defaultQuantity })}
+                    onEditNote={(note) => updateGearItem(item.id, { ...item, note })}
+                    onDelete={() => requestDelete(item)}
+                    onReorder={(sourceId, targetId) => reorderGearItems(sourceId, targetId, item.categoryId)}
+                  />
+                ))}
+                <AddItemButton onClick={() => setAddForm({ categoryId: category?.id ?? null })} />
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Main "add gear" action: a big full-width button pinned to the bottom of the Gear
@@ -211,12 +229,9 @@ export function GearVaultPanel() {
           reaches on a phone (BACKLOG, 2026-10-08). Opens the form with "Other" preselected,
           for categories that aren't in the Vault yet or brand-new ones. */}
       <div className="vault-add-gear-bar">
-        <button
-          type="button"
-          className="btn btn-primary vault-add-gear"
-          onClick={() => setAddForm({ categoryId: null, newCategory: true })}
-        >
-          + Add gear
+        <button type="button" className="btn btn-primary btn-block vault-add-gear" onClick={() => setAddForm({ categoryId: null, newCategory: true })}>
+          <Icon icon={ActionIcon.add} />
+          Add gear
         </button>
       </div>
 
@@ -299,6 +314,7 @@ export function GearVaultPanel() {
               : `Delete "${pendingDelete.name}" from Gear Vault?`
           }
           confirmLabel="Delete"
+          confirmIcon={ActionIcon.delete}
           onConfirm={() => {
             deleteGearItem(pendingDelete.id, false);
             setPendingDelete(null);
@@ -315,13 +331,16 @@ export function GearVaultPanel() {
 function AddItemButton({ onClick }: { onClick: () => void }) {
   return (
     <button type="button" className="vault-add-item" onClick={onClick}>
-      + Add item
+      <Icon icon={ActionIcon.add} size={16} />
+      Add item
     </button>
   );
 }
 
 interface VaultItemRowProps {
   item: GearItem;
+  /** "2 gearlist(s) and your template" when the item is used somewhere, else null. */
+  usage: string | null;
   unitPreference: import('../types').UnitPreference;
   categories: import('../types').Category[];
   onCreateCategory: (name: string) => string;
@@ -332,52 +351,48 @@ interface VaultItemRowProps {
   onReorder: (sourceId: string, targetId: string) => void;
 }
 
-function VaultItemRow({ item, unitPreference, categories, onCreateCategory, onEditCore, onEditQuantity, onEditNote, onDelete, onReorder }: VaultItemRowProps) {
+function VaultItemRow({ item, usage, unitPreference, categories, onCreateCategory, onEditCore, onEditQuantity, onEditNote, onDelete, onReorder }: VaultItemRowProps) {
   const dragProps = makeDragHandlers(item.id, onReorder, 'gear');
   const categoryName = categories.find((c) => c.id === item.categoryId)?.name ?? UNCATEGORIZED;
 
   return (
     <div className="vault-item-row" {...dragProps}>
-      <span className="drag-handle" title="Drag to reorder">
-        ⠿
+      <span className="drag-handle" title="Drag to reorder, or onto a gearlist to add it">
+        <Icon icon={ActionIcon.drag} size={16} />
       </span>
       <div className="vault-item-main">
         <InlineTextField className="vault-item-name" value={item.name} onCommit={(name) => onEditCore({ name })} />
-        <InlineTextField
-          className="vault-item-note"
-          value={item.note}
-          placeholder="Add a note…"
-          allowEmpty
-          onCommit={onEditNote}
-        />
+        {/* Second line: category (click to change, FR-12) · note */}
+        <span className="row-meta">
+          <span className="row-category">
+            <InlineCategorySelect
+              categories={categories}
+              categoryId={item.categoryId}
+              categoryName={categoryName}
+              onChange={(categoryId) => onEditCore({ categoryId })}
+              onCreateCategory={onCreateCategory}
+            />
+          </span>
+          <span className="row-meta-sep" aria-hidden="true">·</span>
+          <InlineTextField className="vault-item-note" value={item.note} placeholder="Add a note…" allowEmpty onCommit={onEditNote} />
+        </span>
       </div>
-      <div className="vault-item-props">
-        <InlineCategorySelect
-          categories={categories}
-          categoryId={item.categoryId}
-          categoryName={categoryName}
-          onChange={(categoryId) => onEditCore({ categoryId })}
-          onCreateCategory={onCreateCategory}
-        />
-        <InlineNumberField
-          className="vault-item-weight"
-          value={fromGrams(item.weightGrams, unitPreference)}
-          format={(v) => formatWeight(toGrams(v, unitPreference), unitPreference)}
-          onCommit={(v) => onEditCore({ weightGrams: toGrams(v, unitPreference) })}
-        />
-        <InlineNumberField
-          className="vault-item-qty"
-          value={item.defaultQuantity}
-          min={1}
-          integer
-          format={(v) => `×${v}`}
-          onCommit={onEditQuantity}
-        />
-      </div>
+      <span className="row-badges">
+        {usage && (
+          <Badge tone="linked" icon={CarabinerIcon} iconOnly tip={`Used in ${usage}`}>
+            {`Used in ${usage}`}
+          </Badge>
+        )}
+      </span>
+      <InlineNumberField
+        className="vault-item-weight"
+        value={fromGrams(item.weightGrams, unitPreference)}
+        format={(v) => formatWeight(toGrams(v, unitPreference), unitPreference)}
+        onCommit={(v) => onEditCore({ weightGrams: toGrams(v, unitPreference) })}
+      />
+      <InlineNumberField className="vault-item-qty" value={item.defaultQuantity} min={1} integer format={(v) => `×${v}`} onCommit={onEditQuantity} />
       <div className="vault-item-actions">
-        <button type="button" className="btn btn-ghost btn-small" onClick={onDelete}>
-          Delete
-        </button>
+        <IconButton label="Delete" icon={ActionIcon.delete} danger small tipEnd onClick={onDelete} />
       </div>
     </div>
   );

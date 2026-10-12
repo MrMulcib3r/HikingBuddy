@@ -28,10 +28,12 @@ interface IconButtonProps {
   /** Tooltip below the button — for buttons at the top of the window or of a scrolling panel,
    * where a tooltip above would be cut off. */
   tipBelow?: boolean;
+  /** Tooltip aligned to the button's right edge — for buttons near the right edge. */
+  tipEnd?: boolean;
   className?: string;
 }
 
-export function IconButton({ label, icon, onClick, variant = 'plain', danger, small, disabled, tipBelow, className }: IconButtonProps) {
+export function IconButton({ label, icon, onClick, variant = 'plain', danger, small, disabled, tipBelow, tipEnd, className }: IconButtonProps) {
   const classes = [
     'icon-btn',
     variant === 'outlined' ? 'icon-btn-outlined' : '',
@@ -48,6 +50,7 @@ export function IconButton({ label, icon, onClick, variant = 'plain', danger, sm
       aria-label={label}
       data-tip={label}
       data-tip-pos={tipBelow ? 'below' : undefined}
+      data-tip-align={tipEnd ? 'end' : undefined}
       disabled={disabled}
       onClick={onClick}
     >
@@ -137,7 +140,7 @@ export function Badge({ tone = 'neutral', icon, iconOnly, children, tip }: Badge
   if (iconOnly && icon) {
     const label = typeof children === 'string' ? children : tip;
     return (
-      <span className={`badge badge-${tone} badge-icon`} role="img" aria-label={label} data-tip={tip ?? label}>
+      <span className={`badge badge-${tone} badge-icon`} role="img" aria-label={label} data-tip={tip ?? label} data-tip-align="end">
         <Icon icon={icon} size={14} />
       </span>
     );

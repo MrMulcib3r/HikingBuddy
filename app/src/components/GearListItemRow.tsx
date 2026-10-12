@@ -6,6 +6,8 @@ import { makeDragHandlers } from '../utils/dnd';
 import { ItemFlagsToggle } from './ItemFlagsToggle';
 import { InlineTextField, InlineNumberField } from './InlineField';
 import { InlineCategorySelect } from './InlineCategorySelect';
+import { ActionIcon } from './icons/actionIcons';
+import { Badge, Icon, IconButton } from './ui';
 
 interface GearListItemRowProps {
   listId: string;
@@ -55,59 +57,58 @@ export function GearListItemRow({ listId, item, onRequestCoreEdit, onReorder }: 
   return (
     <div className="list-item-row" {...dragProps}>
       <span className="drag-handle" title="Drag to reorder">
-        ⠿
+        <Icon icon={ActionIcon.drag} size={16} />
       </span>
       <div className="list-item-main">
         <InlineTextField className="list-item-name" value={item.name} onCommit={handleNameCommit} />
-        <InlineTextField
-          className="list-item-note"
-          value={item.note}
-          placeholder="Add a note…"
-          allowEmpty
-          onCommit={(note) => updateListItem(listId, item.id, { note })}
-        />
-        {!linked && <span className="badge badge-unlinked">custom entry</span>}
+        {/* Second line: category (click to change, FR-12) · note · custom-entry badge */}
+        <span className="row-meta">
+          <span className="row-category">
+            <InlineCategorySelect
+              categories={state.categories}
+              categoryId={linked ? vaultCategory?.id ?? null : null}
+              categoryName={item.categoryName}
+              onChange={handleCategoryChange}
+            />
+          </span>
+          <span className="row-meta-sep" aria-hidden="true">·</span>
+          <InlineTextField
+            className="list-item-note"
+            value={item.note}
+            placeholder="Add a note…"
+            allowEmpty
+            onCommit={(note) => updateListItem(listId, item.id, { note })}
+          />
+          {!linked && (
+            <Badge tone="warning" tip="No longer linked to Gear Vault">
+              custom entry
+            </Badge>
+          )}
+        </span>
       </div>
 
-      {/* Grouped so that in a narrow panel they can wrap onto a second line under the name
-          (see .list-item-props in App.css) instead of squeezing the name to nothing. */}
-      <div className="list-item-props">
-        <InlineCategorySelect
-          categories={state.categories}
-          categoryId={linked ? vaultCategory?.id ?? null : null}
-          categoryName={item.categoryName}
-          onChange={handleCategoryChange}
-        />
+      <ItemFlagsToggle isWorn={item.isWorn} isConsumable={item.isConsumable} onChange={(patch) => updateListItem(listId, item.id, patch)} />
 
-        <InlineNumberField
-          className="list-item-weight"
-          value={fromGrams(item.weightGrams, state.unitPreference)}
-          format={(v) => formatWeight(toGrams(v, state.unitPreference), state.unitPreference)}
-          onCommit={handleWeightCommit}
-        />
+      <InlineNumberField
+        className="list-item-weight"
+        value={fromGrams(item.weightGrams, state.unitPreference)}
+        format={(v) => formatWeight(toGrams(v, state.unitPreference), state.unitPreference)}
+        onCommit={handleWeightCommit}
+      />
 
-        <ItemFlagsToggle
-          isWorn={item.isWorn}
-          isConsumable={item.isConsumable}
-          onChange={(patch) => updateListItem(listId, item.id, patch)}
-        />
-
-        <InlineNumberField
-          className="list-item-qty"
-          value={item.quantity}
-          min={1}
-          integer
-          format={(v) => `×${v}`}
-          onCommit={(quantity) => updateListItem(listId, item.id, { quantity })}
-        />
-      </div>
+      <InlineNumberField
+        className="list-item-qty"
+        value={item.quantity}
+        min={1}
+        integer
+        format={(v) => `×${v}`}
+        onCommit={(quantity) => updateListItem(listId, item.id, { quantity })}
+      />
 
       <span className="list-item-subtotal">{formatWeight(item.weightGrams * item.quantity, state.unitPreference)}</span>
 
       <div className="list-item-actions">
-        <button type="button" className="btn btn-ghost btn-small" onClick={() => removeListItem(listId, item.id)}>
-          Remove
-        </button>
+        <IconButton label="Remove" icon={ActionIcon.remove} small tipEnd onClick={() => removeListItem(listId, item.id)} />
       </div>
     </div>
   );

@@ -1,10 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { useApp } from '../state/AppContext';
 import { sortByOrder } from '../utils/reorder';
 import { makeDragHandlers } from '../utils/dnd';
 import type { GearList } from '../types';
 import { TEMPLATE_NAME } from '../constants';
 import { GearListDetail } from './GearListDetail';
+import { ActionIcon } from './icons/actionIcons';
+import { Icon, IconButton } from './ui';
 
 export function GearListsPanel() {
   const { state, createList, createListFromTemplate } = useApp();
@@ -30,61 +33,77 @@ export function GearListsPanel() {
     setCreating(false);
   }
 
-  return (
-    <section className="panel gear-lists-panel">
-      <header className="panel-header">
-        {selected ? (
-          <GearlistSwitcher lists={sortedLists} template={template} selected={selected} onSelect={setSelectedId} />
-        ) : (
-          <h2>Gearlists</h2>
-        )}
-        <button
-          type="button"
-          className="btn btn-primary btn-small"
-          onClick={() => {
-            setFromTemplate(true);
-            setCreating(true);
-          }}
-        >
-          + New gearlist
-        </button>
-      </header>
+  const newButton = (
+    <IconButton
+      label="New gearlist"
+      icon={ActionIcon.newGearlist}
+      variant="outlined"
+      tipBelow
+      tipEnd
+      onClick={() => {
+        setFromTemplate(true);
+        setCreating(true);
+      }}
+    />
+  );
 
-      {creating && (
-        <div className="new-list-form">
-          {template && (
-            <div className="segmented" role="radiogroup" aria-label="Start from">
-              <button type="button" role="radio" aria-checked={!fromTemplate} className={!fromTemplate ? 'active' : ''} onClick={() => setFromTemplate(false)}>
-                Blank gearlist
-              </button>
-              <button type="button" role="radio" aria-checked={fromTemplate} className={fromTemplate ? 'active' : ''} onClick={() => setFromTemplate(true)}>
-                From template ({template.items.length})
-              </button>
-            </div>
-          )}
-          <input
-            autoFocus
-            value={newName}
-            placeholder="e.g. Nordkalottleden 2027"
-            onChange={(e) => setNewName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') handleCreate();
-              if (e.key === 'Escape') setCreating(false);
-            }}
-          />
-          <button type="button" className="btn btn-primary btn-small" onClick={handleCreate}>
-            Create
+  const newListForm = creating && (
+    <div className="new-list-form">
+      {template && (
+        <div className="segmented" role="radiogroup" aria-label="Start from">
+          <button type="button" role="radio" aria-checked={!fromTemplate} onClick={() => setFromTemplate(false)}>
+            Blank gearlist
           </button>
-          <button type="button" className="btn btn-ghost btn-small" onClick={() => setCreating(false)}>
-            Cancel
+          <button type="button" role="radio" aria-checked={fromTemplate} onClick={() => setFromTemplate(true)}>
+            From template ({template.items.length})
           </button>
         </div>
       )}
+      <div className="field-row">
+        <input
+          autoFocus
+          value={newName}
+          placeholder="e.g. Nordkalottleden 2027"
+          aria-label="Gearlist name"
+          onChange={(e) => setNewName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') handleCreate();
+            if (e.key === 'Escape') setCreating(false);
+          }}
+        />
+        <button type="button" className="btn btn-primary" onClick={handleCreate}>
+          Create
+        </button>
+        <button type="button" className="btn btn-ghost" onClick={() => setCreating(false)}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
 
+  return (
+    <section className="panel gear-lists-panel">
       {selected ? (
-        <GearListDetail key={selected.id} list={selected} isTemplate={selected === selectedTemplate} onDeleted={() => setSelectedId(null)} />
+        <GearListDetail
+          key={selected.id}
+          list={selected}
+          isTemplate={selected === selectedTemplate}
+          onDeleted={() => setSelectedId(null)}
+          switcher={<GearlistSwitcher lists={sortedLists} template={template} selected={selected} onSelect={setSelectedId} />}
+          newButton={newButton}
+          newListForm={newListForm}
+        />
       ) : (
-        <p className="empty-hint">No gearlists yet — create your first one with "+ New gearlist".</p>
+        <>
+          <header className="panel-header">
+            <h2 className="panel-title">Gearlists</h2>
+            <div className="panel-header-actions">{newButton}</div>
+          </header>
+          {newListForm}
+          <div className="panel-body">
+            <p className="empty-hint">No gearlists yet — create your first one with "New gearlist" (+).</p>
+          </div>
+        </>
       )}
     </section>
   );
@@ -131,9 +150,18 @@ function GearlistSwitcher({ lists, template, selected, onSelect }: GearlistSwitc
         title="Switch gearlist"
         onClick={() => setOpen((o) => !o)}
       >
-        <span className="gearlist-switcher-name">{selected === template ? `📋 ${TEMPLATE_NAME}` : selected.name}</span>
+        <span className="gearlist-switcher-name">
+          {selected === template ? (
+            <>
+              <Icon icon={ActionIcon.template} size={28} />
+              {TEMPLATE_NAME}
+            </>
+          ) : (
+            selected.name
+          )}
+        </span>
         <span className="gearlist-switcher-caret" aria-hidden="true">
-          ▾
+          <Icon icon={ChevronDown} size={22} />
         </span>
       </button>
 
@@ -151,7 +179,7 @@ function GearlistSwitcher({ lists, template, selected, onSelect }: GearlistSwitc
               }}
             >
               <span className="drag-handle" aria-hidden="true">
-                📋
+                <Icon icon={ActionIcon.template} size={16} />
               </span>
               <span className="gearlist-switcher-item-name">{TEMPLATE_NAME}</span>
             </li>
@@ -169,12 +197,12 @@ function GearlistSwitcher({ lists, template, selected, onSelect }: GearlistSwitc
               {...makeDragHandlers(list.id, reorderLists, 'gearlist')}
             >
               <span className="drag-handle" title="Drag to reorder">
-                ⠿
+                <Icon icon={ActionIcon.drag} size={16} />
               </span>
               <span className="gearlist-switcher-item-name">{list.name}</span>
               {list.snapshot && (
-                <span className="status-snapshot" title="Snapshot saved">
-                  📷
+                <span className="status-snapshot badge badge-success badge-icon" role="img" aria-label="Snapshot saved" title="Snapshot saved">
+                  <Icon icon={ActionIcon.saveSnapshot} size={14} />
                 </span>
               )}
             </li>

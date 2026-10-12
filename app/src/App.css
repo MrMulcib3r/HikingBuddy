@@ -126,6 +126,7 @@
   flex-direction: column;
   min-width: 0;
   min-height: 0;
+  overflow-x: hidden;
   overflow-y: auto;
   background: var(--surface);
   border: 1px solid var(--line);
@@ -296,6 +297,19 @@
 [data-tip]:focus-visible::after {
   opacity: 1;
   transform: translate(-50%, 0);
+}
+/* Near the right edge: the tooltip grows to the left from the element's right edge. */
+[data-tip-align='end']::after {
+  left: auto;
+  right: 0;
+  transform: translate(0, var(--space-1));
+}
+[data-tip-align='end'][data-tip-pos='below']::after {
+  transform: translate(0, calc(var(--space-1) * -1));
+}
+[data-tip-align='end']:hover::after,
+[data-tip-align='end']:focus-visible::after {
+  transform: translate(0, 0);
 }
 
 /* ============ Inline editing (InlineField / InlineCategorySelect) ============ */
@@ -828,13 +842,23 @@ select.inline-edit-input {
   font-size: var(--text-small);
   line-height: var(--lh-small);
 }
-.row-category {
-  grid-area: cat;
-  justify-self: end;
+/* Second line under the name: category (click to change) · note */
+.row-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--space-2);
+  row-gap: 2px;
+  min-width: 0;
   color: var(--ink-muted);
   font-size: var(--text-small);
   line-height: var(--lh-small);
+}
+.row-category {
   white-space: nowrap;
+}
+.row-meta-sep {
+  color: var(--ink-subtle);
 }
 .vault-item-weight,
 .list-item-weight {
@@ -879,15 +903,15 @@ select.inline-edit-input {
   opacity: 1;
 }
 
-/* Gear Vault row: grip · name+note · category · used-in badge · weight · qty · actions */
+/* Gear Vault row: grip · name (+ category · note) · used-in badge · weight · qty · actions */
 .vault-item-row {
-  grid-template-columns: 16px minmax(0, 1fr) auto 24px 76px 36px auto;
-  grid-template-areas: 'grip main cat badge weight qty actions';
+  grid-template-columns: 16px minmax(0, 1fr) 24px 76px 36px auto;
+  grid-template-areas: 'grip main badge weight qty actions';
 }
-/* Gearlist row: grip · name+note · category · Worn/Consumable · weight · qty · subtotal · remove */
+/* Gearlist row: grip · name (+ category · note) · Worn/Consumable · weight · qty · subtotal · remove */
 .list-item-row {
-  grid-template-columns: 16px minmax(0, 1fr) auto auto 76px 40px 76px auto;
-  grid-template-areas: 'grip main cat flags weight qty sub actions';
+  grid-template-columns: 16px minmax(0, 1fr) auto 76px 40px 76px auto;
+  grid-template-areas: 'grip main flags weight qty sub actions';
 }
 .list-item-row .item-flags-toggle {
   grid-area: flags;
@@ -973,6 +997,7 @@ select.inline-edit-input {
 /* ============ Gearlist panel ============ */
 .gearlist-switcher {
   position: relative;
+  flex: 1 1 260px;
   min-width: 0;
 }
 .gearlist-switcher-button {
@@ -1088,9 +1113,13 @@ select.inline-edit-input {
 }
 
 /* Drag a Gear Vault item onto a gearlist to add it */
+.gear-lists-panel .panel-body {
+  display: flex;
+  flex-direction: column;
+}
 .list-detail {
   position: relative;
-  min-height: 100%;
+  flex: 1;
   border-radius: var(--radius-md);
   outline: 2px dashed transparent;
   outline-offset: var(--space-1);
@@ -1471,14 +1500,14 @@ select.inline-edit-input {
 }
 
 /* ============ Narrow panels: rows wrap onto two lines (PRD v9) ============ */
-@container (max-width: 640px) {
+@container (max-width: 600px) {
   .list-item-row {
     grid-template-columns: 16px minmax(0, 1fr) auto auto auto;
     grid-template-areas:
       'grip main main sub actions'
-      '. cat flags weight qty';
+      '. flags flags weight qty';
   }
-  .list-item-row .row-category {
+  .list-item-row .item-flags-toggle {
     justify-self: start;
   }
   .list-item-row.list-item-row-readonly {
@@ -1488,16 +1517,18 @@ select.inline-edit-input {
       'flags . weight qty';
   }
 }
-@container (max-width: 480px) {
+@container (max-width: 380px) {
   .vault-item-row {
-    grid-template-columns: 16px minmax(0, 1fr) auto auto auto;
+    grid-template-columns: 16px minmax(0, 1fr) auto auto;
     grid-template-areas:
-      'grip main main badge actions'
-      '. cat cat weight qty';
+      'grip main main actions'
+      '. badge weight qty';
   }
-  .vault-item-row .row-category {
+  .vault-item-row .row-badges {
     justify-self: start;
   }
+}
+@container (max-width: 480px) {
   .weight-summary {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
