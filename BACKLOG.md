@@ -72,12 +72,11 @@ Template (nemazat): - [TYP] Krátký název – co se děje / co chci (datum)
 
 _Finální scope appky je v PRD v16 (sekce 0 a 2). Položky níže jsou seřazené: nejdřív všechno dodělat a vyzkoušet lokálně, nasazení na web až nakonec (viz 🟡 Brzy). Souběžně s tím Martin prochází položky v 🧪 Test._
 
-_Prázdné — FR-16, FR-17 a FR-18 jsou hotové a čekají v 🧪 Test. Další na řadě je design (FR-19, 🟡 Brzy), až bude Martinův design system._
+_Prázdné — FR-16 až FR-19 jsou hotové a čekají v 🧪 Test. Zbývá nasazení na web (FR-20, 🟡 Brzy) po Martinově testu._
 
 
 ## 🟡 Brzy
 
-- [ ] [UI] Design system + vizualizace váhy batohem místo koláčového grafu – PRD FR-19. Proč: appka má vypadat dobře pro prezentaci a batoh je srozumitelnější a originálnější než koláč na LighterPacku. **Čeká na Martina:** ten nejdřív vytvoří design system (Claude → Artifacts → Design System) a rozhodne otevřené otázky ve FR-19 (co je v batohu, pořadí vrstev). Claude Code nezačíná, dokud to Martin nepřesune do Teď. (2026-10-09, Martin)
 - [ ] [FEATURE] Nasazení na web jako statická appka (Cloudflare Pages / Netlify / Vercel, zdarma) – PRD FR-20. Proč: veřejný odkaz pro pohovory. Až po dokončení všeho v Teď + design (FR-19) a Martinově testu lokálně. Při nasazení rozhodnout: veřejný, nebo soukromý repozitář (a zkontrolovat, že v repu není nic osobního). (2026-10-09, Martin; původně navrhl Claude 2026-09-23)
 
 ## ⚪ Někdy
@@ -98,6 +97,14 @@ _Ve v16 (2026-10-09) Martin uzavřel scope: všechno přeškrtnuté je vyřazen�
 
 _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, přesuň do ✅ Hotovo; když ne, napiš k položce, co je špatně, a vrať ji do 🔴 Teď._
 
+- [ ] [UI] Design system + vizualizace váhy batohem – PRD FR-19 (v21). (2026-10-09, Martin; implementováno 2026-10-12) → **Jak otestovat** (obnov stránku appky, F5):
+  1. Světlý vzhled s krajinou dole, logo v hlavičce, písma Barlow Condensed / Overpass. Porovnej se screenshoty v `design/2026-10-redesign/implemented/` a s návrhem v `design-system/screenshots/`.
+  2. Batoh nahoře v gearlistu (i v šabloně a na sdílené stránce): nejtěžší kategorie dole, v batohu jen Base + Consumables, pod ním Base / Consumables / Worn. Najeď myší na vrstvu nebo řádek legendy → zvýrazní se obojí. Přepni Worn/Consumable u řádku → batoh se hned přepočítá.
+  3. Ikony místo textu: v hlavičce gearlistu (snapshot, zobrazit snapshot, sdílet, šablona, smazat, nový gearlist), Export/Import, Disconnect, odebrání/smazání řádku. Po najetí myší se ukáže popis.
+  4. Worn = bota, Consumable = příbor (zapnuté jsou oranžově podbarvené). Kategorie je u položky v druhém řádku pod názvem, pořád jde změnit kliknutím. Karabina u položky ve Vaultu = položka je použitá v gearlistu/šabloně (tooltip řekne kde).
+  5. Chování se nemá lišit: inline editace (Enter/Escape), 3-cestný dialog, snapshot, přetažení z Vaultu, sdílení, datový soubor, demo data.
+  6. Telefon: otevři appku v telefonu nebo zmenši okno pod 900 px → panely pod sebou, nic nepřetéká, akce u řádků jsou vidět i bez myši.
+  7. Sdílený odkaz je nově `#share=v2:…` (nese barvy kategorií); staré odkazy `v1` dál fungují.
 - [ ] [CR] When updating gear items in a gearlist(-s) the user needs to know which gear lists are affected. (24.9.2026) → **Jak otestovat:** změň váhu/název položky z Vaultu, která je ve 2+ gearlistech → dialog pod textem vypíše „Affected gearlists:" s jejich názvy. Totéž při Delete a při změně přímo v gearlistu (tam se vypíšou ostatní gearlisty). (implementováno 2026-10-08)
 ![[Pasted image 20260924165604.png|376]]
 - [ ] [BUG] Categories cannot be edited. It should be possible to edit all categories including the template one. (24.9.2026) → **Jak otestovat:** klikni na název kategorie v nadpisu skupiny ve Vaultu (např. FOOD), přepiš, Enter. Escape zruší. Funguje i v dialogu „Categories" (klik na název). (implementováno 2026-10-08)
