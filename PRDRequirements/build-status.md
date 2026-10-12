@@ -153,3 +153,7 @@ Run locally: in the `app/` folder, run `npm install` then `npm run dev`. Data is
 **2026-10-12 (category subtotals in a gearlist):**
 - Martin asked for each category's total weight in the gearlist. PRD section 5 already describes "položky seskupené podle kategorie s mezisoučtem váhy" — it was just missing in the code, so no PRD change. The group title in a gearlist/template now shows the sum of weight × quantity of its rows on the right, aligned with the row subtotals; follows the unit switch.
 - Verified with Playwright on demo data at 1920 px and 1100 px: Clothing subtotal 1.72 kg = sum of its rows, right edge aligned with the row subtotals. `npm run build` passes.
+
+**2026-10-12 ("Update template", PRD v20):**
+- Martin wanted to update the template without building it again. Both ways already existed (edit 📋 Template directly, T-3; overwrite it from a gearlist, T-1). Martin chose to make it visible by naming the gearlist button **"Update template"** whenever a template exists (like "Update snapshot"); the confirm dialog says gearlists created earlier don't change and points to editing the template directly. Label only — no data or behaviour change.
+- Verified with Playwright on demo data: label is "Update template" with a template, dialog title/tip, template replaced by the gearlist's linked rows, label back to "Save as template" after deleting the template. `npm run build` passes.

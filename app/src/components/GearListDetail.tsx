@@ -173,9 +173,9 @@ export function GearListDetail({ list, onDeleted, isTemplate = false }: GearList
                 className="btn btn-ghost btn-small"
                 onClick={() => setConfirmTemplate(true)}
                 disabled={list.items.length === customEntryCount}
-                title="Use this gearlist's items as the starting point for new gearlists"
+                title={hasTemplate ? "Replace your template's items with this gearlist's items" : "Use this gearlist's items as the starting point for new gearlists"}
               >
-                Save as template
+                {hasTemplate ? 'Update template' : 'Save as template'}
               </button>
             </>
           )}
@@ -310,10 +310,10 @@ export function GearListDetail({ list, onDeleted, isTemplate = false }: GearList
 
       {confirmTemplate && (
         <ConfirmDialog
-          title={hasTemplate ? 'Replace template' : 'Create template'}
+          title={hasTemplate ? 'Update template' : 'Create template'}
           message={[
             hasTemplate
-              ? `This replaces your current template with the items of "${list.name}" (quantities and Worn/Consumable included). Continue?`
+              ? `This replaces your current template with the items of "${list.name}" (quantities and Worn/Consumable included). Gearlists already created from it don't change. Tip: to change just a few items, open 📋 Template in the gearlist menu and edit it directly. Continue?`
               : `This saves the items of "${list.name}" (quantities and Worn/Consumable included) as your template. New gearlists can then start from it. Continue?`,
             customEntryCount > 0
               ? `${customEntryCount} custom entr${customEntryCount === 1 ? 'y' : 'ies'} no longer linked to Gear Vault will be skipped.`
@@ -321,7 +321,7 @@ export function GearListDetail({ list, onDeleted, isTemplate = false }: GearList
           ]
             .filter(Boolean)
             .join(' ')}
-          confirmLabel={hasTemplate ? 'Replace template' : 'Create template'}
+          confirmLabel={hasTemplate ? 'Update template' : 'Create template'}
           onConfirm={() => {
             saveAsTemplate(list.id);
             setConfirmTemplate(false);
