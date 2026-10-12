@@ -11,6 +11,7 @@ import { ConfirmDialog } from './ConfirmDialog';
 import { VaultEditDialog } from './VaultEditDialog';
 import { GearListItemRow } from './GearListItemRow';
 import { WeightSummary } from './WeightSummary';
+import { InlineTextField } from './InlineField';
 import { ShareDialog } from './ShareDialog';
 
 interface GearListDetailProps {
@@ -216,7 +217,9 @@ export function GearListDetail({ list, onDeleted, isTemplate = false }: GearList
         )}
         {[...grouped.entries()].map(([category, items]) => (
           <div key={category} className="list-category-group">
-            <h4 className="list-category-title">{category}</h4>
+            <h4 className="list-category-title">
+              <ListCategoryName name={category} items={items} />
+            </h4>
             {items.map((item) => (
               <GearListItemRow
                 key={item.id}
@@ -344,6 +347,17 @@ export function GearListDetail({ list, onDeleted, isTemplate = false }: GearList
       )}
     </div>
   );
+}
+
+/** Group title in a gearlist. Click to rename the category — the same rename as in Gear
+ * Vault (FR-2): it renames the Vault category, so every Vault-linked row in every gearlist
+ * follows. Only offered when the group holds Vault-linked rows of an existing category;
+ * "Uncategorized" and groups of custom entries (no longer linked) stay plain text. */
+function ListCategoryName({ name, items }: { name: string; items: GearListItem[] }) {
+  const { state, renameCategory } = useApp();
+  const category = items.some((i) => i.gearItemId) ? state.categories.find((c) => c.name === name) : undefined;
+  if (!category) return <>{name}</>;
+  return <InlineTextField className="list-category-name" value={category.name} onCommit={(newName) => renameCategory(category.id, newName)} />;
 }
 
 function groupByCategory(items: GearListItem[]): Map<string, GearListItem[]> {

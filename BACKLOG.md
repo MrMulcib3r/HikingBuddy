@@ -120,6 +120,7 @@ _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, př
   4. Změň ve Vaultu váhu položky, která je v šabloně → dialog Cancel / Copy / Continue uvádí „Template“ i u položky, která není v žádném gearlistu.
   5. Smaž ve Vaultu položku, která je jen v šabloně → varování „…will also remove it from the template“.
   6. „Delete template“ smaže šablonu, gearlisty z ní vytvořené zůstanou.
+- [ ] [BUG] Nelze editovat název kategorie v gearlistu. (2026-10-12, Martin; opraveno 2026-10-12) → **Jak otestovat:** v gearlistu klikni na nadpis kategorie (např. SHELTER SYSTEM) → přepiš → Enter. Kategorie se přejmenuje i ve Vaultu, v ostatních gearlistech a v šabloně; snapshot zůstane beze změny. Escape zruší. „Uncategorized“ přejmenovat nejde (není to skutečná kategorie).
 - [ ] [UI] Přidání položky do gearlistu přetažením (drag & drop) přímo z Gear Vaultu; tlačítko „Add item“ zůstává kvůli mobilu. (2026-10-12, Martin; implementováno 2026-10-12) → **Jak otestovat:**
   1. Chyť položku ve Vaultu (kdekoli na řádku) a přetáhni ji do pravého panelu → gearlist se orámuje a nahoře se ukáže „Drop to add to …“ → pusť → položka je v gearlistu.
   2. Přetáhni položku, která už v gearlistu je → nevznikne druhý řádek, jen se zvýší počet (×2).
