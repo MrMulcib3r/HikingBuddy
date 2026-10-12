@@ -1,5 +1,114 @@
+/*
+ * HikingBuddy design tokens (FR-19) — from design/2026-10-redesign/design-system/tokens.json.
+ * Every colour, font size, radius, space and shadow in the app comes from here; App.css only
+ * uses var(--…). Light theme only (PRD v21).
+ */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
+
+  /* colour */
+  --bg: #faf4ee;
+  --surface: #fffcf9;
+  --surface-sunken: #f4ebe2;
+  --surface-hover: #fbf1e8;
+  --line: #e9dccf;
+  --line-control: #9c8676;
+  --ink: #2b1d24;
+  --ink-muted: #68545c;
+  --ink-subtle: #77636b;
+  --accent: #b0502a;
+  --accent-hover: #96421f;
+  --accent-ink: #9a4422;
+  --accent-soft: #f8e1d3;
+  --on-accent: #ffffff;
+  --forest: #3e6b57;
+  --forest-soft: #e1ede5;
+  --danger: #a3312f;
+  --danger-hover: #8a2927;
+  --danger-soft: #f6dedb;
+  --warning: #80530a;
+  --warning-soft: #fbebc8;
+  --focus-ring: var(--accent);
+  --scrim: rgba(43, 29, 36, 0.38);
+  --ridge-1: #f3e1d3;
+  --ridge-2: #eed3c0;
+  --ridge-3: #e7c2ac;
+  --ridge-4: #ddb0a0;
+  --ridge-5: #cfa19a;
+  --sun: #f6ddc7;
+
+  /* category colours — same colour for a category everywhere (pack layer, legend, dots) */
+  --cat-backpack: #c8673f;
+  --cat-shelter: #7e9f7c;
+  --cat-sleep: #6b5079;
+  --cat-clothing: #edb48a;
+  --cat-cooking: #9c3f3a;
+  --cat-water: #79a8ba;
+  --cat-electronics: #e9c46a;
+  --cat-hygiene: #b9a7c9;
+  --cat-food: #2f5d50;
+  --cat-misc: #a89582;
+  --cat-custom-1: #d98a8a;
+  --cat-custom-2: #4e7c8c;
+  --cat-custom-3: #8a9a5b;
+  --cat-custom-4: #c9a27a;
+  --cat-none: #c9bcb0; /* Uncategorized / unknown — neutral, not one of the palette colours */
+
+  /* type */
+  --font-display: 'Barlow Condensed', 'Arial Narrow', system-ui, sans-serif;
+  --font-sans: Overpass, 'Segoe UI', system-ui, sans-serif;
+  --text-brand: 26px;
+  --lh-brand: 28px;
+  --text-title-xl: 34px;
+  --lh-title-xl: 36px;
+  --text-dialog-title: 22px;
+  --lh-dialog-title: 26px;
+  --text-panel-title: 18px;
+  --lh-panel-title: 22px;
+  --text-tile-value: 20px;
+  --lh-tile-value: 26px;
+  --text-body: 15px;
+  --lh-body: 22px;
+  --text-ui: 14px; /* small buttons, banners, legend, dialog lists */
+  --lh-ui: 20px;
+  --text-small: 13px;
+  --lh-small: 18px;
+  --text-label: 13px;
+  --lh-label: 16px;
+  --text-badge: 12px;
+  --text-weight-xl: 32px;
+  --lh-weight-xl: 36px;
+  --tracking-brand: 0.02em;
+  --tracking-title: 0.04em;
+  --tracking-panel: 0.08em;
+  --tracking-label: 0.1em;
+
+  /* spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  /* radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+
+  /* shadow */
+  --shadow-panel: 0 1px 2px rgba(43, 29, 36, 0.06), 0 8px 24px rgba(43, 29, 36, 0.06);
+  --shadow-overlay: 0 4px 12px rgba(43, 29, 36, 0.1), 0 24px 48px rgba(43, 29, 36, 0.16);
+  --shadow-control: 0 1px 2px rgba(43, 29, 36, 0.12);
+
+  /* control sizes */
+  --control-h: 38px;
+  --control-h-sm: 32px;
+  --icon-btn: 36px;
+  --icon-btn-sm: 30px;
+  --touch-target: 44px;
 }
 
 * {
@@ -14,9 +123,12 @@ body,
 }
 
 body {
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background: #14161a;
-  color: #e8e9ec;
+  font-family: var(--font-sans);
+  font-size: var(--text-body);
+  line-height: var(--lh-body);
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
 }
 
 button {
@@ -25,6 +137,22 @@ button {
 }
 
 input,
-select {
+select,
+textarea {
   font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+  }
 }
