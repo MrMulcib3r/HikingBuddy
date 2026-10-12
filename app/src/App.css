@@ -264,7 +264,9 @@
   position: relative;
 }
 [data-tip]::after {
+  /* Empty alt text: screen readers get the name from aria-label, not from the tooltip. */
   content: attr(data-tip);
+  content: attr(data-tip) / '';
   position: absolute;
   left: 50%;
   bottom: calc(100% + var(--space-2));

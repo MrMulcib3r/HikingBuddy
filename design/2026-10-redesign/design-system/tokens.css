@@ -1,0 +1,76 @@
+/* HikingBuddy design tokens: generated from tokens.json. Paste into app/src/index.css (or import it). */
+:root {
+  /* colour */
+  --bg: #FAF4EE;
+  --surface: #FFFCF9;
+  --surface-sunken: #F4EBE2;
+  --surface-hover: #FBF1E8;
+  --line: #E9DCCF;
+  --line-control: #9C8676;
+  --ink: #2B1D24;
+  --ink-muted: #68545C;
+  --ink-subtle: #77636B;
+  --accent: #B0502A;
+  --accent-hover: #96421F;
+  --accent-ink: #9A4422;
+  --accent-soft: #F8E1D3;
+  --on-accent: #FFFFFF;
+  --forest: #3E6B57;
+  --forest-soft: #E1EDE5;
+  --danger: #A3312F;
+  --danger-soft: #F6DEDB;
+  --warning: #80530A;
+  --warning-soft: #FBEBC8;
+  --focus-ring: var(--accent);
+  --scrim: rgba(43, 29, 36, 0.38);
+  --ridge-1: #F3E1D3;
+  --ridge-2: #EED3C0;
+  --ridge-3: #E7C2AC;
+  --ridge-4: #DDB0A0;
+  --ridge-5: #CFA19A;
+  --sun: #F6DDC7;
+  --cat-backpack: #C8673F;
+  --cat-shelter: #7E9F7C;
+  --cat-sleep: #6B5079;
+  --cat-clothing: #EDB48A;
+  --cat-cooking: #9C3F3A;
+  --cat-water: #79A8BA;
+  --cat-electronics: #E9C46A;
+  --cat-hygiene: #B9A7C9;
+  --cat-food: #2F5D50;
+  --cat-misc: #A89582;
+  --cat-custom-1: #D98A8A;
+  --cat-custom-2: #4E7C8C;
+  --cat-custom-3: #8A9A5B;
+  --cat-custom-4: #C9A27A;
+  /* type */
+  --font-display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-sans: Overpass, "Segoe UI", system-ui, sans-serif;
+  /* spacing */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  /* radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+  /* shadow */
+  --shadow-panel: 0 1px 2px rgba(43, 29, 36, 0.06), 0 8px 24px rgba(43, 29, 36, 0.06);
+  --shadow-overlay: 0 4px 12px rgba(43, 29, 36, 0.10), 0 24px 48px rgba(43, 29, 36, 0.16);
+}
+
+/* Type styles (sizes from tokens.json type.groups) */
+.t-brand { font-family: var(--font-display); font-size: 26px; line-height: 28px; font-weight: 700; letter-spacing: 0.02em; }
+.t-title-xl { font-family: var(--font-display); font-size: 34px; line-height: 36px; font-weight: 600; }
+.t-panel-title { font-family: var(--font-display); font-size: 18px; line-height: 22px; font-weight: 600; letter-spacing: 0.08em; }
+.t-label { font-family: var(--font-display); font-size: 13px; line-height: 16px; font-weight: 600; letter-spacing: 0.1em; }
+.t-body { font-family: var(--font-sans); font-size: 15px; line-height: 22px; font-weight: 400; }
+.t-body-strong { font-family: var(--font-sans); font-size: 15px; line-height: 22px; font-weight: 600; }
+.t-small { font-family: var(--font-sans); font-size: 13px; line-height: 18px; font-weight: 400; }
+.t-weight { font-family: var(--font-sans); font-size: 15px; line-height: 22px; font-weight: 500; }
+.t-weight-xl { font-family: var(--font-sans); font-size: 32px; line-height: 36px; font-weight: 700; }

@@ -1,0 +1,22 @@
+<!-- @dsCard group="Gear rows" height=120 -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>FlagToggle — preview</title>
+<style>body{margin:0;background:var(--bg)} .pv{padding:20px;display:flex;flex-wrap:wrap;gap:16px;align-items:center} .pv-col{display:grid;gap:12px} .pv-cap{font:500 12px/16px var(--font-sans);color:var(--ink-muted)}</style>
+</head>
+<body>
+<div class="hb pv">
+  <div class="pv-col"><span class="pv-cap">Off / off (base weight)</span>
+  <div class="hb-flags" role="group" aria-label="Worn / Consumable">
+    <button class="hb-flag" aria-pressed="false" data-tip="Worn: carried on your body, not in the pack" aria-label="Worn"><i data-hb-icon="boot"></i></button>
+    <button class="hb-flag" aria-pressed="false" data-tip="Consumable: food, fuel, water" aria-label="Consumable"><i data-lucide="utensils"></i></button></div></div>
+  <div class="pv-col"><span class="pv-cap">Worn on</span>
+  <div class="hb-flags"><button class="hb-flag" aria-pressed="true" aria-label="Worn"><i data-hb-icon="boot"></i></button>
+    <button class="hb-flag" aria-pressed="false" aria-label="Consumable"><i data-lucide="utensils"></i></button></div></div>
+  <div class="pv-col"><span class="pv-cap">Consumable on</span>
+  <div class="hb-flags"><button class="hb-flag" aria-pressed="false" aria-label="Worn"><i data-hb-icon="boot"></i></button>
+    <button class="hb-flag" aria-pressed="true" aria-label="Consumable"><i data-lucide="utensils"></i></button></div></div>
+</div>
+<script>HB.mountIcons(); document.querySelectorAll(".hb-flag").forEach(function(b){b.addEventListener("click",function(){b.setAttribute("aria-pressed",b.getAttribute("aria-pressed")!=="true")})});</script>
+</body>
+</html>
