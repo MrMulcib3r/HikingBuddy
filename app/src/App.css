@@ -927,11 +927,13 @@ select.inline-edit-input {
 }
 /* Gearlist row: grip · name (+ category · note) · Worn/Consumable · weight · qty · subtotal · remove */
 .list-item-row {
-  grid-template-columns: 16px minmax(0, 1fr) 68px 76px 40px 76px 36px;
+  grid-template-columns: 16px minmax(0, 1fr) 88px 76px 40px 76px 36px;
   grid-template-areas: 'grip main flags weight qty sub actions';
 }
 .list-item-row .item-flags-toggle {
   grid-area: flags;
+  justify-self: center;
+  gap: var(--space-2);
 }
 /* Read-only rows (snapshot, shared page): no grip, no actions, flags as badges. */
 .list-item-row.list-item-row-readonly {
@@ -1002,8 +1004,9 @@ select.inline-edit-input {
 .vault-list {
   container-type: inline-size;
 }
-/* Main "Add gear" action: full-width, pinned to the bottom of the Vault panel (PRD v14). */
-.vault-add-gear-bar {
+/* Each editable panel's main "add" action — "+ Add gear" in the Vault (PRD v14), "+ Add from
+   Gear Vault" in a gearlist / the template: full-width, pinned to the bottom of the panel. */
+.panel-add-bar {
   position: sticky;
   bottom: 0;
   z-index: 2;
@@ -1114,7 +1117,7 @@ select.inline-edit-input {
    Same grid as .list-item-row (+1px for the group border) so the columns line up. */
 .list-head {
   display: grid;
-  grid-template-columns: 16px minmax(0, 1fr) 68px 76px 40px 76px 36px;
+  grid-template-columns: 16px minmax(0, 1fr) 88px 76px 40px 76px 36px;
   column-gap: var(--space-3);
   align-items: end;
   padding: var(--space-2) calc(var(--space-3) + 1px);
@@ -1130,14 +1133,17 @@ select.inline-edit-input {
 .list-head > span:nth-child(n + 4) {
   text-align: right;
 }
+/* The flag column is a fixed 88px in header and rows, so WORN and CONS. have room and sit
+   over their toggles (design system, 2026-10-14). */
 .list-head-flags {
   display: inline-flex;
-  gap: var(--space-1);
+  justify-self: center;
 }
+/* 40px each, no gap: centres sit exactly over the two 32px toggles (gap 8px) below */
 .list-head-flags > span {
-  width: 32px;
+  width: 40px;
   text-align: center;
-  letter-spacing: 0;
+  letter-spacing: 0.04em;
 }
 .list-detail-meta {
   display: flex;
@@ -1164,11 +1170,6 @@ select.inline-edit-input {
   display: grid;
   gap: var(--space-4);
   margin-bottom: var(--space-4);
-}
-/* Right-aligned above the column header: it adds to the list below, not to the backpack. */
-.list-add-item {
-  display: flex;
-  margin: 0 0 var(--space-3) auto;
 }
 .list-detail .banner {
   margin-bottom: var(--space-4);
@@ -1726,7 +1727,7 @@ select.inline-edit-input {
   }
   .panel-header,
   .panel-body,
-  .vault-add-gear-bar {
+  .panel-add-bar {
     padding-left: var(--space-4);
     padding-right: var(--space-4);
   }

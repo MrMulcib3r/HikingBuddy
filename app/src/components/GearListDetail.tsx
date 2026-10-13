@@ -230,17 +230,13 @@ export function GearListDetail({ list, onDeleted, isTemplate = false, switcher }
             <BackpackChart categories={packCategories} consumable={breakdown.consumable} worn={breakdown.worn} unit={state.unitPreference} />
           </div>
 
-          <button type="button" className="btn btn-secondary list-add-item" onClick={() => setAddOpen(true)}>
-            <Icon icon={ActionIcon.add} />
-            Add item from Gear Vault
-          </button>
 
           <div className="list-items">
             {isEmpty && (
               <p className="empty-hint">
                 {isTemplate
-                  ? 'The template is empty — drag the gear you take on most trips here from Gear Vault, or use the button above.'
-                  : 'This gearlist is empty so far — drag gear here from Gear Vault, or use the button above.'}
+                  ? 'The template is empty — drag the gear you take on most trips here from Gear Vault, or use the button below.'
+                  : 'This gearlist is empty so far — drag gear here from Gear Vault, or use the button below.'}
               </p>
             )}
             {/* Column header: names the icon-only Worn / Consumable toggles of every row. */}
@@ -280,6 +276,15 @@ export function GearListDetail({ list, onDeleted, isTemplate = false, switcher }
             ))}
           </div>
         </div>
+      </div>
+
+      {/* The panel's main "add" action, same style and place as "+ Add gear" in the Vault:
+          a full-width bar pinned to the bottom of the panel (design system v2, 2026-10-14). */}
+      <div className="panel-add-bar">
+        <button type="button" className="btn btn-primary btn-block list-add-item" onClick={() => setAddOpen(true)}>
+          <Icon icon={ActionIcon.add} />
+          Add from Gear Vault
+        </button>
       </div>
 
       {shareOpen && <ShareDialog list={list} onClose={() => setShareOpen(false)} />}

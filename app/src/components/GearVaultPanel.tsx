@@ -231,7 +231,7 @@ export function GearVaultPanel() {
           Vault panel — always visible while scrolling, easy to hit, and where a thumb
           reaches on a phone (BACKLOG, 2026-10-08). Opens the form with "Other" preselected,
           for categories that aren't in the Vault yet or brand-new ones. */}
-      <div className="vault-add-gear-bar">
+      <div className="panel-add-bar vault-add-gear-bar">
         <button type="button" className="btn btn-primary btn-block vault-add-gear" onClick={() => setAddForm({ categoryId: null })}>
           <Icon icon={ActionIcon.add} />
           Add gear
