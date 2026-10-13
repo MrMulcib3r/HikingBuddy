@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useApp } from '../state/AppContext';
 import { InlineTextField } from './InlineField';
 import { ConfirmDialog } from './ConfirmDialog';
+import { plural } from '../utils/text';
 import { CategoryIcon } from './CategoryIcon';
 import { ActionIcon } from './icons/actionIcons';
 import { Dialog, DialogActions, Icon, IconButton } from './ui';
@@ -65,7 +66,7 @@ export function CategoryManager({ onClose }: { onClose: () => void }) {
           confirmIcon={ActionIcon.delete}
           message={
             usedBy(pendingDelete.id) > 0
-              ? `Delete "${pendingDelete.name}"? ${usedBy(pendingDelete.id)} item(s) in Gear Vault use it and will become Uncategorized (the items themselves stay).`
+              ? `Delete "${pendingDelete.name}"? ${plural(usedBy(pendingDelete.id), 'item')} in Gear Vault ${usedBy(pendingDelete.id) === 1 ? 'uses' : 'use'} it and will become Uncategorized (the items themselves stay).`
               : `Delete "${pendingDelete.name}"? No items use it.`
           }
           confirmLabel="Delete"

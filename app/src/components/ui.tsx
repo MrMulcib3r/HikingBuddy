@@ -64,6 +64,8 @@ interface DialogProps {
   /** Icon in front of the title (e.g. the carabiner on the "used elsewhere" dialog). */
   titleIcon?: IconComponent;
   wide?: boolean;
+  /** 560px — the 3-way "used elsewhere" dialog, so its three buttons fit on one row. */
+  choice?: boolean;
   /** Called when the scrim (outside the window) is clicked. Leave undefined for dialogs that
    * must not close that way (the add-item form, blocking choices). */
   onBackdropClick?: () => void;
@@ -73,11 +75,11 @@ interface DialogProps {
 
 /** Modal frame: plum scrim, surface window, uppercase display title. Actions are passed as
  * children inside <DialogActions>. */
-export function Dialog({ title, titleIcon, wide, onBackdropClick, labelledBy = 'dialog-title', children }: DialogProps) {
+export function Dialog({ title, titleIcon, wide, choice, onBackdropClick, labelledBy = 'dialog-title', children }: DialogProps) {
   return (
     <div className="dialog-backdrop" role="presentation" onClick={onBackdropClick}>
       <div
-        className={`dialog ${wide ? 'dialog-wide' : ''}`}
+        className={`dialog ${wide ? 'dialog-wide' : ''} ${choice ? 'dialog-choice' : ''}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={labelledBy}

@@ -8,6 +8,7 @@ import { fromGrams, formatWeight, toGrams } from '../utils/weight';
 import { sortByOrder } from '../utils/reorder';
 import { makeDragHandlers } from '../utils/dnd';
 import { ConfirmDialog } from './ConfirmDialog';
+import { plural } from '../utils/text';
 import { VaultEditDialog } from './VaultEditDialog';
 import { GearItemFormDialog } from './GearItemFormDialog';
 import { CategoryManager } from './CategoryManager';
@@ -28,7 +29,7 @@ type CoreFieldPatch = Pick<GearItem, 'name' | 'categoryId' | 'weightGrams'>;
 interface PendingCoreEdit {
   item: GearItem;
   patch: CoreFieldPatch;
-  /** e.g. "2 gearlist(s) and your template" */
+  /** e.g. "2 gearlists and your template" */
   usage: string;
   affectedNames: string[];
 }
@@ -286,7 +287,7 @@ export function GearVaultPanel() {
       {pendingDelete && pendingDelete.listCount > 0 && (
         <VaultEditDialog
           title="This item is used in existing gearlists"
-          message={`"${pendingDelete.name}" is used in ${pendingDelete.listCount} gearlist(s). Do you want to remove it from those gearlists too, or keep it there as a custom entry that is no longer linked to Gear Vault? Saved snapshots are never changed.${
+          message={`"${pendingDelete.name}" is used in ${plural(pendingDelete.listCount, 'gearlist')}. Do you want to remove it from those gearlists too, or keep it there as a custom entry that is no longer linked to Gear Vault? Saved snapshots are never changed.${
             pendingDelete.inTemplate ? ' In both cases it is also removed from your template.' : ''
           }`}
           affectedLists={pendingDelete.affectedNames}
@@ -339,7 +340,7 @@ function AddItemButton({ onClick }: { onClick: () => void }) {
   );
 }
 
-/** "2 gearlist(s) and your template" + how many lists that is. */
+/** "2 gearlists and your template" + how many lists that is. */
 interface Usage {
   count: number;
   text: string;

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { isTemplateCategory } from '../constants';
 import { ConfirmDialog } from './ConfirmDialog';
+import { plural } from '../utils/text';
 import type { Category } from '../types';
 import { sortByOrder } from '../utils/reorder';
 import { CategoryIcon } from './CategoryIcon';
@@ -143,7 +144,7 @@ export function CategoryTilePicker({
           danger
           message={
             (itemCounts[pendingDelete.id] ?? 0) > 0
-              ? `Delete "${pendingDelete.name}"? ${itemCounts[pendingDelete.id]} item(s) in Gear Vault use it and will become Uncategorized (the items themselves stay).`
+              ? `Delete "${pendingDelete.name}"? ${plural(itemCounts[pendingDelete.id], 'item')} in Gear Vault ${itemCounts[pendingDelete.id] === 1 ? 'uses' : 'use'} it and will become Uncategorized (the items themselves stay).`
               : `Delete "${pendingDelete.name}"? No items use it.`
           }
           confirmLabel="Delete"

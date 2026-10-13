@@ -1,3 +1,4 @@
+import { plural } from '../utils/text';
 import { UNCATEGORIZED } from '../types';
 import type { AppState, Category, GearItem, GearList, GearListItem, WeightBreakdown } from '../types';
 
@@ -49,10 +50,10 @@ export function findAffectedTemplates(state: AppState, gearItemId: string): Gear
   return state.templates.filter((t) => t.items.some((i) => i.gearItemId === gearItemId));
 }
 
-/** Plain-language "where is it used" for dialog messages, e.g. "2 gearlist(s) and your template". */
+/** Plain-language "where is it used" for dialog messages, e.g. "2 gearlists and your template". */
 export function describeUsage(listCount: number, templateCount: number): string {
   const parts: string[] = [];
-  if (listCount > 0) parts.push(`${listCount} gearlist(s)`);
+  if (listCount > 0) parts.push(plural(listCount, 'gearlist'));
   if (templateCount > 0) parts.push('your template');
   return parts.join(' and ');
 }

@@ -440,7 +440,10 @@ select.inline-edit-input {
   color: var(--ink-muted);
   pointer-events: none;
 }
-.search .search-input {
+/* (selector repeated with .dialog so it outranks the generic dialog-input rule — the text
+   must start after the magnifier, UI review point 3) */
+.search .search-input,
+.dialog .search .search-input {
   width: 100%;
   height: 40px;
   padding: 0 var(--space-3) 0 38px;
@@ -602,6 +605,10 @@ select.inline-edit-input {
 }
 .dialog-wide {
   width: min(720px, 100%);
+}
+/* The blocking 3-way dialog: wide enough for Cancel + two labelled choices on one row. */
+.dialog-choice {
+  width: min(560px, 100%);
 }
 .dialog-title {
   display: flex;

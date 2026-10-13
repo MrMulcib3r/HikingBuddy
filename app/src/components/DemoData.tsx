@@ -4,6 +4,7 @@ import { useDataFile } from '../state/DataFileContext';
 import { isEmptyState, parseBackup } from '../storage';
 import demoFileText from '../demo/demo-data.json?raw';
 import { ConfirmDialog } from './ConfirmDialog';
+import { plural } from '../utils/text';
 import { LogoMark } from './icons/HikerIcons';
 
 /**
@@ -41,7 +42,7 @@ function useLoadDemo() {
       <ConfirmDialog
         title="Load demo data"
         danger
-        message={`This replaces everything currently in Gear Vault and your gearlists (${state.gearItems.length} item(s), ${state.gearLists.length} gearlist(s)) with the demo data. This can't be undone unless you have a backup (Export backup). Continue?`}
+        message={`This replaces everything currently in Gear Vault and your gearlists (${plural(state.gearItems.length, 'item')}, ${plural(state.gearLists.length, 'gearlist')}) with the demo data. This can't be undone unless you have a backup (Export backup). Continue?`}
         confirmLabel="Replace with demo data"
         onConfirm={() => {
           replaceState(loadDemoState());

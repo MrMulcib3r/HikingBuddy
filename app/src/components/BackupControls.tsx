@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { useApp } from '../state/AppContext';
 import { buildBackup, parseBackup } from '../storage';
 import { ConfirmDialog } from './ConfirmDialog';
+import { plural } from '../utils/text';
 import { ActionIcon } from './icons/actionIcons';
 import { Icon } from './ui';
 
@@ -84,7 +85,7 @@ export function BackupControls() {
         <ConfirmDialog
           title="Import backup"
           danger
-          message={`This replaces everything currently in Gear Vault and your gearlists (${state.gearItems.length} item(s), ${state.gearLists.length} gearlist(s)) with the contents of the backup file (${pendingImport.gearItems.length} item(s), ${pendingImport.gearLists.length} gearlist(s)). This can't be undone unless you have another backup. Continue?`}
+          message={`This replaces everything currently in Gear Vault and your gearlists (${plural(state.gearItems.length, 'item')}, ${plural(state.gearLists.length, 'gearlist')}) with the contents of the backup file (${plural(pendingImport.gearItems.length, 'item')}, ${plural(pendingImport.gearLists.length, 'gearlist')}). This can't be undone unless you have another backup. Continue?`}
           confirmLabel="Replace with backup"
           confirmIcon={ActionIcon.importBackup}
           onConfirm={() => {

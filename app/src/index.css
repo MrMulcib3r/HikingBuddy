@@ -61,23 +61,25 @@
   --lh-brand: 28px;
   --text-title-xl: 34px;
   --lh-title-xl: 36px;
-  --text-dialog-title: 22px;
-  --lh-dialog-title: 26px;
+  --text-dialog-title: 18px;
+  --lh-dialog-title: 22px;
   --text-panel-title: 18px;
   --lh-panel-title: 22px;
   --text-tile-value: 20px;
   --lh-tile-value: 26px;
   --text-body: 15px;
   --lh-body: 22px;
-  --text-ui: 14px; /* small buttons, banners, legend, dialog lists */
+  --text-ui: 14px; /* type style `ui`: small buttons, banners, legend rows, the weight split */
   --lh-ui: 20px;
   --text-small: 13px;
   --lh-small: 18px;
   --text-label: 13px;
   --lh-label: 16px;
-  --text-badge: 12px;
+  --text-badge: 12px; /* type style `caption`: the smallest text in the UI */
+  --text-caption: 12px;
+  --lh-caption: 16px;
   --text-pack-pct: 12px; /* backpack chart, in SVG units */
-  --text-pack-callout: 11px;
+  --text-pack-callout: 12px; /* never below `caption` */
   --text-weight-xl: 32px;
   --lh-weight-xl: 36px;
   --tracking-brand: 0.02em;

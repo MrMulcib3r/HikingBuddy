@@ -4,6 +4,7 @@ import { useApp } from '../state/AppContext';
 import { useDataFile } from '../state/DataFileContext';
 import { pickExistingDataFile, pickNewDataFile } from '../dataFile';
 import { ConfirmDialog } from './ConfirmDialog';
+import { plural } from '../utils/text';
 import { ActionIcon } from './icons/actionIcons';
 import { Banner, Dialog, DialogActions, Icon } from './ui';
 import type { AppState } from '../types';
@@ -182,7 +183,7 @@ export function DataFileBanner() {
 }
 
 function describeCounts(s: AppState): string {
-  return `${s.gearItems.length} item(s) in Gear Vault, ${s.gearLists.length} gearlist(s)${s.templates.length ? ', a template' : ''}`;
+  return `${plural(s.gearItems.length, 'item')} in Gear Vault, ${plural(s.gearLists.length, 'gearlist')}${s.templates.length ? ', a template' : ''}`;
 }
 
 /** Explains the feature once, then opens the browser's own file dialog. */

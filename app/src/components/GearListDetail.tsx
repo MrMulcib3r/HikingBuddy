@@ -4,6 +4,7 @@ import { computeBreakdown, describeUsage, findAffectedLists, findAffectedTemplat
 import { TEMPLATE_NAME } from '../constants';
 import type { GearList, GearListItem } from '../types';
 import { formatWeight } from '../utils/weight';
+import { formatDateTime, plural } from '../utils/text';
 import { sortByOrder } from '../utils/reorder';
 import { dragMime, isDragging } from '../utils/dnd';
 import { categoryColor, categoryColorKey, categoryForName } from '../utils/categoryStyle';
@@ -199,7 +200,7 @@ export function GearListDetail({ list, onDeleted, isTemplate = false, switcher }
           {list.snapshot && (
             <p className="list-detail-meta snapshot-hint">
               <Badge tone="success" icon={ActionIcon.saveSnapshot}>
-                Snapshot saved {new Date(list.snapshot.savedAt).toLocaleString('en-US')}
+                Snapshot saved {formatDateTime(list.snapshot.savedAt)}
               </Badge>
               <span>The live list may have changed since.</span>
               <button type="button" className="btn btn-ghost btn-small" onClick={() => setSnapshotOpen(true)}>
@@ -322,7 +323,7 @@ export function GearListDetail({ list, onDeleted, isTemplate = false, switcher }
 
       {snapshotOpen && list.snapshot && (
         <Dialog title={`Snapshot — ${list.name}`} titleIcon={ActionIcon.viewSnapshot} wide labelledBy="snapshot-title" onBackdropClick={() => setSnapshotOpen(false)}>
-          <p className="dialog-hint">Saved {new Date(list.snapshot.savedAt).toLocaleString('en-US')}. Read-only.</p>
+          <p className="dialog-hint">Saved {formatDateTime(list.snapshot.savedAt)}. Read-only.</p>
           <div className="list-items">
             {[...groupByCategory(list.snapshot.items).entries()].map(([category, items]) => (
               <div key={category} className="list-category-group">
@@ -362,7 +363,7 @@ export function GearListDetail({ list, onDeleted, isTemplate = false, switcher }
           confirmIcon={ActionIcon.template}
           message={[
             hasTemplate
-              ? `This replaces everything in your current template (${state.templates[0]?.items.length ?? 0} item(s)) with the items of "${list.name}" (${list.items.length - customEntryCount} item(s), quantities and Worn/Consumable included). The current template contents can't be restored. Gearlists already created from it don't change. Tip: to change just a few items, open Template in the gearlist menu and edit it directly. Continue?`
+              ? `This replaces everything in your current template (${plural(state.templates[0]?.items.length ?? 0, 'item')}) with the items of "${list.name}" (${plural(list.items.length - customEntryCount, 'item')}, quantities and Worn/Consumable included). The current template contents can't be restored. Gearlists already created from it don't change. Tip: to change just a few items, open Template in the gearlist menu and edit it directly. Continue?`
               : `This saves the items of "${list.name}" (quantities and Worn/Consumable included) as your template. New gearlists can then start from it. Continue?`,
             customEntryCount > 0
               ? `${customEntryCount} custom entr${customEntryCount === 1 ? 'y' : 'ies'} no longer linked to Gear Vault will be skipped.`

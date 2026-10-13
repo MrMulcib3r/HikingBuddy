@@ -45,7 +45,7 @@ export function VaultEditDialog({
   affectedLists = [],
 }: VaultEditDialogProps) {
   return (
-    <Dialog title={title} titleIcon={CarabinerIcon} labelledBy="vault-edit-title" onBackdropClick={onCancel}>
+    <Dialog title={title} titleIcon={CarabinerIcon} choice labelledBy="vault-edit-title" onBackdropClick={onCancel}>
       <p className="dialog-message">{message}</p>
       {affectedLists.length > 0 && (
         <div className="affected-lists">
