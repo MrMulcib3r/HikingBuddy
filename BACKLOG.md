@@ -67,7 +67,7 @@ Template (nemazat): - [TYP] Krátký název – co se děje / co chci (datum)
 - [ ] ~~[FEATURE] Skutečná databáze na serveru – appka s účtem, data uložená na serveru místo jen v prohlížeči. Proč: jediné řešení bez ručních kroků a zároveň technický základ pro sync mezi zařízeními (PRD sekce 7, bod 2) i komunitní sdílení (PRD sekce 9). Větší krok, dává smysl řešit až s těmito featurami, ne samostatně kvůli záloze. Viz PRD sekce 6a, bod 2. (2026-09-24, navrhl Claude)~~ **Vyřazeno ve v16 (2026-10-09)**, data řeší auto-save do souboru (FR-16).
 
 - [ ] [FEATURE] „Import to my HikingBuddy“ na stránce sdíleného gearlistu – návštěvník si sdílený gearlist jedním klikem uloží k sobě (gearlist + jeho položky do Vaultu), bez účtů a serveru, protože odkaz (FR-18) už celý gearlist nese. Položky se přidají jako nové, bez párování s Vaultem (rozhodnutí Martina, PRD 9.3). Proč: malá „lokální“ verze nápadu z PRD sekce 9.3. Mimo uzavřený scope, rozhoduje Martin. (2026-10-13, navrhl Claude)
-- [ ] [CR] `npm audit` hlásí 1 „high“ zranitelnost v `source-map-js` — balíček používá jen sestavovací nástroj (Vite) při vývoji, do appky v prohlížeči se nedostane. Opravit `npm audit fix` před nasazením (FR-20). (2026-10-09, našel Claude)
+- [x] [CR] `npm audit` hlásí 1 „high“ zranitelnost v `source-map-js` — balíček používá jen sestavovací nástroj (Vite) při vývoji, do appky v prohlížeči se nedostane. Opravit `npm audit fix` před nasazením (FR-20). (2026-10-09, našel Claude) **Opraveno 2026-10-13** (`npm audit fix`, 0 zranitelností).
 
 ## 🔴 Teď
 
@@ -103,7 +103,7 @@ _Mimo scope. Uložené nápady pro případ, že by appka vyšla veřejně s mon
 
 _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, přesuň do ✅ Hotovo; když ne, napiš k položce, co je špatně, a vrať ji do 🔴 Teď._
 
-- [ ] [UI] Design system + vizualizace váhy batohem – PRD FR-19 (v21). (2026-10-09, Martin; implementováno 2026-10-12) → **Jak otestovat** (obnov stránku appky, F5):
+- [ ] [UI] Design system + vizualizace váhy batohem – PRD FR-19 (v21, kolo 2 v24, kolo 3 v25). (2026-10-09, Martin; implementováno 2026-10-12, kola 2 a 3 2026-10-13) → **Jak otestovat** (obnov stránku appky, F5):
   1. Světlý vzhled s krajinou dole, logo v hlavičce, písma Barlow Condensed / Overpass. Porovnej se screenshoty v `design/2026-10-redesign/implemented/` a s návrhem v `design-system/screenshots/`.
   2. Batoh nahoře v gearlistu (i v šabloně a na sdílené stránce): nejtěžší kategorie dole, v batohu jen Base + Consumables, pod ním Base / Consumables / Worn. Najeď myší na vrstvu nebo řádek legendy → zvýrazní se obojí. Přepni Worn/Consumable u řádku → batoh se hned přepočítá.
   3. Ikony místo textu: v hlavičce gearlistu (snapshot, zobrazit snapshot, sdílet, šablona, smazat, nový gearlist), Export/Import, Disconnect, odebrání/smazání řádku. Po najetí myší se ukáže popis.
@@ -111,6 +111,18 @@ _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, př
   5. Chování se nemá lišit: inline editace (Enter/Escape), 3-cestný dialog, snapshot, přetažení z Vaultu, sdílení, datový soubor, demo data.
   6. Telefon: otevři appku v telefonu nebo zmenši okno pod 900 px → panely pod sebou, nic nepřetéká, akce u řádků jsou vidět i bez myši.
   7. Sdílený odkaz je nově `#share=v2:…` (nese barvy kategorií); staré odkazy `v1` dál fungují.
+  **Kolo 2 (PRD v24, 2026-10-13)** — po tvém testu:
+  8. Pravý panel má hlavičku GEARLISTS s + (nový gearlist). Pod ní název gearlistu a tlačítka s ikonou i textem: Save/Update snapshot, Share, Save as/Update template; koš smaže gearlist. „View snapshot“ je vedle zeleného štítku „Snapshot saved…“.
+  9. Dlaždice vah zmizely; Base / Consumables / Worn / **Total** jsou pod batohem.
+  10. Batoh je větší a každá kategorie má procento (malé vpravo s čárou). Najeď myší na každou vrstvu i na popisek vpravo.
+  11. Nad seznamem je hlavička sloupců (Item, Worn, Cons., Weight, Qty, Total), lícuje s řádky; na úzké obrazovce se skryje.
+  12. Hlavička appky: Export a Import s textem, Disconnect s textem. Ve Vaultu karabina + „N lists“.
+  13. Písma jsou přibalená v appce (nic se nestahuje od Googlu).
+  **Kolo 3 (PRD v25, 2026-10-13)** — úrovně batohu:
+  14. Demo „Weekend Hikes“ je Ultralight (zelený štítek, holý batoh). Zvyš u „Down quilt“ počet kusů na 3 → Lightweight: připne se karimatka a štítek jednou pulzne. Na 7 → Traditional: cepín, hůlky, kapsy a boty. Pod štítkem je, kolik zbývá do lehčí úrovně.
+  15. Uprav něco uvnitř úrovně (např. kolíky ×7) → nic se neanimuje.
+  16. Přepni na oz / lb → nápověda v librách (10 lb / 15 lb).
+  17. Screenshoty: `design/2026-10-redesign/implemented/v2/` a `v3/`; s tvými daty jen u tebe v `data/screenshots/` (mimo git).
 - [ ] [CR] When updating gear items in a gearlist(-s) the user needs to know which gear lists are affected. (24.9.2026) → **Jak otestovat:** změň váhu/název položky z Vaultu, která je ve 2+ gearlistech → dialog pod textem vypíše „Affected gearlists:" s jejich názvy. Totéž při Delete a při změně přímo v gearlistu (tam se vypíšou ostatní gearlisty). (implementováno 2026-10-08)
 ![[Pasted image 20260924165604.png|376]]
 - [ ] [BUG] Categories cannot be edited. It should be possible to edit all categories including the template one. (24.9.2026) → **Jak otestovat:** klikni na název kategorie v nadpisu skupiny ve Vaultu (např. FOOD), přepiš, Enter. Escape zruší. Funguje i v dialogu „Categories" (klik na název). (implementováno 2026-10-08)

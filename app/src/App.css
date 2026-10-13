@@ -1273,6 +1273,91 @@ select.inline-edit-input {
 .pack.is-focus .pack-callout:not(.is-active) {
   opacity: 0.3;
 }
+/* Pack tier gear (v3): neutral fills, the pack's ink outline. */
+.pack-gear-part {
+  fill: var(--surface-sunken);
+  stroke: var(--ink);
+  stroke-width: 2.25;
+  stroke-linejoin: round;
+}
+.pack-buckle {
+  fill: var(--surface);
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+/* Only gear that is new since the tier changed drops in, once. */
+.pack-gear.is-new {
+  animation: pack-gear-in 0.45s cubic-bezier(0.2, 0.8, 0.3, 1.2) both;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@keyframes pack-gear-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* Tier badge: names the tier in words, so the drawing is never the only signal. */
+.pack-tier-wrap {
+  width: 75.6%;
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  margin-top: var(--space-2);
+}
+.pack-tier {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-small);
+  line-height: 1;
+  font-weight: 600;
+}
+.pack-tier-ultralight {
+  background: var(--forest-soft);
+  color: var(--forest);
+}
+.pack-tier-lightweight {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+.pack-tier-traditional {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+.pack-tier.is-new {
+  animation: pack-tier-pop 0.5s ease-out;
+}
+@keyframes pack-tier-pop {
+  0% {
+    transform: scale(0.85);
+  }
+  60% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: none;
+  }
+}
+.pack-tier-hint {
+  color: var(--ink-muted);
+  font-size: var(--text-badge);
+  line-height: var(--lh-label);
+  font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: reduce) {
+  .pack-gear.is-new,
+  .pack-tier.is-new {
+    animation: none;
+  }
+}
 /* 75.6% = twice the pack's centre (37.8% of the chart width), so total and tier centre on the
    pack; the split is 62% wide, offset 6.8% — same rule as the design system. */
 .pack-total {

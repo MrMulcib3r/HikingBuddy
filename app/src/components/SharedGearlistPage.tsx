@@ -57,7 +57,7 @@ export function SharedGearlistPage({ shared }: { shared: SharedGearlist | null }
             </header>
             <div className="panel-body shared-content">
               <div className="list-detail-overview">
-                <BackpackChart categories={packCategories} consumable={breakdown.consumable} worn={breakdown.worn} unit={unit} />
+                <BackpackChart categories={packCategories} consumable={breakdown.consumable} worn={breakdown.worn} unit={unit} animate={false} />
               </div>
               <div className="list-items">
                 {shared.categories.map((group) => (

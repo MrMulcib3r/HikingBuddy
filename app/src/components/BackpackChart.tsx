@@ -1,4 +1,5 @@
 import { useId, useMemo, useState } from 'react';
+import { Feather, Footprints, Mountain } from 'lucide-react';
 import type { UnitPreference } from '../types';
 import { formatWeight } from '../utils/weight';
 import { categoryColor, type CategoryColorKey } from '../utils/categoryStyle';
@@ -6,11 +7,17 @@ import {
   INSIDE_LABEL_MIN,
   PACK_BOTTOM,
   PACK_TOP,
+  TIERS,
+  gearShown,
   layerHeights,
+  outsideLabelBottom,
   percentText,
   placeOutsideLabels,
+  tierOf,
+  type GearPart,
   type PackCategory,
 } from '../utils/pack';
+import { PackGear } from './PackGear';
 import { CategoryIcon } from './CategoryIcon';
 import { ActionIcon } from './icons/actionIcons';
 import { HikerIcon } from './icons/HikerIcons';
@@ -28,7 +35,12 @@ import { Icon } from './ui';
  * - Every category shows its percentage: inside its layer, or — for thin layers — to the right
  *   of the pack with a leader line; outside labels never overlap.
  * - Hovering or focusing a layer, a label or a legend row highlights all of them.
+ * - Pack tiers (v3): by BASE weight the pack is Ultralight / Lightweight / Traditional; heavier
+ *   tiers strap gear onto the outside (PackGear) and a badge under the pack names the tier in
+ *   words. Gear and badge animate only when the tier changes, never on edits inside a tier.
  */
+
+const TIER_ICONS = { ultralight: Feather, lightweight: Footprints, traditional: Mountain };
 
 // Shape A body: outline AND clip path of the colour layers. The chart reserves room around the
 // pack (viewBox -30 0 370 306) for the outside labels and the tier gear, so nothing jumps.
@@ -58,15 +70,39 @@ interface BackpackChartProps {
   consumable: number;
   worn: number;
   unit: UnitPreference;
+  /** Animate gear when the tier changes. Off on the shared page — nothing changes there. */
+  animate?: boolean;
 }
 
-export function BackpackChart({ categories, consumable, worn, unit }: BackpackChartProps) {
+export function BackpackChart({ categories, consumable, worn, unit, animate = true }: BackpackChartProps) {
   const clipId = useId();
   const [active, setActive] = useState<number | null>(null);
 
   const cats = useMemo(() => categories.filter((c) => c.grams > 0).sort((a, b) => b.grams - a.grams), [categories]);
   const total = cats.reduce((sum, c) => sum + c.grams, 0);
   const base = total - consumable;
+
+  // Tier of this render and the tier it changed FROM (null = no change seen since mounting,
+  // so nothing animates on first view or when switching gearlists). React's "store the
+  // previous value in state" pattern: updating during render is allowed and re-renders at once.
+  const tier = tierOf(base);
+  const [tierState, setTierState] = useState<{ tier: number; from: number | null }>({ tier, from: null });
+  if (tierState.tier !== tier) setTierState({ tier, from: animate ? tierState.tier : null });
+  const changedFrom = tierState.tier === tier ? tierState.from : null;
+  const shown = gearShown(tier);
+  const wasShown = changedFrom === null ? shown : gearShown(changedFrom);
+  const gear = (part: GearPart) => (shown[part] ? <PackGear key={part} part={part} isNew={!wasShown[part]} /> : null);
+  const tierInfo = TIERS[tier];
+  const TierIcon = TIER_ICONS[tierInfo.id];
+  const limits = unit === 'imperial' ? ['10 lb', '15 lb'] : ['4.5 kg', '6.8 kg'];
+  const tierHint =
+    tier === 0 ? `Base weight under ${limits[0]}` : `${formatWeight(base - TIERS[tier - 1].max + 1, unit)} to ${TIERS[tier - 1].name}`;
+  const tierTip =
+    tier === 0
+      ? `Ultralight: base weight under ${limits[0]}`
+      : tier === 1
+        ? `Lightweight: base weight ${limits[0]} to ${limits[1]}`
+        : `Traditional: base weight over ${limits[1]}`;
 
   const layers = useMemo(() => {
     const heights = layerHeights(
@@ -89,11 +125,11 @@ export function BackpackChart({ categories, consumable, worn, unit }: BackpackCh
     const outside = result.filter((l) => !l.inside);
     const placed = placeOutsideLabels(
       outside.map((l) => l.y + l.h / 2),
-      PACK_BOTTOM
+      outsideLabelBottom(tier)
     );
     outside.forEach((l, k) => (l.labelY = placed[k]));
     return result;
-  }, [cats, total]);
+  }, [cats, total, tier]);
 
   const focusProps = (i: number) => ({
     onMouseEnter: () => setActive(i),
@@ -106,18 +142,22 @@ export function BackpackChart({ categories, consumable, worn, unit }: BackpackCh
   return (
     <div className={`pack ${active !== null ? 'is-focus' : ''}`}>
       <div className="pack-figure">
-        <svg className="pack-svg" viewBox={VIEWBOX} role="img" aria-label="Pack weight by category">
+        <svg className="pack-svg" viewBox={VIEWBOX} role="img" aria-label={`Pack weight by category, ${tierInfo.name} pack`}>
           <defs>
             <clipPath id={clipId}>
               <path d={BODY} />
             </clipPath>
           </defs>
+          {/* tier gear behind the pack: ice axe and trekking poles */}
+          {gear('axe')}
+          {gear('poles')}
           {/* behind the body: handle and side pockets */}
           <path d="M94 38V26a16 16 0 0 1 32 0v12" className="pack-detail" />
           <rect x="27" y="150" width="21" height="92" rx="9" className="pack-empty" />
           <rect x="27" y="150" width="21" height="92" rx="9" className="pack-detail" />
           <rect x="172" y="150" width="21" height="92" rx="9" className="pack-empty" />
           <rect x="172" y="150" width="21" height="92" rx="9" className="pack-detail" />
+          {gear('pockets')}
           <path d={BODY} className="pack-empty" />
           <g clipPath={`url(#${clipId})`}>
             {layers.map((l, i) => (
@@ -158,6 +198,9 @@ export function BackpackChart({ categories, consumable, worn, unit }: BackpackCh
               ) : null
             )}
           </g>
+          {/* tier gear in front: sleeping pad and boots */}
+          {gear('pad')}
+          {gear('boots')}
           {/* outside labels for thin layers, joined by a leader line */}
           {layers.map((l, i) =>
             l.inside ? null : (
@@ -173,6 +216,19 @@ export function BackpackChart({ categories, consumable, worn, unit }: BackpackCh
             )
           )}
         </svg>
+        {/* The tier in words, so the drawing is never the only signal. Keyed by tier, so it
+            pops once when the tier changes. */}
+        <div className="pack-tier-wrap">
+          <span
+            key={tier}
+            className={`pack-tier pack-tier-${tierInfo.id} ${changedFrom !== null ? 'is-new' : ''}`}
+            data-tip={tierTip}
+          >
+            <Icon icon={TierIcon} size={15} />
+            {tierInfo.name}
+          </span>
+          <span className="pack-tier-hint">{tierHint}</span>
+        </div>
         <div className="pack-total">
           <div className="label">In the pack</div>
           <div className="pack-kg">{formatWeight(total, unit)}</div>

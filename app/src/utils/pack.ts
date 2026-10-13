@@ -87,3 +87,43 @@ export function placeOutsideLabels(mids: number[], labelBottom: number): number[
   return over > 0 ? placed.map((y) => y - over) : placed;
 }
 
+
+// ---------- Pack tiers (design system v3, 2026-10-13) ----------
+
+/**
+ * Pack tiers by BASE weight (no consumables, no worn) at the common backpacking breakpoints,
+ * exactly 10 lb and 15 lb (Martin, 2026-10-13). The pack outline never changes; each heavier
+ * tier straps more gear onto the outside of the pack.
+ */
+export const ULTRALIGHT_MAX_GRAMS = 4536; // 10 lb
+export const LIGHTWEIGHT_MAX_GRAMS = 6804; // 15 lb
+
+export type TierId = 'ultralight' | 'lightweight' | 'traditional';
+export interface PackTier {
+  id: TierId;
+  name: string;
+  /** Upper bound (exclusive) of the tier's base weight, in grams. */
+  max: number;
+}
+export const TIERS: PackTier[] = [
+  { id: 'ultralight', name: 'Ultralight', max: ULTRALIGHT_MAX_GRAMS },
+  { id: 'lightweight', name: 'Lightweight', max: LIGHTWEIGHT_MAX_GRAMS },
+  { id: 'traditional', name: 'Traditional', max: Infinity },
+];
+
+/** 0 = Ultralight, 1 = Lightweight, 2 = Traditional. */
+export function tierOf(baseGrams: number): number {
+  const i = TIERS.findIndex((t) => baseGrams < t.max);
+  return i === -1 ? TIERS.length - 1 : i;
+}
+
+/** Which gear the drawing shows at a tier (see GEAR in the design system bundle.js). */
+export type GearPart = 'pad' | 'axe' | 'pockets' | 'poles' | 'boots';
+export function gearShown(tier: number): Record<GearPart, boolean> {
+  return { pad: tier >= 1, axe: tier >= 2, pockets: tier >= 2, poles: tier >= 2, boots: tier >= 2 };
+}
+
+/** Lowest outside percentage label: in Traditional the labels stay above the poles. */
+export function outsideLabelBottom(tier: number): number {
+  return tier >= 2 ? 112 : PACK_BOTTOM;
+}
