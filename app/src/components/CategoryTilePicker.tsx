@@ -19,9 +19,8 @@ interface CategoryTilePickerProps {
   onCreatingChange: (creating: boolean) => void;
   newName: string;
   onNewNameChange: (name: string) => void;
-  /** Focus the new-category input when it appears. Off when "Other" is preselected on open,
-   * so the cursor starts in the item Name field. */
-  autoFocusNewName?: boolean;
+  /** "Choose a category." — shown under the tiles, the tile group gets the error border. */
+  error?: string | null;
   /** Deleting a category the user created themselves (via "Other") — template categories
    * have no delete button here. How many Vault items use each category, for the warning. */
   onDeleteCategory?: (categoryId: string) => void;
@@ -35,8 +34,9 @@ interface CategoryTilePickerProps {
  * again clears it (category is optional, FR-8). "Other" creates a new category inline and
  * selects it right away.
  *
- * Exactly one tile can be active at a time: picking a category closes "Other", and picking
- * "Other" clears the chosen category (bug fixed 2026-10-08 — both could look selected).
+ * At most one tile is selected (design system CategoryTile, Martin 2026-10-14). The dashed
+ * "+ Other" tile is an action — it opens the "New category name" field with a single Add
+ * button — never a selection and never preselected. Picking any other tile closes the field.
  */
 export function CategoryTilePicker({
   categories,
@@ -47,7 +47,7 @@ export function CategoryTilePicker({
   onCreatingChange,
   newName,
   onNewNameChange,
-  autoFocusNewName = true,
+  error = null,
   onDeleteCategory,
   itemCounts = {},
 }: CategoryTilePickerProps) {
@@ -62,9 +62,9 @@ export function CategoryTilePicker({
 
   return (
     <div className="category-tiles-wrap">
-      <div className="category-tiles" role="group" aria-label="Category">
+      <div className={`category-tiles ${error ? 'is-error' : ''}`} role="group" aria-label="Category" aria-invalid={error ? true : undefined}>
         {sortByOrder(categories).map((c) => {
-          const selected = !creating && c.id === categoryId;
+          const selected = c.id === categoryId;
           const deletable = onDeleteCategory && !isTemplateCategory(c.id);
           return (
             <div key={c.id} className="category-tile-wrap">
@@ -98,13 +98,10 @@ export function CategoryTilePicker({
         })}
         <button
           type="button"
-          className={`category-tile category-tile-other ${creating ? 'selected' : ''}`}
-          aria-pressed={creating}
-          title={creating ? 'Click again to cancel the new category' : 'Create a new category'}
-          onClick={() => {
-            onChange('');
-            onCreatingChange(!creating);
-          }}
+          className="category-tile category-tile-other"
+          aria-expanded={creating}
+          title="Create a new category"
+          onClick={() => onCreatingChange(!creating)}
         >
           <Plus size={24} strokeWidth={1.75} aria-hidden="true" />
           <span className="category-tile-label">Other</span>
@@ -114,7 +111,7 @@ export function CategoryTilePicker({
       {creating && (
         <div className="field-row category-tiles-new">
           <input
-            autoFocus={autoFocusNewName}
+            autoFocus
             value={newName}
             onChange={(e) => onNewNameChange(e.target.value)}
             placeholder="New category name"
@@ -132,11 +129,10 @@ export function CategoryTilePicker({
           <button type="button" className="btn btn-secondary btn-small" onClick={confirmNewCategory}>
             Add
           </button>
-          <button type="button" className="btn btn-ghost btn-small" onClick={() => onCreatingChange(false)}>
-            Cancel
-          </button>
         </div>
       )}
+
+      {error && <p className="form-error category-tiles-error">{error}</p>}
 
       {pendingDelete && onDeleteCategory && (
         <ConfirmDialog

@@ -14,9 +14,6 @@ interface GearItemFormDialogProps {
   /** Category to preselect — set when the form is opened from a category's own
    * "+ Add item" button in the Gear Vault list. */
   initialCategoryId?: string | null;
-  /** Open with the "Other" (new category) tile active — used by the general "+ Add gear"
-   * button, which isn't tied to any existing category (PRD v13). */
-  startWithNewCategory?: boolean;
   /** Delete a user-created category from the tile grid (BACKLOG, 2026-10-08). */
   onDeleteCategory?: (categoryId: string) => void;
   itemCounts?: Record<string, number>;
@@ -24,18 +21,16 @@ interface GearItemFormDialogProps {
 
 /** Form for adding a new Gear Vault item (FR-1). Editing an existing item happens inline
  * in the Gear Vault list itself, not through this dialog — this is add-only. */
-export function GearItemFormDialog({ categories, unitPreference, onSubmit, onCancel, onCreateCategory, initialCategoryId, startWithNewCategory = false, onDeleteCategory, itemCounts }: GearItemFormDialogProps) {
+export function GearItemFormDialog({ categories, unitPreference, onSubmit, onCancel, onCreateCategory, initialCategoryId, onDeleteCategory, itemCounts }: GearItemFormDialogProps) {
   const [name, setName] = useState('');
   const [categoryId, setCategoryId] = useState<string>(initialCategoryId ?? '');
   const [weightInput, setWeightInput] = useState<string>('');
   const [defaultQuantity, setDefaultQuantity] = useState<string>('1');
   const [note, setNote] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [creatingCategory, setCreatingCategory] = useState(startWithNewCategory);
+  const [categoryError, setCategoryError] = useState<string | null>(null);
+  const [creatingCategory, setCreatingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
-  // When "Other" is preselected on open, the cursor should start in Name, not in the new
-  // category field; once the user toggles "Other" themselves, focus its field as usual.
-  const [focusNewCategory, setFocusNewCategory] = useState(!startWithNewCategory);
 
   // Escape closes the form wherever focus is (e.g. after a nested confirm closed and focus
   // fell back to the page). Ignored while a nested dialog (category delete confirm) is open
@@ -74,6 +69,13 @@ export function GearItemFormDialog({ categories, unitPreference, onSubmit, onCan
     if (creatingCategory && newCategoryName.trim()) {
       finalCategoryId = onCreateCategory(newCategoryName.trim());
     }
+    // A category is required when adding an item (Martin, 2026-10-14; PRD v27, FR-8).
+    if (!finalCategoryId) {
+      setError(null);
+      setCategoryError('Choose a category.');
+      return;
+    }
+    setCategoryError(null);
     onSubmit({
       name: trimmedName,
       categoryId: finalCategoryId,
@@ -101,16 +103,16 @@ export function GearItemFormDialog({ categories, unitPreference, onSubmit, onCan
             <CategoryTilePicker
               categories={categories}
               categoryId={categoryId}
-              onChange={setCategoryId}
+              onChange={(id) => {
+                setCategoryId(id);
+                if (id) setCategoryError(null);
+              }}
               onCreateCategory={onCreateCategory}
               creating={creatingCategory}
-              onCreatingChange={(v) => {
-                setFocusNewCategory(true);
-                setCreatingCategory(v);
-              }}
+              onCreatingChange={setCreatingCategory}
               newName={newCategoryName}
               onNewNameChange={setNewCategoryName}
-              autoFocusNewName={focusNewCategory}
+              error={categoryError}
               onDeleteCategory={onDeleteCategory}
               itemCounts={itemCounts}
             />

@@ -46,10 +46,10 @@ export function GearVaultPanel() {
   const { state, addGearItem, updateGearItem, deleteGearItem, addCategory, renameCategory, deleteCategory, reorderGearItems, reorderCategories } = useApp();
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('');
-  // null = form closed. Otherwise the form is open: from a category's own "+ Add item" with
-  // that category preselected (null = Uncategorized group), or from the general
-  // "+ Add gear" button with the "Other" (new category) tile preselected.
-  const [addForm, setAddForm] = useState<{ categoryId: string | null; newCategory?: boolean } | null>(null);
+  // null = form closed. Otherwise the form is open: from a category's own "Add item" with
+  // that category preselected, or from "+ Add gear" / the Uncategorized group with nothing
+  // selected (Martin, 2026-10-14 — "+ Other" is never preselected any more).
+  const [addForm, setAddForm] = useState<{ categoryId: string | null } | null>(null);
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
   const [pendingCoreEdit, setPendingCoreEdit] = useState<PendingCoreEdit | null>(null);
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
@@ -232,7 +232,7 @@ export function GearVaultPanel() {
           reaches on a phone (BACKLOG, 2026-10-08). Opens the form with "Other" preselected,
           for categories that aren't in the Vault yet or brand-new ones. */}
       <div className="vault-add-gear-bar">
-        <button type="button" className="btn btn-primary btn-block vault-add-gear" onClick={() => setAddForm({ categoryId: null, newCategory: true })}>
+        <button type="button" className="btn btn-primary btn-block vault-add-gear" onClick={() => setAddForm({ categoryId: null })}>
           <Icon icon={ActionIcon.add} />
           Add gear
         </button>
@@ -243,7 +243,6 @@ export function GearVaultPanel() {
           categories={state.categories}
           unitPreference={state.unitPreference}
           initialCategoryId={addForm.categoryId}
-          startWithNewCategory={addForm.newCategory}
           onDeleteCategory={deleteCategory}
           itemCounts={itemCountsByCategory}
           onSubmit={(data) => {
