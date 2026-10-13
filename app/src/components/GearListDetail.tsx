@@ -336,7 +336,7 @@ export function GearListDetail({ list, onDeleted, isTemplate = false, switcher }
                   </span>
                 </h4>
                 {items.map((item) => (
-                  <div key={item.id} className="list-item-row list-item-row-readonly">
+                  <div key={item.id} className={`list-item-row list-item-row-readonly ${item.quantity === 1 ? 'qty-one' : ''}`}>
                     <div className="list-item-main">
                       <span className="list-item-name">{item.name}</span>
                       {item.note && <span className="list-item-note">{item.note}</span>}

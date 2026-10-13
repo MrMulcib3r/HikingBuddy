@@ -1728,6 +1728,11 @@ select.inline-edit-input,
   .list-item-row .item-flags-toggle {
     justify-self: start;
   }
+  /* x1: the per-piece weight would just repeat the total — show one value (review point 11) */
+  .list-item-row-readonly.qty-one .list-item-weight,
+  .list-item-row-readonly.qty-one .list-item-qty {
+    display: none;
+  }
   .list-item-row.list-item-row-readonly {
     grid-template-columns: minmax(0, 1fr) auto auto auto;
     grid-template-areas:

@@ -76,7 +76,7 @@ export function SharedGearlistPage({ shared }: { shared: SharedGearlist | null }
                       </span>
                     </h4>
                     {group.items.map((item, i) => (
-                      <div key={i} className="list-item-row list-item-row-readonly">
+                      <div key={i} className={`list-item-row list-item-row-readonly ${item.quantity === 1 ? 'qty-one' : ''}`}>
                         <div className="list-item-main">
                           <span className="list-item-name">{item.name}</span>
                           {item.note && <span className="list-item-note">{item.note}</span>}
