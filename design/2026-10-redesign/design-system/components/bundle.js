@@ -41,83 +41,147 @@
     return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
   }
 
-  // Backpack geometry, viewBox 0 0 220 280. The body path is also the clip for the layers.
-  // Backpack shapes, all on viewBox 0 0 220 280. `body` is the outline AND the clip for the colour layers;
-  // `behind` is drawn under the body (handle, side pockets, lid), `front` over the layers (seams, pockets).
+  // Backpack chart v2 (2026-10-13). Shape A only. viewBox 0 0 340 280: the pack sits at x 26-194,
+  // the strip x 200-340 holds outside labels for layers too thin to carry their own percentage.
   var D = 'class="hb-pack-detail"', DS = 'class="hb-pack-detail" stroke-opacity=".55"', E = 'class="hb-pack-empty"';
-  var SHAPES = {
-    rounded: { // A: rounded top, side pockets (v1)
-      body: 'M44 94A58 58 0 0 1 102 36H118A58 58 0 0 1 176 94V242A26 26 0 0 1 150 268H70A26 26 0 0 1 44 242Z', top: 36, bottom: 268,
-      behind: '<path d="M94 38V26a16 16 0 0 1 32 0v12" ' + D + '/><rect x="27" y="150" width="21" height="92" rx="9" ' + E + '/><rect x="27" y="150" width="21" height="92" rx="9" ' + D + '/><rect x="172" y="150" width="21" height="92" rx="9" ' + E + '/><rect x="172" y="150" width="21" height="92" rx="9" ' + D + '/>',
-      front: '<path d="M45 104C78 122 142 122 175 104" ' + DS + '/><rect x="72" y="182" width="76" height="66" rx="16" ' + DS + '/>'
-    },
-    dome: { // B: daypack with a full dome and a zip following it
-      body: 'M40 120A70 70 0 0 1 180 120V244A24 24 0 0 1 156 268H64A24 24 0 0 1 40 244Z', top: 50, bottom: 268,
-      behind: '<path d="M97 52V42a13 13 0 0 1 26 0v10" ' + D + '/>',
-      front: '<path d="M56 132A54 54 0 0 1 164 132" ' + DS + '/><path d="M64 190H156V236A16 16 0 0 1 140 252H80A16 16 0 0 1 64 236Z" ' + DS + '/>'
-    },
-    rolltop: { // C: ultralight roll-top with side clips and a front mesh pocket
-      body: 'M46 80H174V246A22 22 0 0 1 152 268H68A22 22 0 0 1 46 246Z', top: 80, bottom: 268,
-      behind: '<rect x="40" y="46" width="140" height="30" rx="15" ' + E + '/><rect x="40" y="46" width="140" height="30" rx="15" ' + D + '/><path d="M58 61H162" ' + DS + '/>',
-      front: '<path d="M50 76V100M170 76V100" ' + D + '/><rect x="44" y="98" width="12" height="10" rx="2" class="hb-pack-buckle"/><rect x="164" y="98" width="12" height="10" rx="2" class="hb-pack-buckle"/><path d="M64 168H156V238A12 12 0 0 1 144 250H76A12 12 0 0 1 64 238Z" ' + DS + '/><path d="M64 176H156" ' + DS + '/>'
-    },
-    trekking: { // D: tall trekking pack with a separate lid and compression straps
-      body: 'M58 72Q58 60 70 60H150Q162 60 162 72L170 250Q171 268 153 268H67Q49 268 50 250Z', top: 60, bottom: 268,
-      behind: '<path d="M52 44Q52 28 70 26H150Q168 28 168 44V60Q110 72 52 60Z" ' + E + '/><path d="M52 44Q52 28 70 26H150Q168 28 168 44V60Q110 72 52 60Z" ' + D + '/>',
-      front: '<path d="M54 130H70M52 190H70M166 130H150M168 190H150" ' + D + '/><rect x="80" y="178" width="60" height="66" rx="12" ' + DS + '/>'
-    },
-    capsule: { // E: pure capsule, the most minimal
-      body: 'M50 100A60 60 0 0 1 170 100V208A60 60 0 0 1 50 208Z', top: 40, bottom: 268,
-      behind: '<path d="M98 42V32a12 12 0 0 1 24 0v10" ' + D + '/>',
-      front: '<path d="M60 150Q110 168 160 150" ' + DS + '/>'
-    }
+  var PACK = {
+    body: 'M44 94A58 58 0 0 1 102 36H118A58 58 0 0 1 176 94V242A26 26 0 0 1 150 268H70A26 26 0 0 1 44 242Z', top: 36, bottom: 268,
+    behind: '<path d="M94 38V26a16 16 0 0 1 32 0v12" ' + D + '/><rect x="27" y="150" width="21" height="92" rx="9" ' + E + '/><rect x="27" y="150" width="21" height="92" rx="9" ' + D + '/><rect x="172" y="150" width="21" height="92" rx="9" ' + E + '/><rect x="172" y="150" width="21" height="92" rx="9" ' + D + '/>',
+    // front pocket only; the lid seam was removed (it crossed the percentages)
+    front: '<rect x="72" y="182" width="76" height="66" rx="16" ' + DS + '/>'
   };
-  var MIN_H = 3;
 
-  /* data = { unit: 'metric'|'imperial', shape: 'rounded'|'dome'|'rolltop'|'trekking'|'capsule',
-              base, consumable, worn (grams), categories: [{ id, name, icon, color (token name), grams }] }
-     The pack holds Base + Consumables (categories' grams); Worn is listed under it, outside the pack.
-     Layers: heaviest at the bottom. Each layer's height = its share of the pack weight. */
+  /* Pack tiers by BASE weight (Martin, 2026-10-13; common backpacking breakpoints, 10 lb and 15 lb):
+     ultralight < 4.5 kg, lightweight 4.5-6.8 kg, traditional > 6.8 kg.
+     The pack outline never changes; each heavier tier straps more gear onto the outside of the pack. */
+  var TIERS = [
+    { id: 'ultralight', name: 'Ultralight', icon: 'feather', max: 4536 },
+    { id: 'lightweight', name: 'Lightweight', icon: 'footprints', max: 6804 },
+    { id: 'traditional', name: 'Traditional', icon: 'mountain', max: Infinity }
+  ];
+  function tierOf(baseGrams) { for (var i = 0; i < TIERS.length; i++) if (baseGrams < TIERS[i].max) return i; return TIERS.length - 1; }
+  var G = 'class="hb-pack-gear-part"';
+  var GEAR = { // ultralight: the bare pack, nothing strapped on
+    // lightweight: a folded foam sleeping pad strapped under the pack
+    pad: '<g class="hb-pack-gear" data-gear="pad"><rect x="34" y="258" width="152" height="34" rx="12" ' + G + ' style="fill:var(--ridge-2)"/>' +
+      '<path d="M50 262v26M66 262v26M82 262v26M98 262v26M122 262v26M138 262v26M154 262v26M170 262v26" class="hb-pack-detail" stroke-opacity=".35" stroke-width="1.5"/>' +
+      '<rect x="64" y="252" width="10" height="46" rx="2" ' + G + '/><rect x="146" y="252" width="10" height="46" rx="2" ' + G + '/>' +
+      '<rect x="62" y="276" width="14" height="8" rx="2" class="hb-pack-buckle"/><rect x="144" y="276" width="14" height="8" rx="2" class="hb-pack-buckle"/></g>',
+    // traditional: + ice axe lashed on the left, two more side pockets, trekking poles on the right, hiking boots at the bottom right
+    axe: '<g class="hb-pack-gear" data-gear="axe"><rect x="12" y="108" width="7" height="166" rx="3" ' + G + '/>' +
+      '<path d="M-22 120Q-6 103 16 102H32Q41 102 43 108L39 111Q34 108 24 109H18Q-2 110 -22 120Z" ' + G + '/><path d="M12 274l3.5 14 3.5-14" ' + G + '/>' +
+      '<path d="M19 200q14 6 8 22" class="hb-pack-detail" stroke-width="1.5"/></g>',
+    pockets: '<g class="hb-pack-gear" data-gear="pockets"><rect x="29" y="92" width="19" height="48" rx="7" ' + G + '/><rect x="172" y="92" width="19" height="48" rx="7" ' + G + '/></g>',
+    // trekking poles strapped upright on the right side: the counterweight to the ice axe on the left
+    poles: '<g class="hb-pack-gear" data-gear="poles"><g transform="translate(197 128)"><rect x="-3" y="16" width="6" height="144" rx="3" ' + G + ' style="fill:var(--sun)"/><rect x="-5" y="0" width="10" height="24" rx="4" ' + G + ' style="fill:var(--ridge-5)"/><path d="M4 3c10 2 12 14 2 16" class="hb-pack-detail" stroke-width="1.75"/><path d="M-2 160L0 170L2 160" ' + G + '/></g><g transform="translate(207 122)"><rect x="-3" y="16" width="6" height="148" rx="3" ' + G + ' style="fill:var(--sun)"/><rect x="-5" y="0" width="10" height="24" rx="4" ' + G + ' style="fill:var(--ridge-5)"/><path d="M4 3c10 2 12 14 2 16" class="hb-pack-detail" stroke-width="1.75"/><path d="M-2 164L0 174L2 164" ' + G + '/></g></g>',
+    // a pair of hiking boots in profile, standing at the bottom right, tied to the poles by a lace
+    boots: '<g class="hb-pack-gear" data-gear="boots"><path d="M205 214Q214 236 214 250" class="hb-pack-detail" stroke-width="1.5"/><g transform="translate(176 297) scale(1.15)"><path d="M4-2V-31Q4-37 10-37H22Q27-37 27-32V-22L38-16Q47-12 47-6V-2Z" ' + G + ' style="fill:var(--ridge-2)"/><path d="M4-31H27" class="hb-pack-detail" stroke-width="1.75"/><path d="M22-28l6 2M23-23l6 2M25-18l6 2" class="hb-pack-detail" stroke-width="1.75"/><path d="M2-3H47Q50-3 50 1V2Q50 5 47 5H5Q2 5 2 2Z" fill="var(--ink)"/></g><g transform="translate(192 301) scale(1.15)"><path d="M4-2V-31Q4-37 10-37H22Q27-37 27-32V-22L38-16Q47-12 47-6V-2Z" ' + G + ' style="fill:var(--ridge-3)"/><path d="M4-31H27" class="hb-pack-detail" stroke-width="1.75"/><path d="M22-28l6 2M23-23l6 2M25-18l6 2" class="hb-pack-detail" stroke-width="1.75"/><path d="M2-3H47Q50-3 50 1V2Q50 5 47 5H5Q2 5 2 2Z" fill="var(--ink)"/></g></g>'
+  };
+  var MIN_H = 7;      // thinnest layer, in viewBox units (~9px on screen), so every category stays visible and hoverable
+  var INSIDE_H = 18;  // a layer at least this tall carries its percentage inside; thinner ones get an outside label
+  var LABEL_GAP = 13; // minimum vertical distance between outside labels
+
+  // Heights proportional to weight, but never below MIN_H; the rest is scaled so the stack still fills the pack exactly.
+  function layerHeights(grams, space) {
+    var total = grams.reduce(function (s, g) { return s + g; }, 0);
+    if (!total) return grams.map(function () { return 0; });
+    var h = grams.map(function (g) { return g / total * space; });
+    for (var k = 0; k < 5; k++) {
+      var small = h.map(function (v) { return v < MIN_H; });
+      var fixed = small.filter(Boolean).length * MIN_H;
+      var restGrams = grams.reduce(function (s, g, i) { return small[i] ? s : s + g; }, 0);
+      h = grams.map(function (g, i) { return small[i] ? MIN_H : g / restGrams * (space - fixed); });
+    }
+    return h;
+  }
+
+  /* data = { unit: 'metric'|'imperial', base, consumable, worn (grams),
+              categories: [{ id, name, icon, color (token name), grams }] }
+     The pack holds Base + Consumables (the categories' grams); Worn is listed under it, outside the pack.
+     Layers: heaviest at the bottom. */
   function backpack(el, data) {
-    var S = SHAPES[data.shape] || SHAPES.rounded /* A, chosen 2026-10-12 */, TOP = S.top, BOTTOM = S.bottom;
+    var S = PACK, TOP = S.top, BOTTOM = S.bottom;
     var css = getComputedStyle(document.documentElement);
     var cats = data.categories.filter(function (c) { return c.grams > 0; }).slice().sort(function (a, b) { return b.grams - a.grams; });
     var total = cats.reduce(function (s, c) { return s + c.grams; }, 0);
+    var consumableG = data.consumable || 0;
+    var baseG = data.base != null ? data.base : total - consumableG;
+    var tier = tierOf(baseG), prevTier = el.hbTier;
+    el.hbTier = tier;
+    var hs = layerHeights(cats.map(function (c) { return c.grams; }), BOTTOM - TOP);
     var uid = 'hbp' + Math.random().toString(36).slice(2, 7);
-    var y = BOTTOM, layers = '', gaps = '', labels = '';
+    var y = BOTTOM, layers = '', gaps = '', inside = '', outside = [];
     cats.forEach(function (c, i) {
-      var h = total ? (c.grams / total) * (BOTTOM - TOP) : 0;
-      if (h > 0 && h < MIN_H) h = MIN_H; // keep tiny categories visible
+      var h = hs[i];
       y -= h;
       var hex = css.getPropertyValue('--' + c.color).trim();
       var pct = total ? Math.round((c.grams / total) * 100) : 0;
-      layers += '<rect class="hb-pack-layer" data-i="' + i + '" x="20" y="' + y.toFixed(2) + '" width="180" height="' + (h + 0.5).toFixed(2) + '" fill="var(--' + c.color + ')"><title>' + c.name + ': ' + fmt(c.grams, data.unit) + ' (' + pct + ' %)</title></rect>';
+      var pctTxt = (pct < 1 ? '<1' : pct) + ' %';
+      layers += '<rect class="hb-pack-layer" data-i="' + i + '" x="20" y="' + y.toFixed(2) + '" width="180" height="' + (h + 0.5).toFixed(2) + '" fill="var(--' + c.color + ')"><title>' + c.name + ': ' + fmt(c.grams, data.unit) + ' (' + pctTxt + ')</title></rect>';
       if (i < cats.length - 1) gaps += '<line class="hb-pack-gap" x1="20" x2="200" y1="' + y.toFixed(2) + '" y2="' + y.toFixed(2) + '"/>';
-      if (h >= 20) labels += '<text x="110" y="' + (y + h / 2 + 5).toFixed(2) + '" text-anchor="middle" font-family="var(--font-sans)" font-size="13" font-weight="600" fill="' + (luminance(hex) > 0.3 ? 'var(--ink)' : 'var(--surface)') + '" pointer-events="none">' + pct + ' %</text>';
+      if (h >= INSIDE_H) inside += '<text class="hb-pack-pct" data-i="' + i + '" x="110" y="' + (y + h / 2 + 5).toFixed(2) + '" text-anchor="middle" fill="' + (luminance(hex) > 0.3 ? 'var(--ink)' : 'var(--surface)') + '">' + pctTxt + '</text>';
+      else outside.push({ i: i, mid: y + h / 2, name: c.name, pct: pctTxt });
     });
+    // Outside labels: top to bottom, pushed apart so they never overlap, kept inside the pack's height.
+    outside.sort(function (a, b) { return a.mid - b.mid; });
+    var ly = TOP;
+    outside.forEach(function (o) { o.ly = Math.max(o.mid, ly); ly = o.ly + LABEL_GAP; });
+    var labelBottom = tier >= 2 ? 112 : BOTTOM; // Traditional: keep outside labels above the poles on the right
+    var over = outside.length ? outside[outside.length - 1].ly - labelBottom : 0;
+    if (over > 0) outside.forEach(function (o) { o.ly -= over; });
+    var callouts = outside.map(function (o) {
+      return '<g class="hb-pack-callout" data-i="' + o.i + '"><path d="M150 ' + o.mid.toFixed(2) + 'H196L206 ' + o.ly.toFixed(2) + 'H212" class="hb-pack-leader"/>' +
+        '<text x="216" y="' + (o.ly + 4).toFixed(2) + '"><tspan class="hb-pack-pct-out">' + o.pct + '</tspan> ' + o.name + '</text></g>';
+    }).join('');
+    // Gear appears in layers: axe and poles behind the side pockets, extra pockets with them, pad and boots in front.
+    // Only gear that is NEW since the last render animates in (class is-new), so normal edits stay calm.
+    function gearPart(name) { return GEAR[name] || ''; }
+    var shown = { pad: tier >= 1, axe: tier >= 2, pockets: tier >= 2, poles: tier >= 2, boots: tier >= 2 };
+    var wasShown = prevTier == null ? shown : { pad: prevTier >= 1, axe: prevTier >= 2, pockets: prevTier >= 2, poles: prevTier >= 2, boots: prevTier >= 2 };
+    function g(name) {
+      if (!shown[name]) return '';
+      var html = gearPart(name);
+      return wasShown[name] ? html : html.replace('class="hb-pack-gear"', 'class="hb-pack-gear is-new"');
+    }
+    var gearBehind = g('axe') + g('poles'), gearMid = g('pockets'), gearFront = g('pad') + g('boots');
     var svg =
-      '<svg class="hb-pack-svg" viewBox="0 0 220 280" role="img" aria-label="Pack weight by category">' +
+      '<svg class="hb-pack-svg" viewBox="-30 0 370 306" role="img" aria-label="Pack weight by category, ' + TIERS[tier].name + ' pack">' +
       '<defs><clipPath id="' + uid + '"><path d="' + S.body + '"/></clipPath></defs>' +
+      gearBehind +
       S.behind +
+      gearMid +
       '<path d="' + S.body + '" ' + E + '/>' +
-      '<g clip-path="url(#' + uid + ')">' + layers + gaps + labels + '</g>' +
+      '<g clip-path="url(#' + uid + ')">' + layers + gaps + '</g>' +
       S.front +
       '<path d="' + S.body + '" class="hb-pack-outline"/>' +
+      '<g clip-path="url(#' + uid + ')">' + inside + '</g>' +
+      gearFront +
+      callouts +
       '</svg>';
     var rows = cats.map(function (c, i) {
       return '<li class="hb-legend-row" data-i="' + i + '" tabindex="0"><span class="hb-swatch" style="background:var(--' + c.color + ')"></span>' +
         iconHtml(c.icon) + '<span>' + c.name + '</span>' +
         '<span class="hb-legend-w">' + fmt(c.grams, data.unit) + '</span><span class="hb-legend-p">' + (total ? Math.round(c.grams / total * 100) : 0) + ' %</span></li>';
     }).join('');
-    var base = data.base != null ? data.base : total - (data.consumable || 0);
+    var T = TIERS[tier], LIMIT = data.unit === 'imperial' ? ['10 lb', '15 lb'] : ['4.5 kg', '6.8 kg'];
+    var hint = tier === 0 ? 'Base weight under ' + LIMIT[0]
+      : fmt(baseG - TIERS[tier - 1].max + 1, data.unit) + ' to ' + TIERS[tier - 1].name;
+    var tierTip = tier === 0 ? 'Ultralight: base weight under ' + LIMIT[0]
+      : tier === 1 ? 'Lightweight: base weight ' + LIMIT[0] + ' to ' + LIMIT[1] : 'Traditional: base weight over ' + LIMIT[1];
+    var tierHtml = '<div class="hb-pack-tier-wrap"><span class="hb-pack-tier hb-pack-tier--' + T.id + (prevTier != null && prevTier !== tier ? ' is-new' : '') + '" data-tip="' + tierTip + '">' +
+      '<i data-lucide="' + T.icon + '"></i>' + T.name + '</span><span class="hb-pack-tier-hint">' + hint + '</span></div>';
+    var consumable = data.consumable || 0, worn = data.worn || 0;
+    var base = data.base != null ? data.base : total - consumable;
     el.classList.add('hb-pack');
     el.innerHTML =
       '<div class="hb-pack-figure">' + svg +
+      tierHtml +
       '<div class="hb-pack-total"><div class="hb-label">In the pack</div><div class="hb-pack-kg">' + fmt(total, data.unit) + '</div></div>' +
       '<dl class="hb-pack-split">' +
-      '<div data-tip="Base weight: everything in the pack except consumables"><dt><i data-lucide="backpack"></i>Base</dt><dd>' + fmt(base, data.unit) + '</dd></div>' +
-      '<div data-tip="Consumables: food, fuel, water. In the pack, gets lighter every day"><dt>' + '<i data-lucide="utensils"></i>Consumables</dt><dd>' + fmt(data.consumable || 0, data.unit) + '</dd></div>' +
-      '<div class="hb-pack-split-worn" data-tip="Worn: carried on your body, not in the pack"><dt>' + icons.hiker + 'Worn</dt><dd>+ ' + fmt(data.worn || 0, data.unit) + '</dd></div>' +
+      '<div data-tip="Everything in the pack except consumables"><dt><i data-lucide="backpack"></i>Base weight</dt><dd>' + fmt(base, data.unit) + '</dd></div>' +
+      '<div data-tip="Food, fuel and water: in the pack, lighter every day"><dt><i data-lucide="utensils"></i>Consumables</dt><dd>' + fmt(consumable, data.unit) + '</dd></div>' +
+      '<div class="hb-pack-split-worn" data-tip="Carried on your body, not in the pack"><dt>' + icons.hiker + 'Worn</dt><dd>+ ' + fmt(worn, data.unit) + '</dd></div>' +
+      '<div class="hb-pack-split-total"><dt><i data-lucide="mountain"></i>Total</dt><dd>' + fmt(total + worn, data.unit) + '</dd></div>' +
       '</dl></div>' +
       '<ul class="hb-legend"><li class="hb-legend-head hb-label"><span></span><span></span><span>Category</span><span>Weight</span><span>Share</span></li>' + rows + '</ul>';
     function focus(i) {

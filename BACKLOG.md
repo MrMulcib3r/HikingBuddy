@@ -66,6 +66,7 @@ Template (nemazat): - [TYP] Krátký název – co se děje / co chci (datum)
 - [ ] [FEATURE] Automatické testy – přidat do projektu sadu testů, které po každé změně ověří klíčová pravidla z PRD (dialog Cancel/Copy/Continue, žádné duplicitní řádky, snapshot…). Proč: dnes se vše ověřuje ručně a chyba se může vloudit nepozorovaně. (2026-09-23, navrhl Claude)
 - [ ] ~~[FEATURE] Skutečná databáze na serveru – appka s účtem, data uložená na serveru místo jen v prohlížeči. Proč: jediné řešení bez ručních kroků a zároveň technický základ pro sync mezi zařízeními (PRD sekce 7, bod 2) i komunitní sdílení (PRD sekce 9). Větší krok, dává smysl řešit až s těmito featurami, ne samostatně kvůli záloze. Viz PRD sekce 6a, bod 2. (2026-09-24, navrhl Claude)~~ **Vyřazeno ve v16 (2026-10-09)**, data řeší auto-save do souboru (FR-16).
 
+- [ ] [FEATURE] „Import to my HikingBuddy“ na stránce sdíleného gearlistu – návštěvník si sdílený gearlist jedním klikem uloží k sobě (gearlist + jeho položky do Vaultu), bez účtů a serveru, protože odkaz (FR-18) už celý gearlist nese. Položky se přidají jako nové, bez párování s Vaultem (rozhodnutí Martina, PRD 9.3). Proč: malá „lokální“ verze nápadu z PRD sekce 9.3. Mimo uzavřený scope, rozhoduje Martin. (2026-10-13, navrhl Claude)
 - [ ] [CR] `npm audit` hlásí 1 „high“ zranitelnost v `source-map-js` — balíček používá jen sestavovací nástroj (Vite) při vývoji, do appky v prohlížeči se nedostane. Opravit `npm audit fix` před nasazením (FR-20). (2026-10-09, našel Claude)
 
 ## 🔴 Teď
@@ -83,6 +84,7 @@ _Prázdné — FR-16 až FR-19 jsou hotové a čekají v 🧪 Test. Zbývá nasa
 
 _Ve v16 (2026-10-09) Martin uzavřel scope: všechno přeškrtnuté je vyřazené, ne jen odložené._
 
+- [ ] [FEATURE] Obvyklé teploty v místě a období treku – u gearlistu zadám období (měsíc nebo dny) a místo (např. Kvikkjokk) a uvidím obvyklé denní a noční teploty. Proč: vím, na jaké teploty balím (spacák, oblečení). Nice-to-have, mimo uzavřený scope, ale jde to bez serveru. Viz PRD sekce 7, bod 9. (2026-10-13, Martin)
 - [ ] ~~[FEATURE] Duplicate gearlist – nový gearlist jako kopie existujícího. Viz PRD sekce 7, bod 8. (2026-10-07)~~ Vyřazeno ve v16.
 - [ ] ~~[FEATURE] Víc snapshotů na gearlist (historie). Viz PRD sekce 7, bod 6.~~
 - [ ] ~~[FEATURE] Koláčový graf rozložení váhy podle kategorie. Viz PRD sekce 7, bod 4.~~ Nahrazeno batohem (🟡 Brzy, FR-19).
@@ -91,7 +93,11 @@ _Ve v16 (2026-10-09) Martin uzavřel scope: všechno přeškrtnuté je vyřazen�
 
 ## 🔭 Vize
 
-- [ ] ~~[VISION] Komunitní sdílení gearlistů + monetizace. Viz PRD sekce 9 (otevřené otázky).~~
+_Mimo scope. Uložené nápady pro případ, že by appka vyšla veřejně s monetizací (PRD sekce 9). Neimplementovat._
+
+- [ ] [VISION] Komunitní katalog vybavení jako výchozí Gear Vault – nový uživatel nezačíná s prázdným Vaultem, ale s vybavením od komunity; může nahrávat vlastní položky; ochrana proti duplicitám, vulgaritám a zahlcení databáze. Proč: prázdný Vault je největší bariéra pro nového uživatele. Viz PRD sekce 9.2. (2026-10-13, Martin)
+- [ ] [VISION] Kopírování sdíleného gearlistu „pod svůj účet“ – tlačítko na sdíleném gearlistu. Proč: cizí gearlist jako základ pro vlastní trek. Viz PRD sekce 9.3. (2026-10-13, Martin)
+- [ ] [VISION] Komunitní sdílení gearlistů (procházení gearlistů ostatních) + monetizace. Viz PRD sekce 9.4. (původní vize z v6)
 
 ## 🧪 Test
 

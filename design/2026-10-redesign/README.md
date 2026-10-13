@@ -107,6 +107,7 @@ Obsahuje barvy, písma, rozestupy, ikony, ilustraci pozadí a 15 komponent s ži
 - Ikona **Consumable = příbor** (Lucide `utensils`). Kategorie **Food zůstává s jablkem**.
 - Ikony místo textu i u Create a copy, Delete, Copy link, New gearlist atd. (s tooltipem). V dialozích ikona + text.
 - Telefon: appka se nesmí rozbít a nic se nesmí schovávat za hover. Samostatná mobilní verze zůstává mimo scope.
+- **Výjimka: sdílený gearlist (FR-18) bude na telefonu vyladěný**, protože se odkazy otevírají hlavně v mobilu (Martin, 2026-10-12).
 
 Kopie design systému pro Claude Code je v `design-system/` (zdrojem pravdy zůstává artefakt). Zadání pro Claude Code je v `claude-code-prompt.md`.
 
@@ -117,3 +118,28 @@ Kopie design systému pro Claude Code je v `design-system/` (zdrojem pravdy zůs
 - Worn/Consumable jsou na řádku gearlistu, ne na položce ve Vaultu.
 - Texty v UI anglicky.
 - Pokud návrh změní chování, je to produktové rozhodnutí → nejdřív do PRD.
+
+## 5. Design system v2: úpravy po první implementaci (Martin, 2026-10-13)
+
+Martin prošel první implementaci od Claude Code a našel 4 problémy. Design system je upravený (artefakt i kopie v `design-system/`), zadání pro Claude Code je v `claude-code-prompt-2.md`.
+
+1. **Chyběl název panelu s gearlisty.** Pravý panel má teď hlavičku „GEARLISTS“ (stejně jako „GEAR VAULT“) s tlačítkem + pro nový gearlist. Pod ní je název gearlistu s přepínačem a jeho akcemi.
+2. **Dlaždice s váhami byly duplicitní.** Odstraněny. Base, Consumables, Worn a nově i **Total** jsou jen v rozpadu pod batohem. Batoh je díky tomu větší a **ukazuje procento každé kategorie**: velké vrstvy uvnitř, tenké vrstvy popiskem vpravo od batohu s odkazovou čárou. Každá vrstva má minimální výšku, takže na ni jde najet myší.
+3. **Ikony samotné nebyly srozumitelné.** Pravidlo: jen ikona pouze u akcí, které pozná každý (+, koš, ×, kopírovat). Ostatní mají **ikonu + text**: Snapshot, Share, Template, Export, Import, Connect/Disconnect. Worn/Consumable v řádcích zůstávají ikonami, ale nad seznamem je **hlavička sloupců** (Item, Worn, Cons., Weight, Qty, Total), která je pojmenuje. Štítek „použito jinde“ ve Vaultu ukazuje text „2 lists“.
+4. **Eliptická čára v batohu překrývala procenta.** Odstraněna. Procenta se kreslí až nad obrysem kapsy.
+
+## 6. Design system v3: batoh reaguje na váhu (Martin, 2026-10-13)
+
+Martinův nápad: grafika batohu reaguje na **base weight** podle běžných hranic v backpackingu. Obrys batohu, vrstvy ani procenta se nemění. Při překročení hranice se na batoh „připne“ výbava:
+
+| Úroveň | Base weight | Co přibude |
+|---|---|---|
+| Ultralight | pod 4,5 kg (10 lb) | nic, holý batoh |
+| Lightweight | 4,5–6,8 kg (10–15 lb) | karimatka připnutá pod batohem |
+| Traditional | nad 6,8 kg (15 lb) | karimatka + cepín vlevo, trekové hůlky svisle vpravo (protiváha cepínu), další boční kapsy, trekové boty z profilu (hladká podrážka) vpravo dole přivázané tkaničkou k hůlkám |
+
+- Pod batohem je štítek s názvem úrovně a nápovědou, kolik zbývá do lehčí úrovně (např. „1.06 kg to Ultralight“). Informace tak není jen v obrázku.
+- Nová výbava se animuje jen při změně úrovně, ne při každé úpravě. Respektuje se `prefers-reduced-motion`.
+- Proč je to dobré UX: dává okamžitou zpětnou vazbu na úpravy, motivuje k odlehčení batohu (hikerský cíl) a je to zapamatovatelný detail do portfolia. Rizika (rušivost, nejasnost) řeší neměnný obrys, decentní neutrální barvy výbavy a textový štítek.
+
+**Finální podoba úrovně Traditional (Martin, 2026-10-13):** po několika kolech variant (crocsy, žabky, pantofle z profilu, 5 rozložení) vybral Martin rozložení „Symetrie“ (cepín vlevo, hůlky vpravo) a trekové boty varianty A (klasická bota s hladkou podrážkou). Pantofle byly zamítnuté, protože nebyly čitelné, a crocsy kvůli podobnosti se značkou.

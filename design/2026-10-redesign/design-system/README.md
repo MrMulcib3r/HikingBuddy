@@ -2,6 +2,7 @@ HikingBuddy is a personal gear planner for long-distance treks: a Gear Vault of 
 
 ## Principles
 
+- **The pack reacts.** At the Ultralight / Lightweight / Traditional base-weight breakpoints, gear appears strapped to the pack (sleeping pad, ice axe, trekking poles, hiking boots) with a tier badge in words. It rewards going lighter and makes edits feel alive (see BackpackChart).
 - **The pack is the hero.** The backpack chart (`BackpackChart`) is the largest, most colourful thing on screen. Everything else stays quiet so it can be.
 - **Light and calm.** Panels are `surface` on the `bg` ground; colour is spent on the category layers and on one ember accent. No dark theme.
 - **Icons over words, never icons without words.** Frequent actions are icon buttons, and every icon button carries a tooltip and `aria-label` with its full name.
@@ -48,7 +49,9 @@ Both faces come from road and trail signage, which suits an app about walking lo
 
 - Consumable = Lucide `utensils` (cutlery, like LighterPack), Worn = custom boot.
 
-- **Icons instead of text** for actions the user repeats: everything in the gearlist header, row actions (create a copy, delete, remove), the data-file and backup controls, Share dialog actions. Every icon-only button has a tooltip and `aria-label`. Words stay on dialog buttons (icon + label), the full-width "Add gear" button and the welcome card.
+- **Icon-only is reserved for actions everyone recognises without help:** add `plus`, delete `trash-2`, remove `x`, copy `copy`, search, the switcher `chevron-down` and the drag grip. Every icon-only button still has a tooltip and `aria-label`.
+- **Every other action is icon + a short label** (Martin's test, 2026-10-13: users did not understand camera / signpost / map on their own): Snapshot, Share, Template, Export, Import, Connect / Disconnect data file, Create a copy, and all dialog buttons.
+- **Worn / Consumable in rows stay icon-only** because they repeat on every row; the gearlist's column header names them (WORN, CONS.) so the meaning is always on screen.
 
 - **Lucide** (already in the app as `lucide-react`), 1.75 stroke, 18px in buttons and rows, 24px in category tiles.
 - Custom hiker icons on the same grid, in `assets/Icons/` and `HB.icons`: boot = Worn, carabiner = used in other gearlists, hiker = worn weight beside the pack, plus the app mark.
@@ -59,19 +62,20 @@ Both faces come from road and trail signage, which suits an app about walking lo
 
 - Header: mark + "HikingBuddy", then data-file status, backup buttons and the unit toggle on the right.
 - Two panels: Gear Vault (2 parts) left, Gearlists (3 parts) right; stacked below 900px.
-- Gearlist panel, top to bottom: name with gearlist switcher and icon actions → `BackpackChart` beside its legend → `WeightSummary` → category groups with `GearlistItemRow`s.
+- Gearlist panel, top to bottom: panel header "GEARLISTS" with the New gearlist `plus` → gearlist name with switcher and its actions (Snapshot, Share, Template as icon + label, Delete as icon) → `BackpackChart` (large) beside its legend, with the weight split and Total under the pack → column header (Item, Worn, Cons., Weight, Qty, Total) → category groups with `GearlistItemRow`s. There are no separate weight tiles: the split under the pack is the one place for Base / Consumables / Worn / Total.
 - Gear Vault panel: search and category filter → category groups with `VaultItemRow`s → full-width "Add gear" button pinned at the bottom.
 
 ## Screen sizes and touch
 
 - Built desktop-first (the app's main use), but it must never break on a phone: shared gearlist links (FR-18) and the public site (FR-20) will often be opened on one.
-- **900px and below:** the two panels stack (Gear Vault, then Gearlists). **560px and below:** gearlist rows wrap to two lines, weight tiles go 2×2, the backpack sits above its legend, side paddings shrink to `space-4`.
+- **900px and below:** the two panels stack (Gear Vault, then Gearlists). **560px and below:** gearlist rows wrap to two lines and the column header hides, the backpack sits above its legend (it also drops under the pack whenever the panel is too narrow), side paddings shrink to `space-4`.
 - **Touch (no hover):** row actions and drag handles are always visible, tooltips are not shown, so every icon button keeps its `aria-label` and icon meaning must also be learnable from context. Touch targets are at least 44px (`pointer: coarse`).
-- Not designed (out of scope, PRD v16): a dedicated mobile layout, gestures, offline use.
+- **Exception: the shared gearlist page (FR-18) is phone-first**, because shared links are mostly opened on phones. At 360px: no zoom or sideways scrolling, backpack above its legend, item rows readable (name, quantity and weight never overlap), Worn/Consumable shown as text badges, unit toggle and "Open HikingBuddy" easy to reach with a thumb.
+- Not designed (out of scope, PRD v16): a dedicated mobile layout for the rest of the app, gestures, offline use.
 
 ## For Claude Code: applying this to the app
 
 - Tokens become CSS custom properties in `app/src/index.css` (from `tokens.json`); `App.css` keeps no literal colours, font sizes or radii, only `var(--…)`.
-- Map old classes to components: `.btn*` → Button, row action buttons → IconButton, `ItemFlagsToggle` → FlagToggle, `InlineField` / `InlineCategorySelect` → InlineField, `.search-input` and form fields → TextField, `UnitToggle` → UnitToggle, `CategoryTilePicker` → CategoryTile, `.badge*` / snapshot status → Badge, `DataFileBanner` / template banner → Banner, Vault rows and headings → VaultItemRow, `GearListItemRow` → GearlistItemRow, `WeightSummary` → WeightSummary, every dialog → Dialog, `App.tsx` layout → AppShell.
+- Map old classes to components: `.btn*` → Button, row action buttons → IconButton, `ItemFlagsToggle` → FlagToggle, `InlineField` / `InlineCategorySelect` → InlineField, `.search-input` and form fields → TextField, `UnitToggle` → UnitToggle, `CategoryTilePicker` → CategoryTile, `.badge*` / snapshot status → Badge, `DataFileBanner` / template banner → Banner, Vault rows and headings → VaultItemRow, `GearListItemRow` → GearlistItemRow, `WeightSummary` → removed (its numbers live in the BackpackChart split), every dialog → Dialog, `App.tsx` layout → AppShell.
 - New: `BackpackChart` (port `HB.backpack` from `components/bundle.js`), the landscape background, the custom icons.
 - Do not change behaviour, data or texts beyond the icon-for-text swaps listed above. If a design choice would change behaviour, ask Martin first.

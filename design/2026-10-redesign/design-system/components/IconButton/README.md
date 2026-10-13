@@ -1,22 +1,15 @@
 # IconButton
 
-Icon-only button for frequent actions on the gearlist header and rows. Every icon button has `aria-label` AND a `data-tip` tooltip with the same words, because the icon alone is not enough for a first-time visitor.
+Icon-only button, used **only for actions everyone recognises without help**. Every icon button has `aria-label` AND a `data-tip` tooltip with the same words.
 
 | Action | Icon |
 |---|---|
-| Save snapshot | Lucide `camera` |
-| View snapshot | Lucide `images` |
-| Share read-only link | Lucide `signpost` |
-| Create / Update template | Lucide `map` |
-| Delete gearlist / item | Lucide `trash-2` (+ `--danger`) |
+| New gearlist (in the GEARLISTS panel header) | Lucide `plus` |
+| Delete gearlist / item / category | Lucide `trash-2` (+ `--danger`) |
 | Remove from gearlist | Lucide `x` |
-| Export / Import backup | Lucide `hard-drive-download` / `hard-drive-upload` |
-| New gearlist | Lucide `plus` |
-| Create a copy of the item | Lucide `copy-plus` |
-| Copy link / Open preview (Share dialog) | Lucide `copy` / `external-link` |
-| Connect / Disconnect data file | Lucide `hard-drive` / `unplug` |
-| Delete category | Lucide `trash-2` (+ `--danger`) |
+| Copy link (Share dialog) | Lucide `copy` |
+| Close banner / dialog | Lucide `x` |
 
-- Text stays only where the user makes a decision or meets the action for the first time: dialog buttons (icon + label), the full-width "Add gear" button and the welcome card.
-- `--outlined` in the gearlist header, plain in rows (rows reveal actions on hover/focus).
+- Anything less obvious is a Button with icon + label instead (Snapshot `camera`, Share `signpost`, Template `map`, Export / Import, Connect / Disconnect data file `hard-drive` / `unplug`, Create a copy `copy-plus`, Open preview `external-link`). Decided 2026-10-13 after Martin's test: the camera / signpost / map icons alone were not understood.
+- `--outlined` in panel headers, plain in rows (rows reveal actions on hover/focus; always visible on touch).
 - Tooltip: CSS `[data-tip]`, shows after 250 ms on hover and immediately on keyboard focus.

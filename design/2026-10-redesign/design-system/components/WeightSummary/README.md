@@ -1,5 +1,3 @@
-# WeightSummary
+# WeightSummary (removed)
 
-Four weight tiles under the backpack: Base weight (Lucide `backpack`), Consumables (Lucide `utensils`), Worn (boot), Total (Lucide `mountain`, on ink). Numbers are tabular, in the user's unit.
-
-- The backpack chart repeats Base, Consumables and Worn in its split under the pack; these tiles stay as the full summary.
+Removed in design system v2 (2026-10-13). The four weight tiles repeated the numbers already shown under the backpack. Base, Consumables, Worn and Total now live only in the BackpackChart split. Do not render WeightSummary in the gearlist; `screenshots/WeightSummary.png` is outdated.
