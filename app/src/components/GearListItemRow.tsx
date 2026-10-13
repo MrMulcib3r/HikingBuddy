@@ -61,8 +61,18 @@ export function GearListItemRow({ listId, item, onRequestCoreEdit, onReorder }: 
       </span>
       <div className="list-item-main">
         <InlineTextField className="list-item-name" value={item.name} onCommit={handleNameCommit} />
-        {/* Second line: category (click to change, FR-12) · note · custom-entry badge */}
+        {/* Second line: note · category (click to change, FR-12) · custom-entry badge. The
+            category and an empty "Add a note…" appear only on row hover / focus (always on
+            touch) — review 2026-10-14, points 7–8. */}
         <span className="row-meta">
+          <InlineTextField
+            className="list-item-note"
+            value={item.note}
+            placeholder="Add a note…"
+            allowEmpty
+            onCommit={(note) => updateListItem(listId, item.id, { note })}
+          />
+          <span className="row-meta-sep" aria-hidden="true">·</span>
           <span className="row-category">
             <InlineCategorySelect
               categories={state.categories}
@@ -71,14 +81,6 @@ export function GearListItemRow({ listId, item, onRequestCoreEdit, onReorder }: 
               onChange={handleCategoryChange}
             />
           </span>
-          <span className="row-meta-sep" aria-hidden="true">·</span>
-          <InlineTextField
-            className="list-item-note"
-            value={item.note}
-            placeholder="Add a note…"
-            allowEmpty
-            onCommit={(note) => updateListItem(listId, item.id, { note })}
-          />
           {!linked && (
             <Badge tone="warning" tip="No longer linked to Gear Vault">
               custom entry

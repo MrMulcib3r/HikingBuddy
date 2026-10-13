@@ -351,10 +351,18 @@
   max-width: 10ch;
   text-align: right;
 }
-select.inline-edit-input {
+/* Inline category select while editing (review point 13, design system InlineField): wide
+   enough for the longest category name, ui type, 32px, same accent ring as other inline fields. */
+select.inline-edit-input,
+.row-category .inline-edit-input {
   width: auto;
+  min-width: 180px;
   max-width: 100%;
-  font-size: var(--text-small);
+  height: var(--control-h-sm);
+  margin: 0;
+  padding: 0 var(--space-2);
+  font-size: var(--text-ui);
+  line-height: var(--lh-ui);
 }
 
 /* ============ Text fields, search, select ============ */
@@ -876,6 +884,40 @@ select.inline-edit-input {
 }
 .row-meta-sep {
   color: var(--ink-subtle);
+}
+/* Quiet rows (review 2026-10-14, points 7–8): the category (already named by the group
+   heading) and an empty "Add a note…" show only on row hover or keyboard focus. Their space is
+   kept (category last on the line, empty note still clickable), so nothing jumps. Touch: always visible. */
+.row-meta {
+  align-self: stretch; /* full column width, so a short note never wraps and changes the height */
+  min-height: var(--lh-small);
+}
+/* Right-aligned above the column header: it adds to the list below, not to the backpack. */
+.list-add-item {
+  display: flex;
+  margin: 0 0 var(--space-3) auto;
+}
+@media (hover: hover) {
+  .vault-item-row .row-meta-sep,
+  .vault-item-row .row-category,
+  .list-item-row .row-meta-sep,
+  .list-item-row .row-category {
+    visibility: hidden; /* space kept: it sits at the end of the line, so nothing moves on hover */
+  }
+  .vault-item-row .inline-edit-text:has(> .inline-edit-placeholder),
+  .list-item-row .inline-edit-text:has(> .inline-edit-placeholder) {
+    opacity: 0;
+  }
+  .vault-item-row:is(:hover, :focus-within) .row-meta-sep,
+  .vault-item-row:is(:hover, :focus-within) .row-category,
+  .list-item-row:is(:hover, :focus-within) .row-meta-sep,
+  .list-item-row:is(:hover, :focus-within) .row-category {
+    visibility: visible;
+  }
+  .vault-item-row:is(:hover, :focus-within) .inline-edit-text:has(> .inline-edit-placeholder),
+  .list-item-row:is(:hover, :focus-within) .inline-edit-text:has(> .inline-edit-placeholder) {
+    opacity: 1;
+  }
 }
 .vault-item-weight,
 .list-item-weight {

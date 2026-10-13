@@ -370,8 +370,12 @@ function VaultItemRow({ item, usage, unitPreference, categories, onCreateCategor
       </span>
       <div className="vault-item-main">
         <InlineTextField className="vault-item-name" value={item.name} onCommit={(name) => onEditCore({ name })} />
-        {/* Second line: category (click to change, FR-12) · note */}
+        {/* Second line: note · category (click to change, FR-12). The group heading already
+            names the category and an empty "Add a note…" is noise, so both appear only on row
+            hover / focus (always on touch) — review 2026-10-14, points 7–8. */}
         <span className="row-meta">
+          <InlineTextField className="vault-item-note" value={item.note} placeholder="Add a note…" allowEmpty onCommit={onEditNote} />
+          <span className="row-meta-sep" aria-hidden="true">·</span>
           <span className="row-category">
             <InlineCategorySelect
               categories={categories}
@@ -381,8 +385,6 @@ function VaultItemRow({ item, usage, unitPreference, categories, onCreateCategor
               onCreateCategory={onCreateCategory}
             />
           </span>
-          <span className="row-meta-sep" aria-hidden="true">·</span>
-          <InlineTextField className="vault-item-note" value={item.note} placeholder="Add a note…" allowEmpty onCommit={onEditNote} />
         </span>
       </div>
       <span className="row-badges">
