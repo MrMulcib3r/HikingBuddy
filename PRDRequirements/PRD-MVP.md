@@ -400,6 +400,7 @@ Inspirováno rozložením lighterpack.com (ověřeno i přímým průzkumem appk
 - **„Add item from Gear Vault“** (bod 1): Martin chtěl jen **stejný vzhled** jako „+ Add gear“ (plné oranžové), ne přesun — tlačítko zůstává vpravo nad hlavičkou sloupců v původní velikosti. (Design system popisuje celou šířku připnutou dole; Martin rozhodl jinak.)
 - 3-cestný dialog je 560 px široký (bod 5); správné množné číslo všude (bod 6); datum snapshotu „12 Sep 2026, 8:30“ (bod 10); nadpisy dialogů 18 px a nic menšího než 12 px podle design systému.
 - Bod 12 („Load demo data“ zůstává v hlavičce) beze změny.
+- **Akční dlaždice „+ Other“ přejmenována na „+ New category“** (Martin nahlásil dvě dlaždice „Other“: jeho kategorie Misc je přejmenovaná na „Other“). Design system ji vede jako „+ Other“ — zde vědomá odchylka.
 
 ## 9. Veřejná komunitní verze — nápady pro případný další vývoj (mimo scope)
 

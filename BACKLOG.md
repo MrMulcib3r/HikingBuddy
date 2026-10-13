@@ -136,6 +136,7 @@ _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, př
   26. 3-cestný dialog má Cancel / Create a copy / Continue na jednom řádku; texty „1 gearlist“ / „3 gearlists“ místo „(s)“; datum snapshotu „12 Sep 2026, 8:30“.
   27. Sdílená stránka na telefonu: u ×1 jen jedna váha.
   28. Screenshoty: `design/2026-10-redesign/implemented/v4/`.
+  29. Akční dlaždice ve formuláři se jmenuje „New category“ (dřív „Other“) — u tebe už nejsou dvě „Other“. Výběr kategorie v řádku má 180 px (pokud ne, obnov stránku Ctrl+F5).
 - [ ] [CR] When updating gear items in a gearlist(-s) the user needs to know which gear lists are affected. (24.9.2026) → **Jak otestovat:** změň váhu/název položky z Vaultu, která je ve 2+ gearlistech → dialog pod textem vypíše „Affected gearlists:" s jejich názvy. Totéž při Delete a při změně přímo v gearlistu (tam se vypíšou ostatní gearlisty). (implementováno 2026-10-08)
 ![[Pasted image 20260924165604.png|376]]
 - [ ] [BUG] Categories cannot be edited. It should be possible to edit all categories including the template one. (24.9.2026) → **Jak otestovat:** klikni na název kategorie v nadpisu skupiny ve Vaultu (např. FOOD), přepiš, Enter. Escape zruší. Funguje i v dialogu „Categories" (klik na název). (implementováno 2026-10-08)

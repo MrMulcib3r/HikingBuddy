@@ -35,7 +35,7 @@ interface CategoryTilePickerProps {
  * selects it right away.
  *
  * At most one tile is selected (design system CategoryTile, Martin 2026-10-14). The dashed
- * "+ Other" tile is an action — it opens the "New category name" field with a single Add
+ * "+ New category" tile (was "+ Other") is an action — it opens the "New category name" field with a single Add
  * button — never a selection and never preselected. Picking any other tile closes the field.
  */
 export function CategoryTilePicker({
@@ -104,7 +104,9 @@ export function CategoryTilePicker({
           onClick={() => onCreatingChange(!creating)}
         >
           <Plus size={24} strokeWidth={1.75} aria-hidden="true" />
-          <span className="category-tile-label">Other</span>
+          {/* "New category", not "Other": a user category can itself be called Other (e.g. a renamed
+              Misc from a LighterPack import), and two Other tiles were confusing (Martin, 2026-10-14). */}
+          <span className="category-tile-label">New category</span>
         </button>
       </div>
 
