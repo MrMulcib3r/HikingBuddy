@@ -2,31 +2,38 @@ import { useId, useMemo, useState } from 'react';
 import type { UnitPreference } from '../types';
 import { formatWeight } from '../utils/weight';
 import { categoryColor, type CategoryColorKey } from '../utils/categoryStyle';
+import {
+  INSIDE_LABEL_MIN,
+  PACK_BOTTOM,
+  PACK_TOP,
+  layerHeights,
+  percentText,
+  placeOutsideLabels,
+  type PackCategory,
+} from '../utils/pack';
 import { CategoryIcon } from './CategoryIcon';
 import { ActionIcon } from './icons/actionIcons';
 import { HikerIcon } from './icons/HikerIcons';
-import type { PackCategory } from '../utils/pack';
 import { Icon } from './ui';
 
 /**
- * FR-19 — the backpack weight chart (React port of HB.backpack from
- * design/2026-10-redesign/design-system/components/bundle.js, shape A "rounded").
+ * FR-19 — the backpack weight chart, React port of HB.backpack (design system v2,
+ * design/2026-10-redesign/design-system/components/bundle.js, shape A).
  *
- * Decided with Martin (PRD v21):
- * - In the pack = Base + Consumables. Worn is carried on the body, so it is never a layer;
- *   it's listed under the pack (hiker icon, "+ weight").
- * - One layer per category, height = the category's share of the pack weight, heaviest at
- *   the bottom. Tiny categories keep a minimum height so they stay visible.
- * - Hovering or focusing a layer or a legend row highlights both and dims the others.
+ * - In the pack = Base + Consumables. Worn is carried on the body, never a layer; the split
+ *   under the pack lists Base, Consumables, Worn and Total (pack + worn). It replaces the old
+ *   four weight tiles (removed in v2).
+ * - One layer per category, heaviest at the bottom, minimum layer height so every category
+ *   stays visible and hoverable (utils/pack.ts).
+ * - Every category shows its percentage: inside its layer, or — for thin layers — to the right
+ *   of the pack with a leader line; outside labels never overlap.
+ * - Hovering or focusing a layer, a label or a legend row highlights all of them.
  */
 
-// Shape A geometry (viewBox 0 0 220 280) — kept exactly as in the design system. `BODY` is
-// both the outline and the clip path of the colour layers.
+// Shape A body: outline AND clip path of the colour layers. The chart reserves room around the
+// pack (viewBox -30 0 370 306) for the outside labels and the tier gear, so nothing jumps.
 const BODY = 'M44 94A58 58 0 0 1 102 36H118A58 58 0 0 1 176 94V242A26 26 0 0 1 150 268H70A26 26 0 0 1 44 242Z';
-const TOP = 36;
-const BOTTOM = 268;
-const MIN_LAYER = 3;
-const LABEL_MIN = 20;
+const VIEWBOX = '-30 0 370 306';
 
 /** Relative luminance of a #rrggbb colour (WCAG), to pick dark or light percentage text. */
 function luminance(hex: string): number {
@@ -62,19 +69,30 @@ export function BackpackChart({ categories, consumable, worn, unit }: BackpackCh
   const base = total - consumable;
 
   const layers = useMemo(() => {
-    // Heights first (tiny categories keep a minimum so they stay visible), then stack them
-    // from the bottom up: layer i starts where the layers below it end.
-    const heights = cats.map((c) => {
-      const h = total ? (c.grams / total) * (BOTTOM - TOP) : 0;
-      return h > 0 && h < MIN_LAYER ? MIN_LAYER : h;
-    });
-    return cats.map((c, i) => {
+    const heights = layerHeights(
+      cats.map((c) => c.grams),
+      PACK_BOTTOM - PACK_TOP
+    );
+    const result = cats.map((c, i) => {
       const h = heights[i];
-      const y = BOTTOM - heights.slice(0, i + 1).reduce((sum, v) => sum + v, 0);
-      const pct = total ? Math.round((c.grams / total) * 100) : 0;
-      const dark = luminance(tokenHex(c.colorKey)) > 0.3;
-      return { cat: c, y, h, pct, dark };
+      const y = PACK_BOTTOM - heights.slice(0, i + 1).reduce((sum, v) => sum + v, 0);
+      return {
+        cat: c,
+        y,
+        h,
+        pct: percentText(c.grams, total),
+        inside: h >= INSIDE_LABEL_MIN,
+        dark: luminance(tokenHex(c.colorKey)) > 0.3,
+        labelY: 0,
+      };
     });
+    const outside = result.filter((l) => !l.inside);
+    const placed = placeOutsideLabels(
+      outside.map((l) => l.y + l.h / 2),
+      PACK_BOTTOM
+    );
+    outside.forEach((l, k) => (l.labelY = placed[k]));
+    return result;
   }, [cats, total]);
 
   const focusProps = (i: number) => ({
@@ -88,7 +106,7 @@ export function BackpackChart({ categories, consumable, worn, unit }: BackpackCh
   return (
     <div className={`pack ${active !== null ? 'is-focus' : ''}`}>
       <div className="pack-figure">
-        <svg className="pack-svg" viewBox="0 0 220 280" role="img" aria-label="Pack weight by category">
+        <svg className="pack-svg" viewBox={VIEWBOX} role="img" aria-label="Pack weight by category">
           <defs>
             <clipPath id={clipId}>
               <path d={BODY} />
@@ -113,15 +131,20 @@ export function BackpackChart({ categories, consumable, worn, unit }: BackpackCh
                 fill={categoryColor(l.cat.colorKey)}
                 {...focusProps(i)}
               >
-                <title>{`${l.cat.name}: ${formatWeight(l.cat.grams, unit)} (${l.pct} %)`}</title>
+                <title>{`${l.cat.name}: ${formatWeight(l.cat.grams, unit)} (${l.pct})`}</title>
               </rect>
             ))}
             {layers.slice(0, -1).map((l) => (
               <line key={`gap-${l.cat.key}`} className="pack-gap" x1="20" x2="200" y1={l.y.toFixed(2)} y2={l.y.toFixed(2)} />
             ))}
-            {layers
-              .filter((l) => l.h >= LABEL_MIN)
-              .map((l) => (
+          </g>
+          {/* front pocket (the lid seam was removed in v2 — it crossed the percentages) */}
+          <rect x="72" y="182" width="76" height="66" rx="16" className="pack-detail" strokeOpacity={0.55} />
+          <path d={BODY} className="pack-outline" />
+          {/* percentages inside big layers, drawn above the pocket outline */}
+          <g clipPath={`url(#${clipId})`}>
+            {layers.map((l) =>
+              l.inside ? (
                 <text
                   key={`pct-${l.cat.key}`}
                   className="pack-pct"
@@ -130,40 +153,58 @@ export function BackpackChart({ categories, consumable, worn, unit }: BackpackCh
                   textAnchor="middle"
                   fill={l.dark ? 'var(--ink)' : 'var(--surface)'}
                 >
-                  {l.pct} %
+                  {l.pct}
                 </text>
-              ))}
+              ) : null
+            )}
           </g>
-          {/* over the layers: lid seam and front pocket */}
-          <path d="M45 104C78 122 142 122 175 104" className="pack-detail" strokeOpacity={0.55} />
-          <rect x="72" y="182" width="76" height="66" rx="16" className="pack-detail" strokeOpacity={0.55} />
-          <path d={BODY} className="pack-outline" />
+          {/* outside labels for thin layers, joined by a leader line */}
+          {layers.map((l, i) =>
+            l.inside ? null : (
+              <g key={`out-${l.cat.key}`} className={`pack-callout ${activeClass(i)}`} {...focusProps(i)}>
+                <path
+                  d={`M150 ${(l.y + l.h / 2).toFixed(2)}H196L206 ${l.labelY.toFixed(2)}H212`}
+                  className="pack-leader"
+                />
+                <text x="216" y={(l.labelY + 4).toFixed(2)}>
+                  <tspan className="pack-pct-out">{l.pct}</tspan> {l.cat.name}
+                </text>
+              </g>
+            )
+          )}
         </svg>
         <div className="pack-total">
           <div className="label">In the pack</div>
           <div className="pack-kg">{formatWeight(total, unit)}</div>
         </div>
         <dl className="pack-split">
-          <div data-tip="Base weight: everything in the pack except consumables">
+          <div data-tip="Everything in the pack except consumables">
             <dt>
               <Icon icon={ActionIcon.base} />
-              Base
+              Base weight
             </dt>
             <dd>{formatWeight(base, unit)}</dd>
           </div>
-          <div data-tip="Consumables: food, fuel, water. In the pack, gets lighter every day">
+          <div data-tip="Food, fuel and water: in the pack, lighter every day">
             <dt>
               <Icon icon={ActionIcon.consumable} />
               Consumables
             </dt>
             <dd>{formatWeight(consumable, unit)}</dd>
           </div>
-          <div className="pack-split-worn" data-tip="Worn: carried on your body, not in the pack">
+          <div className="pack-split-worn" data-tip="Carried on your body, not in the pack">
             <dt>
               <HikerIcon />
               Worn
             </dt>
             <dd>+ {formatWeight(worn, unit)}</dd>
+          </div>
+          <div className="pack-split-total">
+            <dt>
+              <Icon icon={ActionIcon.total} />
+              Total
+            </dt>
+            <dd>{formatWeight(total + worn, unit)}</dd>
           </div>
         </dl>
       </div>
@@ -183,7 +224,7 @@ export function BackpackChart({ categories, consumable, worn, unit }: BackpackCh
             <CategoryIcon id={l.cat.iconId} name={l.cat.name} size={16} />
             <span>{l.cat.name}</span>
             <span className="legend-w">{formatWeight(l.cat.grams, unit)}</span>
-            <span className="legend-p">{l.pct} %</span>
+            <span className="legend-p">{l.pct}</span>
           </li>
         ))}
       </ul>

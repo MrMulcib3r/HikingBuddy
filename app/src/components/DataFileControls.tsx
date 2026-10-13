@@ -5,7 +5,7 @@ import { useDataFile } from '../state/DataFileContext';
 import { pickExistingDataFile, pickNewDataFile } from '../dataFile';
 import { ConfirmDialog } from './ConfirmDialog';
 import { ActionIcon } from './icons/actionIcons';
-import { Banner, Dialog, DialogActions, Icon, IconButton } from './ui';
+import { Banner, Dialog, DialogActions, Icon } from './ui';
 import type { AppState } from '../types';
 
 /** FR-16, header part: "Connect data file", or where the data is being saved right now. */
@@ -59,7 +59,10 @@ export function DataFileControls() {
           <Icon icon={status.save === 'error' ? TriangleAlert : ActionIcon.dataFile} size={14} />
           {label}
         </span>
-        <IconButton label="Disconnect" icon={ActionIcon.disconnect} onClick={() => void disconnect()} tipBelow />
+        <button type="button" className="btn btn-ghost btn-small" onClick={() => void disconnect()}>
+          <Icon icon={ActionIcon.disconnect} />
+          Disconnect
+        </button>
       </span>
     );
   }

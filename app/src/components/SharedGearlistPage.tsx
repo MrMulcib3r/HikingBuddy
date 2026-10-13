@@ -4,7 +4,6 @@ import { sharedItemsAsListItems, type SharedGearlist } from '../share';
 import type { UnitPreference } from '../types';
 import { formatWeight } from '../utils/weight';
 import { categoryColor, templateIdForKey } from '../utils/categoryStyle';
-import { WeightSummary } from './WeightSummary';
 import { BackpackChart } from './BackpackChart';
 import { packCategoriesFromItems } from '../utils/pack';
 import { CategoryIcon } from './CategoryIcon';
@@ -59,7 +58,6 @@ export function SharedGearlistPage({ shared }: { shared: SharedGearlist | null }
             <div className="panel-body shared-content">
               <div className="list-detail-overview">
                 <BackpackChart categories={packCategories} consumable={breakdown.consumable} worn={breakdown.worn} unit={unit} />
-                <WeightSummary breakdown={breakdown} unit={unit} />
               </div>
               <div className="list-items">
                 {shared.categories.map((group) => (

@@ -11,7 +11,6 @@ import { AddItemToListDialog } from './AddItemToListDialog';
 import { ConfirmDialog } from './ConfirmDialog';
 import { VaultEditDialog } from './VaultEditDialog';
 import { GearListItemRow } from './GearListItemRow';
-import { WeightSummary } from './WeightSummary';
 import { BackpackChart } from './BackpackChart';
 import { packCategoriesFromItems } from '../utils/pack';
 import { InlineTextField } from './InlineField';
@@ -27,12 +26,8 @@ interface GearListDetailProps {
   /** Showing the Gearlist Template (PRD 7.5, T-3): edited like a gearlist, but no snapshot,
    * no "Save as template", and Delete removes the template. */
   isTemplate?: boolean;
-  /** The gearlist switcher (name + dropdown), shown at the start of the panel header. */
+  /** The gearlist switcher (name + dropdown), shown at the start of the gearlist's own header. */
   switcher: ReactNode;
-  /** "New gearlist" button, shown at the end of the panel header's actions. */
-  newButton: ReactNode;
-  /** The "new gearlist" form, shown under the header while open. */
-  newListForm?: ReactNode;
 }
 
 type CorePatch = { name?: string; categoryId?: string | null; weightGrams?: number };
@@ -44,7 +39,7 @@ interface PendingCoreEdit {
   affectedNames: string[];
 }
 
-export function GearListDetail({ list, onDeleted, isTemplate = false, switcher, newButton, newListForm }: GearListDetailProps) {
+export function GearListDetail({ list, onDeleted, isTemplate = false, switcher }: GearListDetailProps) {
   const {
     state,
     continueEditLinkedItem,
@@ -152,41 +147,31 @@ export function GearListDetail({ list, onDeleted, isTemplate = false, switcher, 
 
   return (
     <>
-      <header className="panel-header list-detail-header">
+      {/* The gearlist's own header (design system v2): name with switcher, then its actions —
+          icon + label for Snapshot / Share / Template (icons alone were not understood), icon
+          only for Delete. */}
+      <div className="gearlist-head list-detail-header">
         {switcher}
-        <div className="panel-header-actions list-detail-actions">
+        <div className="gearlist-actions list-detail-actions">
           {!isTemplate && (
             <>
-              <IconButton
-                label={list.snapshot ? 'Update snapshot' : 'Save snapshot'}
-                icon={ActionIcon.saveSnapshot}
-                variant="outlined"
-                tipBelow
-                tipEnd
-                disabled={isEmpty}
-                onClick={() => setConfirmSnapshot(true)}
-              />
-              {list.snapshot && (
-                <IconButton label="View snapshot" icon={ActionIcon.viewSnapshot} variant="outlined" tipBelow tipEnd onClick={() => setSnapshotOpen(true)} />
-              )}
-              <IconButton
-                label="Share read-only link"
-                icon={ActionIcon.share}
-                variant="outlined"
-                tipBelow
-                tipEnd
-                disabled={isEmpty}
-                onClick={() => setShareOpen(true)}
-              />
-              <IconButton
-                label={hasTemplate ? 'Update template' : 'Save as template'}
-                icon={ActionIcon.template}
-                variant="outlined"
-                tipBelow
-                tipEnd
+              <button type="button" className="btn btn-secondary btn-small" disabled={isEmpty} onClick={() => setConfirmSnapshot(true)}>
+                <Icon icon={ActionIcon.saveSnapshot} />
+                {list.snapshot ? 'Update snapshot' : 'Save snapshot'}
+              </button>
+              <button type="button" className="btn btn-secondary btn-small" disabled={isEmpty} onClick={() => setShareOpen(true)}>
+                <Icon icon={ActionIcon.share} />
+                Share
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary btn-small"
                 disabled={list.items.length === customEntryCount}
                 onClick={() => setConfirmTemplate(true)}
-              />
+              >
+                <Icon icon={ActionIcon.template} />
+                {hasTemplate ? 'Update template' : 'Save as template'}
+              </button>
             </>
           )}
           <IconButton
@@ -194,15 +179,11 @@ export function GearListDetail({ list, onDeleted, isTemplate = false, switcher, 
             icon={ActionIcon.delete}
             variant="outlined"
             danger
-            tipBelow
             tipEnd
             onClick={() => setConfirmDelete(true)}
           />
-          {newButton}
         </div>
-      </header>
-
-      {newListForm}
+      </div>
 
       <div className="panel-body">
         <div className={`list-detail ${dropActive ? 'list-detail-drop-active' : ''}`} {...dropHandlers}>
@@ -221,6 +202,10 @@ export function GearListDetail({ list, onDeleted, isTemplate = false, switcher, 
                 Snapshot saved {new Date(list.snapshot.savedAt).toLocaleString('en-US')}
               </Badge>
               <span>The live list may have changed since.</span>
+              <button type="button" className="btn btn-ghost btn-small" onClick={() => setSnapshotOpen(true)}>
+                <Icon icon={ActionIcon.viewSnapshot} />
+                View snapshot
+              </button>
             </p>
           )}
 
@@ -242,7 +227,6 @@ export function GearListDetail({ list, onDeleted, isTemplate = false, switcher, 
 
           <div className="list-detail-overview">
             <BackpackChart categories={packCategories} consumable={breakdown.consumable} worn={breakdown.worn} unit={state.unitPreference} />
-            <WeightSummary breakdown={breakdown} unit={state.unitPreference} />
           </div>
 
           <button type="button" className="btn btn-secondary list-add-item" onClick={() => setAddOpen(true)}>
@@ -257,6 +241,21 @@ export function GearListDetail({ list, onDeleted, isTemplate = false, switcher, 
                   ? 'The template is empty — drag the gear you take on most trips here from Gear Vault, or use the button above.'
                   : 'This gearlist is empty so far — drag gear here from Gear Vault, or use the button above.'}
               </p>
+            )}
+            {/* Column header: names the icon-only Worn / Consumable toggles of every row. */}
+            {!isEmpty && (
+              <div className="list-head" aria-hidden="true">
+                <span />
+                <span>Item</span>
+                <span className="list-head-flags">
+                  <span>Worn</span>
+                  <span>Cons.</span>
+                </span>
+                <span>Weight</span>
+                <span>Qty</span>
+                <span>Total</span>
+                <span />
+              </div>
             )}
             {[...grouped.entries()].map(([category, items]) => (
               <div key={category} className="list-category-group">

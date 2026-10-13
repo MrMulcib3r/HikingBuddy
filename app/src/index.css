@@ -76,6 +76,10 @@
   --text-label: 13px;
   --lh-label: 16px;
   --text-badge: 12px;
+  --text-label-xs: 11px; /* gearlist column header */
+  --lh-label-xs: 14px;
+  --text-pack-pct: 12px; /* backpack chart, in SVG units */
+  --text-pack-callout: 11px;
   --text-weight-xl: 32px;
   --lh-weight-xl: 36px;
   --tracking-brand: 0.02em;

@@ -3,7 +3,7 @@ import { useApp } from '../state/AppContext';
 import { buildBackup, parseBackup } from '../storage';
 import { ConfirmDialog } from './ConfirmDialog';
 import { ActionIcon } from './icons/actionIcons';
-import { IconButton } from './ui';
+import { Icon } from './ui';
 
 /**
  * The only thing in this MVP (no account/server yet, see PRD section 2/6) that makes data
@@ -54,8 +54,20 @@ export function BackupControls() {
 
   return (
     <div className="backup-controls header-group">
-      <IconButton label="Export backup" icon={ActionIcon.exportBackup} onClick={handleExport} tipBelow />
-      <IconButton label="Import backup" icon={ActionIcon.importBackup} onClick={() => fileInputRef.current?.click()} tipBelow />
+      <button type="button" className="btn btn-ghost btn-small" onClick={handleExport} data-tip="Save all your data as a file on this computer" data-tip-pos="below">
+        <Icon icon={ActionIcon.exportBackup} />
+        Export
+      </button>
+      <button
+        type="button"
+        className="btn btn-ghost btn-small"
+        onClick={() => fileInputRef.current?.click()}
+        data-tip="Restore data from an exported backup file"
+        data-tip-pos="below"
+      >
+        <Icon icon={ActionIcon.importBackup} />
+        Import
+      </button>
       <input ref={fileInputRef} type="file" accept="application/json" className="visually-hidden" onChange={handleFileChange} />
 
       {importError && (

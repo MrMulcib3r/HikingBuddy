@@ -1,6 +1,6 @@
 import { ActionIcon } from './icons/actionIcons';
 import { BootIcon } from './icons/HikerIcons';
-import { Icon } from './ui';
+import { Badge, Icon } from './ui';
 
 interface ItemFlagsToggleProps {
   isWorn: boolean;
@@ -49,19 +49,20 @@ export function ItemFlagsToggle({ isWorn, isConsumable, onChange }: ItemFlagsTog
   );
 }
 
-/** Read-only flags (snapshot, shared page): icon badges with the same tooltips. */
+/** Read-only flags (snapshot, shared page): text badges, so the meaning is readable without
+ * hovering — the shared page is phone-first (design system v2). */
 export function ItemFlagsBadges({ isWorn, isConsumable }: { isWorn: boolean; isConsumable: boolean }) {
   return (
     <span className="shared-flags">
       {isWorn && (
-        <span className="badge badge-linked badge-icon shared-flag" role="img" aria-label="Worn" data-tip={WORN_TIP}>
-          <BootIcon size={14} />
-        </span>
+        <Badge tone="linked" icon={BootIcon} tip={WORN_TIP}>
+          Worn
+        </Badge>
       )}
       {isConsumable && (
-        <span className="badge badge-linked badge-icon shared-flag" role="img" aria-label="Consumable" data-tip={CONSUMABLE_TIP}>
-          <Icon icon={ActionIcon.consumable} size={14} />
-        </span>
+        <Badge tone="linked" icon={ActionIcon.consumable} tip={CONSUMABLE_TIP}>
+          Consumable
+        </Badge>
       )}
     </span>
   );

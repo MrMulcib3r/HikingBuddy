@@ -83,6 +83,12 @@ export function GearListsPanel() {
 
   return (
     <section className="panel gear-lists-panel">
+      {/* Panel header like "GEAR VAULT" (design system v2), with New gearlist (+). */}
+      <header className="panel-header">
+        <h2 className="panel-title">Gearlists</h2>
+        <div className="panel-header-actions">{newButton}</div>
+      </header>
+      {newListForm}
       {selected ? (
         <GearListDetail
           key={selected.id}
@@ -90,20 +96,11 @@ export function GearListsPanel() {
           isTemplate={selected === selectedTemplate}
           onDeleted={() => setSelectedId(null)}
           switcher={<GearlistSwitcher lists={sortedLists} template={template} selected={selected} onSelect={setSelectedId} />}
-          newButton={newButton}
-          newListForm={newListForm}
         />
       ) : (
-        <>
-          <header className="panel-header">
-            <h2 className="panel-title">Gearlists</h2>
-            <div className="panel-header-actions">{newButton}</div>
-          </header>
-          {newListForm}
-          <div className="panel-body">
-            <p className="empty-hint">No gearlists yet — create your first one with "New gearlist" (+).</p>
-          </div>
-        </>
+        <div className="panel-body">
+          <p className="empty-hint">No gearlists yet — create your first one with "New gearlist" (+).</p>
+        </div>
       )}
     </section>
   );

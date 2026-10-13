@@ -70,12 +70,14 @@ export function GearVaultPanel() {
 
   const sortedCategories = useMemo(() => sortByOrder(state.categories), [state.categories]);
 
-  /** "Used in …" for the carabiner badge on rows (design system VaultItemRow). */
+  /** Where each Vault item is used, for the "N lists" badge on rows (design system v2). The
+   * template counts as one of the lists (Martin, 2026-10-13). */
   const usageByItem = useMemo(() => {
-    const usage = new Map<string, string>();
+    const usage = new Map<string, Usage>();
     for (const g of state.gearItems) {
-      const text = describeUsage(findAffectedLists(state, g.id).length, findAffectedTemplates(state, g.id).length);
-      if (text) usage.set(g.id, text);
+      const lists = findAffectedLists(state, g.id).length;
+      const templates = findAffectedTemplates(state, g.id).length;
+      if (lists + templates > 0) usage.set(g.id, { count: lists + templates, text: describeUsage(lists, templates) });
     }
     return usage;
   }, [state]);
@@ -337,10 +339,16 @@ function AddItemButton({ onClick }: { onClick: () => void }) {
   );
 }
 
+/** "2 gearlist(s) and your template" + how many lists that is. */
+interface Usage {
+  count: number;
+  text: string;
+}
+
 interface VaultItemRowProps {
   item: GearItem;
-  /** "2 gearlist(s) and your template" when the item is used somewhere, else null. */
-  usage: string | null;
+  /** Where the item is used, or null when it isn't used anywhere. */
+  usage: Usage | null;
   unitPreference: import('../types').UnitPreference;
   categories: import('../types').Category[];
   onCreateCategory: (name: string) => string;
@@ -379,8 +387,8 @@ function VaultItemRow({ item, usage, unitPreference, categories, onCreateCategor
       </div>
       <span className="row-badges">
         {usage && (
-          <Badge tone="linked" icon={CarabinerIcon} iconOnly tip={`Used in ${usage}`}>
-            {`Used in ${usage}`}
+          <Badge tone="linked" icon={CarabinerIcon} tip={`Used in ${usage.text}. Editing it changes these too.`} tipEnd>
+            {usage.count === 1 ? '1 list' : `${usage.count} lists`}
           </Badge>
         )}
       </span>

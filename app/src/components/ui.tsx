@@ -134,9 +134,11 @@ interface BadgeProps {
   iconOnly?: boolean;
   children: ReactNode;
   tip?: string;
+  /** Tooltip aligned to the badge's right edge (badges near the right edge of a panel). */
+  tipEnd?: boolean;
 }
 
-export function Badge({ tone = 'neutral', icon, iconOnly, children, tip }: BadgeProps) {
+export function Badge({ tone = 'neutral', icon, iconOnly, children, tip, tipEnd }: BadgeProps) {
   if (iconOnly && icon) {
     const label = typeof children === 'string' ? children : tip;
     return (
@@ -146,7 +148,7 @@ export function Badge({ tone = 'neutral', icon, iconOnly, children, tip }: Badge
     );
   }
   return (
-    <span className={`badge badge-${tone}`} data-tip={tip}>
+    <span className={`badge badge-${tone}`} data-tip={tip} data-tip-align={tipEnd ? 'end' : undefined}>
       {icon && <Icon icon={icon} size={14} />}
       {children}
     </span>
