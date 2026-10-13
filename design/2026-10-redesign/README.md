@@ -147,4 +147,4 @@ Martinův nápad: grafika batohu reaguje na **base weight** podle běžných hra
 ## 7. Drobné úpravy po implementaci (Martin, 2026-10-14)
 
 - Hlavičky sloupců gearlistu mají 13 px (styl `label`, chyba v design systému opravena), sloupec Worn/Cons. má pevnou šířku 88 px, legenda je široká max. 420 px a „+ New gearlist“ je tlačítko s textem.
-- **„Add item from Gear Vault“ má stejný vzhled i místo jako „+ Add gear“**: plné oranžové tlačítko přes celou šířku, připnuté dole v panelu gearlistu (a šablony), s textem „+ Add from Gear Vault“. Pravidlo: každý editovatelný panel má právě jedno takové tlačítko pro svou hlavní akci přidání. Na snapshotu a sdílené stránce není.
+- **„Add item from Gear Vault“ má stejný vzhled jako „+ Add gear“ (plné oranžové), ale zůstává na svém místě**: normální velikost, zarovnané vpravo nad hlavičkou sloupců, protože patří k seznamu pod ním (Martin, 2026-10-14, upřesnění po implementaci). Pruh přes celou šířku dole má jen Gear Vault. Na snapshotu a sdílené stránce tlačítko není.
