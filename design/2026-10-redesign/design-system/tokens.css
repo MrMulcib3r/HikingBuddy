@@ -71,6 +71,8 @@
 .t-label { font-family: var(--font-display); font-size: 13px; line-height: 16px; font-weight: 600; letter-spacing: 0.1em; }
 .t-body { font-family: var(--font-sans); font-size: 15px; line-height: 22px; font-weight: 400; }
 .t-body-strong { font-family: var(--font-sans); font-size: 15px; line-height: 22px; font-weight: 600; }
+.t-ui { font-family: var(--font-sans); font-size: 14px; line-height: 20px; font-weight: 500; }
 .t-small { font-family: var(--font-sans); font-size: 13px; line-height: 18px; font-weight: 400; }
 .t-weight { font-family: var(--font-sans); font-size: 15px; line-height: 22px; font-weight: 500; }
 .t-weight-xl { font-family: var(--font-sans); font-size: 32px; line-height: 36px; font-weight: 700; }
+.t-caption { font-family: var(--font-sans); font-size: 12px; line-height: 16px; font-weight: 500; }

@@ -12,7 +12,7 @@ Behaviour:
 - Hovering or focusing a layer or a legend row highlights both and dims the others.
 - **Every category shows its percentage** (v2, 2026-10-13). Layers at least 18 units tall carry it inside, in ink or surface depending on the layer's lightness. Thinner layers get an **outside label** to the right of the pack ("2 % Water"), joined to the layer by a thin leader line; outside labels are pushed apart so they never overlap. Labels are drawn above the pocket outline, never under it.
 - **Minimum layer height 7 units** (about 9px): every category stays visible and easy to hover; the other layers shrink proportionally so the stack still fills the pack exactly.
-- **Size:** the chart takes up to 480px of width (viewBox 0 0 340 280, the pack at x 26-194, outside labels at x 200-340); the legend sits beside it and drops under it when the panel is too narrow.
+- **Size:** the chart takes up to 480px of width (viewBox 0 0 340 280, the pack at x 26-194, outside labels at x 200-340); the legend sits beside it (max 420px wide, so weight and share stay close to the name) and drops under it when the panel is too narrow.
 - No lid seam: it crossed the percentages and was removed (2026-10-13). Only the front-pocket outline stays.
 - Empty gearlist: the empty pack (surface-sunken) with "0 g".
 

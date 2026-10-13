@@ -4,7 +4,6 @@ Icon-only button, used **only for actions everyone recognises without help**. Ev
 
 | Action | Icon |
 |---|---|
-| New gearlist (in the GEARLISTS panel header) | Lucide `plus` |
 | Delete gearlist / item / category | Lucide `trash-2` (+ `--danger`) |
 | Remove from gearlist | Lucide `x` |
 | Copy link (Share dialog) | Lucide `copy` |
