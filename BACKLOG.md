@@ -123,6 +123,11 @@ _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, př
   15. Uprav něco uvnitř úrovně (např. kolíky ×7) → nic se neanimuje.
   16. Přepni na oz / lb → nápověda v librách (10 lb / 15 lb).
   17. Screenshoty: `design/2026-10-redesign/implemented/v2/` a `v3/`; s tvými daty jen u tebe v `data/screenshots/` (mimo git).
+  **Úpravy v26 (2026-10-13):**
+  18. V hlavičce GEARLISTS je tlačítko „+ New gearlist“ s textem.
+  19. „Add item from Gear Vault“ je vpravo nad hlavičkou sloupců (lícuje s pravým okrajem seznamu).
+  20. Hlavička sloupců (ITEM, WORN, CONS., …) má větší písmo (13 px, jako hlavička legendy).
+  21. Legenda vedle batohu je na širokém okně užší (max. 420 px), váha a procenta jsou blízko názvů.
 - [ ] [CR] When updating gear items in a gearlist(-s) the user needs to know which gear lists are affected. (24.9.2026) → **Jak otestovat:** změň váhu/název položky z Vaultu, která je ve 2+ gearlistech → dialog pod textem vypíše „Affected gearlists:" s jejich názvy. Totéž při Delete a při změně přímo v gearlistu (tam se vypíšou ostatní gearlisty). (implementováno 2026-10-08)
 ![[Pasted image 20260924165604.png|376]]
 - [ ] [BUG] Categories cannot be edited. It should be possible to edit all categories including the template one. (24.9.2026) → **Jak otestovat:** klikni na název kategorie v nadpisu skupiny ve Vaultu (např. FOOD), přepiš, Enter. Escape zruší. Funguje i v dialogu „Categories" (klik na název). (implementováno 2026-10-08)

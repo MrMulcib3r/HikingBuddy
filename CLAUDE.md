@@ -7,7 +7,7 @@ Martin is the Product Manager and owner of this project. He is **not a developer
 - Product decisions (what the app does, how it behaves for the user) are Martin's. If a requirement is unclear or contradicts the PRD, ask him before building. Implementation details (how the code is written) are yours to decide, but tell him what you chose and why.
 
 ## Source of truth
-- **`PRDRequirements/PRD-MVP.md`** (currently v25 — **final scope**, see sections 0 and 2; FR-16 to FR-19 built, FR-20 (deployment) remains) — what we are building and why. Read it before any feature work. Code must match it; if they disagree, flag it to Martin.
+- **`PRDRequirements/PRD-MVP.md`** (currently v26 — **final scope**, see sections 0 and 2; FR-16 to FR-19 built, FR-20 (deployment) remains) — what we are building and why. Read it before any feature work. Code must match it; if they disagree, flag it to Martin.
 - **`PRDRequirements/build-status.md`** — log of what has been built, decided and verified. Read it at the start of a session; **append an entry after every meaningful change**.
 - `PRDRequirements/gemini-code-*.txt` — the original long-term vision (v1). Reference only, *not* the current scope.
 - If a product decision changes during work, update the PRD (bump the version, add a line to its history and to section 8/8a "Rozhodnutí") in the same change.

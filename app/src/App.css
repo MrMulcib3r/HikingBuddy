@@ -1104,8 +1104,9 @@ select.inline-edit-input {
   align-items: end;
   padding: var(--space-2) calc(var(--space-3) + 1px);
   font-family: var(--font-display);
-  font-size: var(--text-label-xs);
-  line-height: var(--lh-label-xs);
+  /* the 'label' type style (13px), same as the legend's column headers — bundle.css had 11px */
+  font-size: var(--text-label);
+  line-height: var(--lh-label);
   font-weight: 600;
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
@@ -1149,8 +1150,10 @@ select.inline-edit-input {
   gap: var(--space-4);
   margin-bottom: var(--space-4);
 }
+/* Right-aligned above the column header: it adds to the list below, not to the backpack. */
 .list-add-item {
-  margin-bottom: var(--space-4);
+  display: flex;
+  margin: 0 0 var(--space-3) auto;
 }
 .list-detail .banner {
   margin-bottom: var(--space-4);
@@ -1418,9 +1421,11 @@ select.inline-edit-input {
   color: var(--ink);
   font-weight: 700;
 }
+/* max-width keeps weight and share close to the category names on wide screens */
 .legend {
   flex: 1 1 280px;
   min-width: min(280px, 100%);
+  max-width: 420px;
   display: grid;
   gap: 2px;
   margin: 0;

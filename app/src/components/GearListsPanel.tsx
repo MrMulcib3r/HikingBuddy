@@ -7,7 +7,7 @@ import type { GearList } from '../types';
 import { TEMPLATE_NAME } from '../constants';
 import { GearListDetail } from './GearListDetail';
 import { ActionIcon } from './icons/actionIcons';
-import { Icon, IconButton } from './ui';
+import { Icon } from './ui';
 
 export function GearListsPanel() {
   const { state, createList, createListFromTemplate } = useApp();
@@ -33,18 +33,20 @@ export function GearListsPanel() {
     setCreating(false);
   }
 
+  // Text + icon, not icon only: it is the panel's main action and a lone + was easy to miss
+  // (Martin, 2026-10-13 — a deliberate exception to the design system's icon-only + rule).
   const newButton = (
-    <IconButton
-      label="New gearlist"
-      icon={ActionIcon.newGearlist}
-      variant="outlined"
-      tipBelow
-      tipEnd
+    <button
+      type="button"
+      className="btn btn-secondary btn-small"
       onClick={() => {
         setFromTemplate(true);
         setCreating(true);
       }}
-    />
+    >
+      <Icon icon={ActionIcon.newGearlist} />
+      New gearlist
+    </button>
   );
 
   const newListForm = creating && (
