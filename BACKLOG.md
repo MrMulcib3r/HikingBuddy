@@ -128,6 +128,14 @@ _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, př
   19. „Add item from Gear Vault“ je vpravo nad hlavičkou sloupců (lícuje s pravým okrajem seznamu).
   20. Hlavička sloupců (ITEM, WORN, CONS., …) má větší písmo (13 px, jako hlavička legendy).
   21. Legenda vedle batohu je na širokém okně užší (max. 420 px), váha a procenta jsou blízko názvů.
+  **Opravy podle UI review 2026-10-14 (PRD v27):**
+  22. „Add item from Gear Vault“ je plné oranžové (jako „+ Add gear“), na svém místě vpravo nad hlavičkou sloupců. Sloupec Worn / Cons. je širší, popisky sedí nad ikonami.
+  23. „+ Add gear“ → formulář bez vybrané kategorie. Add bez kategorie → červený obrys a „Choose a category.“, dialog zůstane. „+ Other“ otevře pole jen s Add; klik na jinou dlaždici ho zavře. „Add item“ v kategorii ji předvybere.
+  24. V řádcích je kategorie a prázdné „Add a note…“ vidět jen při najetí myší (na telefonu vždy); řádky se při tom nehýbou. Klik na kategorii → širší výběr (180 px).
+  25. Dialog „Add gear to this gearlist“: text hledání začíná za lupou, položky jsou po kategoriích s tečkou, „In list ×6“ u toho, co už v gearlistu je, tlačítka Add jsou sekundární.
+  26. 3-cestný dialog má Cancel / Create a copy / Continue na jednom řádku; texty „1 gearlist“ / „3 gearlists“ místo „(s)“; datum snapshotu „12 Sep 2026, 8:30“.
+  27. Sdílená stránka na telefonu: u ×1 jen jedna váha.
+  28. Screenshoty: `design/2026-10-redesign/implemented/v4/`.
 - [ ] [CR] When updating gear items in a gearlist(-s) the user needs to know which gear lists are affected. (24.9.2026) → **Jak otestovat:** změň váhu/název položky z Vaultu, která je ve 2+ gearlistech → dialog pod textem vypíše „Affected gearlists:" s jejich názvy. Totéž při Delete a při změně přímo v gearlistu (tam se vypíšou ostatní gearlisty). (implementováno 2026-10-08)
 ![[Pasted image 20260924165604.png|376]]
 - [ ] [BUG] Categories cannot be edited. It should be possible to edit all categories including the template one. (24.9.2026) → **Jak otestovat:** klikni na název kategorie v nadpisu skupiny ve Vaultu (např. FOOD), přepiš, Enter. Escape zruší. Funguje i v dialogu „Categories" (klik na název). (implementováno 2026-10-08)

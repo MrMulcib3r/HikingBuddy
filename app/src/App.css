@@ -688,11 +688,10 @@ select.inline-edit-input,
 }
 /* "Choose a category." — the tile group gets the same error border as an is-error input. */
 .category-tiles.is-error {
-  padding: var(--space-2);
-  margin: calc(var(--space-2) * -1);
-  border: 1px solid var(--danger);
+  /* outline, not border: the tiles don't move and the label above isn't covered */
   border-radius: var(--radius-md);
-  box-shadow: 0 0 0 3px var(--danger-soft);
+  outline: 1px solid var(--danger);
+  outline-offset: 3px;
 }
 .category-tile {
   position: relative;
