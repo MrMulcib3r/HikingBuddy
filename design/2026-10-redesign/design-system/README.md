@@ -2,7 +2,7 @@ HikingBuddy is a personal gear planner for long-distance treks: a Gear Vault of 
 
 ## Principles
 
-- **The pack reacts.** At the Ultralight / Lightweight / Traditional base-weight breakpoints, gear appears strapped to the pack (sleeping pad, ice axe, camp clogs) with a tier badge in words. It rewards going lighter and makes edits feel alive (see BackpackChart).
+- **The pack reacts.** At the Ultralight / Lightweight / Traditional base-weight breakpoints, gear appears strapped to the pack (sleeping pad, ice axe, trekking poles, hiking boots) with a tier badge in words. It rewards going lighter and makes edits feel alive (see BackpackChart).
 - **The pack is the hero.** The backpack chart (`BackpackChart`) is the largest, most colourful thing on screen. Everything else stays quiet so it can be.
 - **Light and calm.** Panels are `surface` on the `bg` ground; colour is spent on the category layers and on one ember accent. No dark theme.
 - **Icons over words, never icons without words.** Frequent actions are icon buttons, and every icon button carries a tooltip and `aria-label` with its full name.
@@ -63,7 +63,7 @@ Both faces come from road and trail signage, which suits an app about walking lo
 
 - Header: mark + "HikingBuddy", then data-file status, backup buttons and the unit toggle on the right.
 - Two panels: Gear Vault (2 parts) left, Gearlists (3 parts) right; stacked below 900px.
-- Gearlist panel, top to bottom: panel header "GEARLISTS" with a "+ New gearlist" button (icon + label) → gearlist name with switcher and its actions (Snapshot, Share, Template as icon + label, Delete as icon) → `BackpackChart` (large) beside its legend, with the weight split and Total under the pack → column header (Item, Worn, Cons., Weight, Qty, Total) → category groups with `GearlistItemRow`s. There are no separate weight tiles: the split under the pack is the one place for Base / Consumables / Worn / Total.
+- Gearlist panel, top to bottom: panel header "GEARLISTS" with a "+ New gearlist" button (icon + label) → gearlist name with switcher and its actions (Snapshot, Share, Template as icon + label, Delete as icon) → `BackpackChart` (large) beside its legend, with the weight split and Total under the pack → column header (Item, Worn, Cons., Weight, Qty, Total) → category groups with `GearlistItemRow`s → full-width "+ Add from Gear Vault" bar pinned at the bottom (same style and place as "+ Add gear" in the Vault). There are no separate weight tiles: the split under the pack is the one place for Base / Consumables / Worn / Total.
 - Gear Vault panel: search and category filter → category groups with `VaultItemRow`s → full-width "Add gear" button pinned at the bottom.
 
 ## Screen sizes and touch

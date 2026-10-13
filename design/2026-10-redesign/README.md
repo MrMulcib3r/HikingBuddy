@@ -143,3 +143,8 @@ Martinův nápad: grafika batohu reaguje na **base weight** podle běžných hra
 - Proč je to dobré UX: dává okamžitou zpětnou vazbu na úpravy, motivuje k odlehčení batohu (hikerský cíl) a je to zapamatovatelný detail do portfolia. Rizika (rušivost, nejasnost) řeší neměnný obrys, decentní neutrální barvy výbavy a textový štítek.
 
 **Finální podoba úrovně Traditional (Martin, 2026-10-13):** po několika kolech variant (crocsy, žabky, pantofle z profilu, 5 rozložení) vybral Martin rozložení „Symetrie“ (cepín vlevo, hůlky vpravo) a trekové boty varianty A (klasická bota s hladkou podrážkou). Pantofle byly zamítnuté, protože nebyly čitelné, a crocsy kvůli podobnosti se značkou.
+
+## 7. Drobné úpravy po implementaci (Martin, 2026-10-14)
+
+- Hlavičky sloupců gearlistu mají 13 px (styl `label`, chyba v design systému opravena), sloupec Worn/Cons. má pevnou šířku 88 px, legenda je široká max. 420 px a „+ New gearlist“ je tlačítko s textem.
+- **„Add item from Gear Vault“ má stejný vzhled i místo jako „+ Add gear“**: plné oranžové tlačítko přes celou šířku, připnuté dole v panelu gearlistu (a šablony), s textem „+ Add from Gear Vault“. Pravidlo: každý editovatelný panel má právě jedno takové tlačítko pro svou hlavní akci přidání. Na snapshotu a sdílené stránce není.

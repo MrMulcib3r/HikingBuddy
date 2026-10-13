@@ -7,3 +7,4 @@ Text button for actions that need a word: one `hb-btn--primary` per area for the
 - Gearlist actions are `--secondary --sm` with icon + label: Snapshot `camera`, Share `signpost`, Template `map`. Header backup controls are `--ghost --sm`: Export `hard-drive-download`, Import `hard-drive-upload`.
 - One primary per dialog or panel header. Destructive confirmations put the danger button last.
 - Replaces `.btn`, `.btn-primary`, `.btn-secondary`, `.btn-ghost`, `.btn-danger`, `.btn-small` in `App.css`.
+- **Panel bar** (`--primary --block`, pinned to the bottom of its panel): each editable panel has exactly one, for its main "add" action. Gear Vault: "+ Add gear". Gearlist and template: "+ Add from Gear Vault" (opens the same picker as before). Two orange bars side by side is intended: same action type, same place, one per panel. Not shown on snapshots or the shared page.
