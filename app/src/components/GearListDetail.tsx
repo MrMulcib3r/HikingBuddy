@@ -262,7 +262,8 @@ export function GearListDetail({ list, onDeleted, isTemplate = false, switcher }
               </div>
             )}
             {[...grouped.entries()].map(([category, items]) => (
-              <div key={category} className="list-category-group" {...makeDragHandlers(category, (src, target) => reorderListCategories(list.id, src, target), 'list-category')}>
+              <div key={category} className="category-slot" {...makeDragHandlers(category, (src, target, after) => reorderListCategories(list.id, src, target, after), 'list-category')}>
+               <div className="list-category-group">
                 <h4 className="list-category-title">
                   <span className="vault-category-handle" title="Drag to reorder categories">
                     <Icon icon={ActionIcon.drag} size={16} />
@@ -279,9 +280,10 @@ export function GearListDetail({ list, onDeleted, isTemplate = false, switcher }
                     listId={list.id}
                     item={item}
                     onRequestCoreEdit={requestCoreEdit}
-                    onReorder={(sourceId, targetId) => reorderListItems(list.id, sourceId, targetId)}
+                    onReorder={(sourceId, targetId, after) => reorderListItems(list.id, sourceId, targetId, after)}
                   />
                 ))}
+               </div>
               </div>
             ))}
           </div>

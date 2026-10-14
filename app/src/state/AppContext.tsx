@@ -17,21 +17,21 @@ type Action =
   | { type: 'ADD_CATEGORY'; id: string; name: string }
   | { type: 'RENAME_CATEGORY'; id: string; name: string }
   | { type: 'DELETE_CATEGORY'; id: string }
-  | { type: 'REORDER_CATEGORIES'; sourceId: string; targetId: string }
+  | { type: 'REORDER_CATEGORIES'; sourceId: string; targetId: string; after?: boolean }
   | { type: 'ADD_GEAR_ITEM'; id: string; item: GearItemPatch }
   | { type: 'UPDATE_GEAR_ITEM'; id: string; patch: GearItemPatch }
   | { type: 'DELETE_GEAR_ITEM'; id: string; removeFromLists: boolean }
-  | { type: 'REORDER_GEAR_ITEMS'; sourceId: string; targetId: string; targetCategoryId: string | null }
+  | { type: 'REORDER_GEAR_ITEMS'; sourceId: string; targetId: string; targetCategoryId: string | null; after?: boolean }
   | { type: 'CREATE_LIST'; id: string; name: string }
   | { type: 'ADD_ITEM_TO_LIST'; listId: string; gearItemId: string; quantity: number }
   | { type: 'UPDATE_LIST_ITEM'; listId: string; itemId: string; patch: ListItemEditablePatch }
   | { type: 'UPDATE_UNLINKED_LIST_ITEM'; listId: string; itemId: string; patch: UnlinkedItemPatch }
   | { type: 'RELINK_LIST_ITEM'; listId: string; itemId: string; gearItemId: string }
   | { type: 'REMOVE_LIST_ITEM'; listId: string; itemId: string }
-  | { type: 'REORDER_LIST_ITEMS'; listId: string; sourceId: string; targetId: string }
-  | { type: 'REORDER_LIST_CATEGORIES'; listId: string; sourceName: string; targetName: string }
+  | { type: 'REORDER_LIST_ITEMS'; listId: string; sourceId: string; targetId: string; after?: boolean }
+  | { type: 'REORDER_LIST_CATEGORIES'; listId: string; sourceName: string; targetName: string; after?: boolean }
   | { type: 'SAVE_SNAPSHOT'; listId: string }
-  | { type: 'REORDER_LISTS'; sourceId: string; targetId: string }
+  | { type: 'REORDER_LISTS'; sourceId: string; targetId: string; after?: boolean }
   | { type: 'DELETE_LIST'; listId: string }
   | { type: 'SAVE_AS_TEMPLATE'; listId: string; templateId: string }
   | { type: 'DELETE_TEMPLATE'; templateId: string }
@@ -59,7 +59,7 @@ function reducer(state: AppState, action: Action): AppState {
       return mapAllLists({ ...state, categories, gearItems }, (list) => syncLinkedItemsAfterCategoryRename(list, gearItems, categories));
     }
     case 'REORDER_CATEGORIES': {
-      const reordered = reorderById(sortByOrder(state.categories), action.sourceId, action.targetId);
+      const reordered = reorderById(sortByOrder(state.categories), action.sourceId, action.targetId, action.after);
       return { ...state, categories: withSequentialOrder(reordered) };
     }
     case 'ADD_GEAR_ITEM': {
@@ -92,7 +92,7 @@ function reducer(state: AppState, action: Action): AppState {
     case 'REORDER_GEAR_ITEMS': {
       const sorted = sortByOrder(state.gearItems);
       const moved = sorted.map((g) => (g.id === action.sourceId ? { ...g, categoryId: action.targetCategoryId } : g));
-      const reordered = reorderById(moved, action.sourceId, action.targetId);
+      const reordered = reorderById(moved, action.sourceId, action.targetId, action.after);
       return { ...state, gearItems: withSequentialOrder(reordered) };
     }
     case 'CREATE_LIST': {
@@ -166,7 +166,7 @@ function reducer(state: AppState, action: Action): AppState {
     }
     case 'REORDER_LIST_ITEMS': {
       return mapListById(state, action.listId, (list) => {
-        const reordered = reorderById(sortByOrder(list.items), action.sourceId, action.targetId);
+        const reordered = reorderById(sortByOrder(list.items), action.sourceId, action.targetId, action.after);
         return { ...list, items: withSequentialOrder(reordered) };
       });
     }
@@ -180,7 +180,7 @@ function reducer(state: AppState, action: Action): AppState {
           if (group) group.items.push(item);
           else groups.push({ id: item.categoryName, items: [item] });
         }
-        const moved = reorderById(groups, action.sourceName, action.targetName);
+        const moved = reorderById(groups, action.sourceName, action.targetName, action.after);
         return { ...list, items: withSequentialOrder(moved.flatMap((g) => g.items)) };
       });
     }
@@ -193,7 +193,7 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, gearLists };
     }
     case 'REORDER_LISTS': {
-      const reordered = reorderById(sortByOrder(state.gearLists), action.sourceId, action.targetId);
+      const reordered = reorderById(sortByOrder(state.gearLists), action.sourceId, action.targetId, action.after);
       return { ...state, gearLists: withSequentialOrder(reordered) };
     }
     case 'DELETE_LIST': {
@@ -307,13 +307,13 @@ interface AppContextValue {
   addCategory: (name: string) => string;
   renameCategory: (id: string, name: string) => void;
   deleteCategory: (id: string) => void;
-  reorderCategories: (sourceId: string, targetId: string) => void;
+  reorderCategories: (sourceId: string, targetId: string, after?: boolean) => void;
   addGearItem: (item: GearItemPatch) => string;
   updateGearItem: (id: string, patch: GearItemPatch) => void;
   /** removeFromLists: true = also remove its rows from every gearlist ("Delete everywhere");
    * false = keep those rows as unlinked custom entries. Snapshots are never touched. */
   deleteGearItem: (id: string, removeFromLists: boolean) => void;
-  reorderGearItems: (sourceId: string, targetId: string, targetCategoryId: string | null) => void;
+  reorderGearItems: (sourceId: string, targetId: string, targetCategoryId: string | null, after?: boolean) => void;
   createList: (name: string) => string;
   addItemToList: (listId: string, gearItemId: string, quantity: number) => void;
   updateListItem: (listId: string, itemId: string, patch: ListItemEditablePatch) => void;
@@ -323,11 +323,11 @@ interface AppContextValue {
   /** FR-5 "Create a copy of the item": vytvoří novou Vault položku a přepojí na ni jen tento konkrétní řádek gearlistu. */
   copyAndRelinkListItem: (listId: string, itemId: string, patch: GearItemPatch) => void;
   removeListItem: (listId: string, itemId: string) => void;
-  reorderListItems: (listId: string, sourceId: string, targetId: string) => void;
+  reorderListItems: (listId: string, sourceId: string, targetId: string, after?: boolean) => void;
   /** Moves a category's rows (by category name) in front of another category in one gearlist. */
-  reorderListCategories: (listId: string, sourceName: string, targetName: string) => void;
+  reorderListCategories: (listId: string, sourceName: string, targetName: string, after?: boolean) => void;
   saveSnapshot: (listId: string) => void;
-  reorderLists: (sourceId: string, targetId: string) => void;
+  reorderLists: (sourceId: string, targetId: string, after?: boolean) => void;
   deleteList: (listId: string) => void;
   /** T-1: save this gearlist's Vault-linked rows as the (single) template, replacing any existing one. */
   saveAsTemplate: (listId: string) => void;
@@ -358,7 +358,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       },
       renameCategory: (id, name) => dispatch({ type: 'RENAME_CATEGORY', id, name }),
       deleteCategory: (id) => dispatch({ type: 'DELETE_CATEGORY', id }),
-      reorderCategories: (sourceId, targetId) => dispatch({ type: 'REORDER_CATEGORIES', sourceId, targetId }),
+      reorderCategories: (sourceId, targetId, after) => dispatch({ type: 'REORDER_CATEGORIES', sourceId, targetId, after }),
       addGearItem: (item) => {
         const id = newId('gear');
         dispatch({ type: 'ADD_GEAR_ITEM', id, item });
@@ -366,8 +366,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       },
       updateGearItem: (id, patch) => dispatch({ type: 'UPDATE_GEAR_ITEM', id, patch }),
       deleteGearItem: (id, removeFromLists) => dispatch({ type: 'DELETE_GEAR_ITEM', id, removeFromLists }),
-      reorderGearItems: (sourceId, targetId, targetCategoryId) =>
-        dispatch({ type: 'REORDER_GEAR_ITEMS', sourceId, targetId, targetCategoryId }),
+      reorderGearItems: (sourceId, targetId, targetCategoryId, after) =>
+        dispatch({ type: 'REORDER_GEAR_ITEMS', sourceId, targetId, targetCategoryId, after }),
       createList: (name) => {
         const id = newId('list');
         dispatch({ type: 'CREATE_LIST', id, name });
@@ -383,11 +383,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
         dispatch({ type: 'RELINK_LIST_ITEM', listId, itemId, gearItemId: id });
       },
       removeListItem: (listId, itemId) => dispatch({ type: 'REMOVE_LIST_ITEM', listId, itemId }),
-      reorderListItems: (listId, sourceId, targetId) => dispatch({ type: 'REORDER_LIST_ITEMS', listId, sourceId, targetId }),
-      reorderListCategories: (listId, sourceName, targetName) =>
-        dispatch({ type: 'REORDER_LIST_CATEGORIES', listId, sourceName, targetName }),
+      reorderListItems: (listId, sourceId, targetId, after) => dispatch({ type: 'REORDER_LIST_ITEMS', listId, sourceId, targetId, after }),
+      reorderListCategories: (listId, sourceName, targetName, after) =>
+        dispatch({ type: 'REORDER_LIST_CATEGORIES', listId, sourceName, targetName, after }),
       saveSnapshot: (listId) => dispatch({ type: 'SAVE_SNAPSHOT', listId }),
-      reorderLists: (sourceId, targetId) => dispatch({ type: 'REORDER_LISTS', sourceId, targetId }),
+      reorderLists: (sourceId, targetId, after) => dispatch({ type: 'REORDER_LISTS', sourceId, targetId, after }),
       deleteList: (listId) => dispatch({ type: 'DELETE_LIST', listId }),
       saveAsTemplate: (listId) => dispatch({ type: 'SAVE_AS_TEMPLATE', listId, templateId: newId('tpl') }),
       deleteTemplate: (templateId) => dispatch({ type: 'DELETE_TEMPLATE', templateId }),

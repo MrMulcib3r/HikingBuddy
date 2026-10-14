@@ -110,7 +110,7 @@ _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, př
 
 
 - [ ] [BUG] Dvě chyby z druhého testu 2026-10-14 (opraveno 2026-10-14) → **Jak otestovat** (Ctrl+F5):
-  1. **Pořadí kategorií v gearlistu:** přetáhni kategorii (úchyt vlevo u nadpisu, objeví se při najetí) na jinou — nahoru i **dolů**, i o jedno místo. Příčina: přetažení „před cíl“ nešlo posunout o jedno místo dolů ani na konec; teď se při tažení dolů vloží za cíl. Platí i pro položky, gearlisty a kategorie ve Vaultu.
+  1. **Pořadí kategorií v gearlistu (i ve Vaultu):** přetáhni kategorii za úchyt vlevo u nadpisu — a pusť ji **mezi dvě kategorie** (do mezery), na nadpis nebo na řádek jiné kategorie. Mezera pod kategorií = „vlož za ni“; jinak se přetažená kategorie posadí na místo cíle (nahoru před něj, dolů za něj). Příčina předchozích chyb: mezera mezi kategoriemi nebyla cíl pro puštění (kurzor 🚫), a posun o jedno místo dolů nic neudělal.
   2. **Klik do poznámky a pak na kategorii:** poznámka se uloží a rovnou se otevře výběr kategorie (ve Vaultu i v gearlistu). Stejně funguje klik z poznámky na název, váhu nebo množství.
 
 ## ✅ Hotovo

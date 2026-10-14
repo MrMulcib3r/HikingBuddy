@@ -188,7 +188,8 @@ export function GearVaultPanel() {
             const category = key === UNCATEGORIZED_FILTER ? null : state.categories.find((c) => c.id === key) ?? null;
             const total = items.reduce((sum, g) => sum + g.weightGrams * g.defaultQuantity, 0);
             return (
-              <div key={key} className="vault-category-group" {...(category ? makeDragHandlers(category.id, reorderCategories, 'category') : {})}>
+              <div key={key} className="category-slot" {...(category ? makeDragHandlers(category.id, reorderCategories, 'category') : {})}>
+               <div className="vault-category-group">
                 <h3 className="vault-category-title">
                   {category && (
                     <span className="vault-category-handle" title="Drag to reorder categories">
@@ -220,10 +221,11 @@ export function GearVaultPanel() {
                     onEditQuantity={(defaultQuantity) => updateGearItem(item.id, { ...item, defaultQuantity })}
                     onEditNote={(note) => requestCoreEdit(item, { note })}
                     onDelete={() => requestDelete(item)}
-                    onReorder={(sourceId, targetId) => reorderGearItems(sourceId, targetId, item.categoryId)}
+                    onReorder={(sourceId, targetId, after) => reorderGearItems(sourceId, targetId, item.categoryId, after)}
                   />
                 ))}
                 <AddItemButton onClick={() => setAddForm({ categoryId: category?.id ?? null })} />
+               </div>
               </div>
             );
           })}
@@ -357,7 +359,7 @@ interface VaultItemRowProps {
   onEditQuantity: (quantity: number) => void;
   onEditNote: (note: string) => void;
   onDelete: () => void;
-  onReorder: (sourceId: string, targetId: string) => void;
+  onReorder: (sourceId: string, targetId: string, after?: boolean) => void;
 }
 
 function VaultItemRow({ item, usage, unitPreference, categories, onCreateCategory, onEditCore, onEditQuantity, onEditNote, onDelete, onReorder }: VaultItemRowProps) {

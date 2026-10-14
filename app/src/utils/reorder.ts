@@ -3,7 +3,7 @@
  * it (so moving an item one slot down works too) — keeping everything else in place. Used for gearlists, categories,
  * and items inside a gearlist/vault list. Returns a new array with `order` fields rewritten
  * 0..n-1 to match the new position. */
-export function reorderById<T extends { id: string }>(list: T[], sourceId: string, targetId: string): T[] {
+export function reorderById<T extends { id: string }>(list: T[], sourceId: string, targetId: string, after?: boolean): T[] {
   if (sourceId === targetId) return list;
   const items = [...list];
   const fromIndex = items.findIndex((i) => i.id === sourceId);
@@ -11,7 +11,9 @@ export function reorderById<T extends { id: string }>(list: T[], sourceId: strin
   if (fromIndex === -1 || toIndex === -1) return list;
   const [moved] = items.splice(fromIndex, 1);
   const targetIndex = items.findIndex((i) => i.id === targetId);
-  items.splice(fromIndex < toIndex ? targetIndex + 1 : targetIndex, 0, moved);
+  // `after` forces the side (a category dropped in the gap below a group); without it, dragging
+  // downwards lands after the target and upwards before it.
+  items.splice((after ?? fromIndex < toIndex) ? targetIndex + 1 : targetIndex, 0, moved);
   return items;
 }
 

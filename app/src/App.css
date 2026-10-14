@@ -782,6 +782,15 @@ select.inline-edit-input,
   background: var(--surface);
   overflow: hidden;
 }
+/* Draggable category + the gap below it: dropping a category between two groups must land on
+   a drop target too (a plain margin is outside every group, so the browser showed "not allowed"). */
+.category-slot {
+  padding-bottom: var(--space-4);
+}
+.category-slot > .vault-category-group,
+.category-slot > .list-category-group {
+  margin-bottom: 0;
+}
 .vault-category-title,
 .list-category-title {
   display: flex;

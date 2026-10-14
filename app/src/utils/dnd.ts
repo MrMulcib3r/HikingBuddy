@@ -22,7 +22,7 @@ export function isDragging(e: DragEvent, kind: DragKind): boolean {
  * "drag this row onto that row to reorder" interaction used for gearlists, categories,
  * and items within a list. `onReorder` receives (draggedId, droppedOnId). A gear item
  * ('gear') can additionally be dropped onto a gearlist to add it there (GearListDetail). */
-export function makeDragHandlers(id: string, onReorder: (sourceId: string, targetId: string) => void, kind: DragKind) {
+export function makeDragHandlers(id: string, onReorder: (sourceId: string, targetId: string, after?: boolean) => void, kind: DragKind) {
   return {
     draggable: true,
     onDragStart: (e: DragEvent) => {
@@ -41,7 +41,14 @@ export function makeDragHandlers(id: string, onReorder: (sourceId: string, targe
       e.preventDefault();
       e.stopPropagation();
       const sourceId = e.dataTransfer.getData(dragMime(kind));
-      if (sourceId && sourceId !== id) onReorder(sourceId, id);
+      // Category groups sit in a "slot" (card + gap below). Dropped in the gap below a card →
+      // after that group; anywhere else the dragged item takes the target's place.
+      let after: boolean | undefined;
+      if (kind === 'category' || kind === 'list-category') {
+        const card = (e.currentTarget as HTMLElement).firstElementChild;
+        if (card && e.clientY > card.getBoundingClientRect().bottom) after = true;
+      }
+      if (sourceId && sourceId !== id) onReorder(sourceId, id, after);
     },
   };
 }

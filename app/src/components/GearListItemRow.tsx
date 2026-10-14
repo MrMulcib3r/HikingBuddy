@@ -13,7 +13,7 @@ interface GearListItemRowProps {
   listId: string;
   item: GearListItem;
   onRequestCoreEdit: (item: GearListItem, patch: { name?: string; categoryId?: string | null; weightGrams?: number }) => void;
-  onReorder: (sourceId: string, targetId: string) => void;
+  onReorder: (sourceId: string, targetId: string, after?: boolean) => void;
 }
 
 /**
