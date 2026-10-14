@@ -14,7 +14,7 @@ import type { AppState } from './types';
  * loadState() below applies every migration in sequence up to CURRENT_SCHEMA_VERSION, so a
  * user who hasn't opened the app in months still gets their data upgraded correctly.
  */
-export const CURRENT_SCHEMA_VERSION = 5;
+export const CURRENT_SCHEMA_VERSION = 6;
 
 interface StoredPayload {
   schemaVersion: number;
@@ -158,11 +158,46 @@ const migrateV4ToV5: Migration = (raw) => {
   };
 };
 
+/**
+ * Schema 6 = same shape as schema 5; content only. The category "Worn clothing" is renamed to
+ * "Clothing" (BACKLOG 2026-10-14, Martin: "Worn" is a flag on a gearlist row, not a kind of
+ * clothing). Same one-time rename as migrateV3ToV4: the category's name changes and live
+ * gearlist/template rows linked to Vault items in it show the new name; unlinked custom rows
+ * and snapshots stay as they are. Skipped when there is no such category or a "Clothing" one
+ * already exists. Runs once, so a later manual rename sticks.
+ */
+const migrateV5ToV6: Migration = (raw) => {
+  const state = (raw ?? {}) as Record<string, any>;
+  const categories: any[] = Array.isArray(state.categories) ? state.categories : [];
+  const OLD_NAME = 'worn clothing';
+  const NEW_NAME = 'Clothing';
+  const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();
+  if (categories.some((c) => norm(c?.name) === norm(NEW_NAME))) return state;
+  const worn = categories.find((c) => norm(c?.name) === OLD_NAME);
+  if (!worn) return state;
+
+  const gearItems: any[] = Array.isArray(state.gearItems) ? state.gearItems : [];
+  const itemIds = new Set(gearItems.filter((g) => g?.categoryId === worn.id).map((g) => g.id));
+  const renameRows = (l: any) => ({
+    ...l,
+    items: (Array.isArray(l?.items) ? l.items : []).map((it: any) =>
+      it?.gearItemId && itemIds.has(it.gearItemId) ? { ...it, categoryName: NEW_NAME } : it
+    ),
+  });
+  return {
+    ...state,
+    categories: categories.map((c) => (c === worn ? { ...c, name: NEW_NAME } : c)),
+    gearLists: (Array.isArray(state.gearLists) ? state.gearLists : []).map(renameRows),
+    templates: (Array.isArray(state.templates) ? state.templates : []).map(renameRows),
+  };
+};
+
 const MIGRATIONS: Record<number, Migration> = {
   1: migrateV1ToV2,
   2: migrateV2ToV3,
   3: migrateV3ToV4,
   4: migrateV4ToV5,
+  5: migrateV5ToV6,
 };
 
 function runMigrations(state: unknown, fromVersion: number): AppState {

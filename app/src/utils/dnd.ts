@@ -6,7 +6,7 @@ import type { DragEvent } from 'react';
  * isn't mistaken for a gearlist row being reordered, and dragging a Vault item doesn't
  * also drag the category group it sits in.
  */
-export type DragKind = 'gear' | 'category' | 'list-item' | 'gearlist';
+export type DragKind = 'gear' | 'category' | 'list-category' | 'list-item' | 'gearlist';
 
 export function dragMime(kind: DragKind): string {
   return `application/x-hikingbuddy-${kind}`;

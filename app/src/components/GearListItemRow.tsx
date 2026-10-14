@@ -72,7 +72,6 @@ export function GearListItemRow({ listId, item, onRequestCoreEdit, onReorder }: 
             allowEmpty
             onCommit={(note) => updateListItem(listId, item.id, { note })}
           />
-          <span className="row-meta-sep" aria-hidden="true">·</span>
           <span className="row-category">
             <InlineCategorySelect
               categories={state.categories}

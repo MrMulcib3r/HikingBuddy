@@ -6,7 +6,7 @@ import type { GearList, GearListItem } from '../types';
 import { formatWeight } from '../utils/weight';
 import { formatDateTime, plural } from '../utils/text';
 import { sortByOrder } from '../utils/reorder';
-import { dragMime, isDragging } from '../utils/dnd';
+import { dragMime, isDragging, makeDragHandlers } from '../utils/dnd';
 import { categoryColor, categoryColorKey, categoryForName } from '../utils/categoryStyle';
 import { AddItemToListDialog } from './AddItemToListDialog';
 import { ConfirmDialog } from './ConfirmDialog';
@@ -48,6 +48,7 @@ export function GearListDetail({ list, onDeleted, isTemplate = false, switcher }
     saveSnapshot,
     deleteList,
     reorderListItems,
+    reorderListCategories,
     saveAsTemplate,
     deleteTemplate,
     dismissTemplateBanner,
@@ -261,8 +262,11 @@ export function GearListDetail({ list, onDeleted, isTemplate = false, switcher }
               </div>
             )}
             {[...grouped.entries()].map(([category, items]) => (
-              <div key={category} className="list-category-group">
+              <div key={category} className="list-category-group" {...makeDragHandlers(category, (src, target) => reorderListCategories(list.id, src, target), 'list-category')}>
                 <h4 className="list-category-title">
+                  <span className="vault-category-handle" title="Drag to reorder categories">
+                    <Icon icon={ActionIcon.drag} size={16} />
+                  </span>
                   <CategoryHeading name={category} items={items} editable />
                   {/* Category subtotal (PRD section 5) — every row's weight × quantity. */}
                   <span className="list-category-total">

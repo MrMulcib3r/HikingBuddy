@@ -126,7 +126,7 @@ export function GearItemFormDialog({ categories, unitPreference, onSubmit, onCan
                 step="any"
                 value={weightInput}
                 onChange={(e) => setWeightInput(e.target.value)}
-                placeholder="60"
+                placeholder="0"
               />
             </label>
             <label className="field">

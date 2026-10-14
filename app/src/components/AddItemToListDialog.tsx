@@ -88,6 +88,9 @@ export function AddItemToListDialog({ listId, onClose }: AddItemToListDialogProp
                 <div key={item.id} className="add-item-row">
                   <span className="add-item-name">
                     {item.name}
+                    {/* The note sits on the name's line so two items with the same name (two
+                        T-shirts) can be told apart without making the rows taller. */}
+                    {item.note && <span className="add-item-note">{item.note}</span>}
                     {already !== undefined && (
                       <Badge tone="success" tip="Already in this gearlist — adding raises its quantity">
                         In list ×{already}

@@ -22,7 +22,9 @@ import { categoryColor, categoryColorKey } from '../utils/categoryStyle';
 
 const UNCATEGORIZED_FILTER = '__uncategorized__';
 
-type CoreFieldPatch = Pick<GearItem, 'name' | 'categoryId' | 'weightGrams'>;
+/** The note counts as a core field in the Vault: it is copied into every gearlist that uses
+ * the item, so changing it goes through the same dialog as the name (BACKLOG 2026-10-14). */
+type CoreFieldPatch = Pick<GearItem, 'name' | 'categoryId' | 'weightGrams' | 'note'>;
 
 /** A pending edit to a "core" field (name/category/weight) that is used elsewhere and so
  * needs the Cancel / Create a copy / Continue dialog (FR-5). */
@@ -114,12 +116,13 @@ export function GearVaultPanel() {
       name: patch.name ?? item.name,
       categoryId: patch.categoryId !== undefined ? patch.categoryId : item.categoryId,
       weightGrams: patch.weightGrams ?? item.weightGrams,
+      note: patch.note !== undefined ? patch.note : item.note,
     };
     const affected = findAffectedLists(state, item.id);
     const templates = findAffectedTemplates(state, item.id);
     // The template counts as "used elsewhere" too (T-5).
     if (affected.length === 0 && templates.length === 0) {
-      updateGearItem(item.id, { ...fullPatch, defaultQuantity: item.defaultQuantity, note: item.note });
+      updateGearItem(item.id, { ...fullPatch, defaultQuantity: item.defaultQuantity });
       return;
     }
     setPendingCoreEdit({
@@ -215,7 +218,7 @@ export function GearVaultPanel() {
                     onCreateCategory={addCategory}
                     onEditCore={(patch) => requestCoreEdit(item, patch)}
                     onEditQuantity={(defaultQuantity) => updateGearItem(item.id, { ...item, defaultQuantity })}
-                    onEditNote={(note) => updateGearItem(item.id, { ...item, note })}
+                    onEditNote={(note) => requestCoreEdit(item, { note })}
                     onDelete={() => requestDelete(item)}
                     onReorder={(sourceId, targetId) => reorderGearItems(sourceId, targetId, item.categoryId)}
                   />
@@ -266,7 +269,6 @@ export function GearVaultPanel() {
             addGearItem({
               ...pendingCoreEdit.patch,
               defaultQuantity: pendingCoreEdit.item.defaultQuantity,
-              note: pendingCoreEdit.item.note,
             });
             setPendingCoreEdit(null);
           }}
@@ -274,7 +276,6 @@ export function GearVaultPanel() {
             updateGearItem(pendingCoreEdit.item.id, {
               ...pendingCoreEdit.patch,
               defaultQuantity: pendingCoreEdit.item.defaultQuantity,
-              note: pendingCoreEdit.item.note,
             });
             setPendingCoreEdit(null);
           }}
@@ -375,7 +376,6 @@ function VaultItemRow({ item, usage, unitPreference, categories, onCreateCategor
             hover / focus (always on touch) — review 2026-10-14, points 7–8. */}
         <span className="row-meta">
           <InlineTextField className="vault-item-note" value={item.note} placeholder="Add a note…" allowEmpty onCommit={onEditNote} />
-          <span className="row-meta-sep" aria-hidden="true">·</span>
           <span className="row-category">
             <InlineCategorySelect
               categories={categories}

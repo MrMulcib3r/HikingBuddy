@@ -8,6 +8,12 @@ export function categoryNameFor(categoryId: string | null, categories: Category[
   return categories.find((c) => c.id === categoryId)?.name ?? UNCATEGORIZED;
 }
 
+/** Items added from a category called "Consumables" start as Consumable in the gearlist
+ * (BACKLOG 2026-10-14). Matched by name, since the category is Martin's own, not a default. */
+export function isConsumablesCategory(categoryName: string): boolean {
+  return categoryName.trim().toLowerCase() === 'consumables';
+}
+
 /** Zrcadlová pole, která se u "linked" položky v gearlistu přebírají z Gear Vaultu (FR-5). */
 export function mirrorFromVault(item: GearItem, categories: Category[]) {
   return {

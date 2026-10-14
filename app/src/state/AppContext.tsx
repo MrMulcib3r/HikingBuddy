@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useReducer, type ReactNo
 import { loadState, saveState } from '../storage';
 import { newId } from '../utils/id';
 import { reorderById, sortByOrder, withSequentialOrder } from '../utils/reorder';
-import { categoryNameFor, mirrorFromVault } from './logic';
+import { categoryNameFor, isConsumablesCategory, mirrorFromVault } from './logic';
 import { TEMPLATE_NAME } from '../constants';
 import type { AppState, Category, GearItem, GearList, GearListItem, UnitPreference } from '../types';
 
@@ -29,6 +29,7 @@ type Action =
   | { type: 'RELINK_LIST_ITEM'; listId: string; itemId: string; gearItemId: string }
   | { type: 'REMOVE_LIST_ITEM'; listId: string; itemId: string }
   | { type: 'REORDER_LIST_ITEMS'; listId: string; sourceId: string; targetId: string }
+  | { type: 'REORDER_LIST_CATEGORIES'; listId: string; sourceName: string; targetName: string }
   | { type: 'SAVE_SNAPSHOT'; listId: string }
   | { type: 'REORDER_LISTS'; sourceId: string; targetId: string }
   | { type: 'DELETE_LIST'; listId: string }
@@ -66,9 +67,14 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, gearItems: [...state.gearItems, item] };
     }
     case 'UPDATE_GEAR_ITEM': {
+      const before = state.gearItems.find((g) => g.id === action.id);
       const gearItems = state.gearItems.map((g) => (g.id === action.id ? { ...g, ...action.patch } : g));
       const updated = gearItems.find((g) => g.id === action.id)!;
-      return mapAllLists({ ...state, gearItems }, (list) => syncLinkedItemsAfterVaultEdit(list, updated, state.categories));
+      // The Vault note reaches the lists only when it was actually edited (the user confirmed
+      // the dialog); other updates carry the unchanged note and must not overwrite the notes
+      // people wrote per gearlist.
+      const noteChanged = before !== undefined && before.note !== updated.note;
+      return mapAllLists({ ...state, gearItems }, (list) => syncLinkedItemsAfterVaultEdit(list, updated, state.categories, noteChanged));
     }
     case 'DELETE_GEAR_ITEM': {
       const gearItems = state.gearItems.filter((g) => g.id !== action.id);
@@ -123,7 +129,8 @@ function reducer(state: AppState, action: Action): AppState {
           quantity: action.quantity,
           note: gearItem.note,
           isWorn: false,
-          isConsumable: false,
+          // A Vault item from the "Consumables" category is a consumable from the start.
+          isConsumable: isConsumablesCategory(mirror.categoryName),
           order: list.items.length,
         };
         return { ...list, items: [...list.items, listItem] };
@@ -161,6 +168,20 @@ function reducer(state: AppState, action: Action): AppState {
       return mapListById(state, action.listId, (list) => {
         const reordered = reorderById(sortByOrder(list.items), action.sourceId, action.targetId);
         return { ...list, items: withSequentialOrder(reordered) };
+      });
+    }
+    case 'REORDER_LIST_CATEGORIES': {
+      // A gearlist shows its categories in the order of its rows, so moving a category means
+      // moving all its rows as a block (no data-shape change; only this list is affected).
+      return mapListById(state, action.listId, (list) => {
+        const groups: { id: string; items: GearListItem[] }[] = [];
+        for (const item of sortByOrder(list.items)) {
+          const group = groups.find((g) => g.id === item.categoryName);
+          if (group) group.items.push(item);
+          else groups.push({ id: item.categoryName, items: [item] });
+        }
+        const moved = reorderById(groups, action.sourceName, action.targetName);
+        return { ...list, items: withSequentialOrder(moved.flatMap((g) => g.items)) };
       });
     }
     case 'SAVE_SNAPSHOT': {
@@ -251,11 +272,12 @@ function mapListById(state: AppState, listId: string, fn: (list: GearList) => Ge
 }
 
 /** FR-5: propaguje editaci Gear Vault položky do všech gearlistů, kde je "linked". */
-function syncLinkedItemsAfterVaultEdit(list: GearList, updated: GearItem, categories: Category[]): GearList {
+function syncLinkedItemsAfterVaultEdit(list: GearList, updated: GearItem, categories: Category[], noteChanged: boolean): GearList {
   const mirror = mirrorFromVault(updated, categories);
   const items = list.items.map((item) => {
     if (item.gearItemId !== updated.id) return item;
-    return { ...item, name: mirror.name, categoryName: mirror.categoryName, weightGrams: mirror.weightGrams };
+    const synced = { ...item, name: mirror.name, categoryName: mirror.categoryName, weightGrams: mirror.weightGrams };
+    return noteChanged ? { ...synced, note: updated.note } : synced;
   });
   return { ...list, items };
 }
@@ -302,6 +324,8 @@ interface AppContextValue {
   copyAndRelinkListItem: (listId: string, itemId: string, patch: GearItemPatch) => void;
   removeListItem: (listId: string, itemId: string) => void;
   reorderListItems: (listId: string, sourceId: string, targetId: string) => void;
+  /** Moves a category's rows (by category name) in front of another category in one gearlist. */
+  reorderListCategories: (listId: string, sourceName: string, targetName: string) => void;
   saveSnapshot: (listId: string) => void;
   reorderLists: (sourceId: string, targetId: string) => void;
   deleteList: (listId: string) => void;
@@ -360,6 +384,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       },
       removeListItem: (listId, itemId) => dispatch({ type: 'REMOVE_LIST_ITEM', listId, itemId }),
       reorderListItems: (listId, sourceId, targetId) => dispatch({ type: 'REORDER_LIST_ITEMS', listId, sourceId, targetId }),
+      reorderListCategories: (listId, sourceName, targetName) =>
+        dispatch({ type: 'REORDER_LIST_CATEGORIES', listId, sourceName, targetName }),
       saveSnapshot: (listId) => dispatch({ type: 'SAVE_SNAPSHOT', listId }),
       reorderLists: (sourceId, targetId) => dispatch({ type: 'REORDER_LISTS', sourceId, targetId }),
       deleteList: (listId) => dispatch({ type: 'DELETE_LIST', listId }),
