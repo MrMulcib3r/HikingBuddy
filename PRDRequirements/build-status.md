@@ -216,3 +216,8 @@ Run locally: in the `app/` folder, run `npm install` then `npm run dev`. Data is
 **2026-10-14 (correction after Martin's answer: the category is "Food", not "Consumables"; PRD v28):**
 - Martin: Consumable is only a flag on a gearlist row, so there should be no "Consumables" category. Auto-Consumable now triggers on category "Food" (`isConsumablesCategory` in `state/logic.ts`); schema 7 migration `migrateV6ToV7` renames an existing "Consumables" category to "Food" (skipped if "Food" exists; linked rows follow, snapshots untouched). The apple icon stays (name match "food").
 - **Verified:** build passes; seeded a schema-5 payload with "Worn clothing" + "Consumables" → loads as schema 7 with "Clothing" and "Food", linked row renamed.
+
+**2026-10-14 (two bugs from Martin's second test):**
+- Category reorder "still not working": real-browser drag (Playwright/Chromium, also on Martin's own data, read-only) did reorder, but `reorderById` always inserted *before* the target, so dragging an item/category onto the next one down changed nothing and nothing could reach the last place. Now dragging down inserts after the target (`utils/reorder.ts`; applies to Vault items/categories, gearlist rows/categories, gearlists).
+- Click from the note field to the category field did nothing: the note's blur re-laid out the row between mouse-down and mouse-up, so no `click` fired. Inline fields now open on mouse-down when another form control has focus (`openOnMouseDownWhileEditing` in `InlineField.tsx`, used by text, number and category fields); normal clicks and row dragging unchanged.
+- **Verified:** build passes; Playwright: Backpack moved down one slot and then to the end; note → category click opens the select in Vault and in gearlist rows.

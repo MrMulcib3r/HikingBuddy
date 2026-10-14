@@ -1,5 +1,6 @@
-/** Generic helper for drag & drop: move the item with `sourceId` to sit right before the
- * item with `targetId`, keeping everything else in place. Used for gearlists, categories,
+/** Generic helper for drag & drop: move the item with `sourceId` to the place of the item
+ * with `targetId` — dragged upwards it lands right before it, dragged downwards right after
+ * it (so moving an item one slot down works too) — keeping everything else in place. Used for gearlists, categories,
  * and items inside a gearlist/vault list. Returns a new array with `order` fields rewritten
  * 0..n-1 to match the new position. */
 export function reorderById<T extends { id: string }>(list: T[], sourceId: string, targetId: string): T[] {
@@ -9,8 +10,8 @@ export function reorderById<T extends { id: string }>(list: T[], sourceId: strin
   const toIndex = items.findIndex((i) => i.id === targetId);
   if (fromIndex === -1 || toIndex === -1) return list;
   const [moved] = items.splice(fromIndex, 1);
-  const insertAt = items.findIndex((i) => i.id === targetId);
-  items.splice(insertAt, 0, moved);
+  const targetIndex = items.findIndex((i) => i.id === targetId);
+  items.splice(fromIndex < toIndex ? targetIndex + 1 : targetIndex, 0, moved);
   return items;
 }
 

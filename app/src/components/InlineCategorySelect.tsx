@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { Category } from '../types';
+import { openOnMouseDownWhileEditing } from './InlineField';
 
 interface InlineCategorySelectProps {
   categories: Category[];
@@ -79,6 +80,7 @@ export function InlineCategorySelect({ categories, categoryId, categoryName, onC
   return (
     <span
       className="inline-edit-text"
+      onMouseDown={openOnMouseDownWhileEditing(() => setMode('select'))}
       onClick={(e) => {
         e.stopPropagation();
         setMode('select');

@@ -1,5 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 
+/** Clicking a field while another one is still being edited: the other field's blur re-lays
+ * out the row between mouse-down and mouse-up, so the browser never fires "click" on the new
+ * target (the click seemed to do nothing). Opening on mouse-down avoids that. Only done while
+ * a form control has focus, so dragging a row by its text still works. */
+export function openOnMouseDownWhileEditing(open: () => void) {
+  return () => {
+    const tag = document.activeElement?.tagName;
+    if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') setTimeout(open, 0);
+  };
+}
+
 interface InlineTextFieldProps {
   value: string;
   onCommit: (value: string) => void;
@@ -56,6 +67,10 @@ export function InlineTextField({ value, onCommit, placeholder, className, allow
   return (
     <span
       className={`inline-edit-text ${className ?? ''}`}
+      onMouseDown={openOnMouseDownWhileEditing(() => {
+        setDraft(value);
+        setEditing(true);
+      })}
       onClick={(e) => {
         e.stopPropagation();
         setDraft(value);
@@ -127,6 +142,10 @@ export function InlineNumberField({ value, onCommit, min = 0, step = 'any', form
   return (
     <span
       className={`inline-edit-text ${className ?? ''}`}
+      onMouseDown={openOnMouseDownWhileEditing(() => {
+        setDraft(String(value));
+        setEditing(true);
+      })}
       onClick={(e) => {
         e.stopPropagation();
         setDraft(String(value));

@@ -78,6 +78,7 @@ _Zbývají jen dvě položky, které jdou ověřit až po nasazení na web (FR-2
 1. Sdílená stránka na telefonu: u ×1 jen jedna váha. → netestovatelné lokálně, sdílené gearlisty nefungují s lokální adresou. Znovu otestovat po nasazení.
 2. Share gearlist feature not working locally. This is ok but will need to retest while deployed online.
 
+
 ## 🟡 Brzy
 
 - [ ] [FEATURE] Nasazení na web jako statická appka (Cloudflare Pages / Netlify / Vercel, zdarma) – PRD FR-20. Proč: veřejný odkaz pro pohovory. Až po dokončení všeho v Teď + design (FR-19) a Martinově testu lokálně. Při nasazení rozhodnout: veřejný, nebo soukromý repozitář (a zkontrolovat, že v repu není nic osobního). (2026-10-09, Martin; původně navrhl Claude 2026-09-23)
@@ -105,17 +106,12 @@ _Mimo scope. Uložené nápady pro případ, že by appka vyšla veřejně s mon
 
 _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, přesuň do ✅ Hotovo; když ne, napiš k položce, co je špatně, a vrať ji do 🔴 Teď._
 
-- [ ] [BUG/CR/UI] Opravy z Martinova testu (BACKLOG „Teď“, 9 z 11 bodů; implementováno 2026-10-14, PRD v28) → **Jak otestovat** (obnov stránku, Ctrl+F5):
-  1. **Clothing:** kategorie „Worn clothing“ se jmenuje „Clothing“ (ve Vaultu, v gearlistech i v rozpadu pod batohem). Starý snapshot zůstane „Worn clothing“.
-  2. **Poznámka v „Add gear to this gearlist“:** u položek se stejným názvem (dvě trička) je vedle názvu vidět jejich poznámka.
-  3. **Food:** kategorie „Consumables“ se jmenuje „Food“ (s jablkem). Přidej do gearlistu položku z kategorie „Food“ (tlačítkem i přetažením) → je rovnou označená jako Consumable (příbor zapnutý). Jde ji vypnout.
-  4. **Pořadí kategorií v gearlistu:** najeď na nadpis kategorie, vlevo se ukáže úchyt → přetáhni ji nad jinou kategorii. Pořadí ve Vaultu se nemění.
-  5. **Tečka u poznámky:** při najetí na řádek už vedle poznámky není tečka a dlouhý název kategorie se zkrátí na „…“ místo přetečení.
-  6. **Tooltip „Load demo data“:** s připojeným datovým souborem je tlačítko šedé; najeď myší → vysvětlení je celé vidět pod tlačítkem.
-  7. **Výběr kategorie u položky ve Vaultu:** klikni na kategorii u položky použité v gearlistu → rozbalovátko nepřekrývá štítek „N lists“.
-  8. **Poznámka ve Vaultu:** změň poznámku položky, která je v gearlistu → dialog Cancel / Create a copy / Continue s výpisem gearlistů. Continue změní poznámku i v gearlistech (snapshot ne). U položky, která nikde není, dialog není. Poznámku přímo v gearlistu dál změníš bez dialogu.
-  9. **Nová položka:** ve formuláři je u váhy šedá „0“; když ji nezměníš, uloží se 0 g.
 
+
+
+- [ ] [BUG] Dvě chyby z druhého testu 2026-10-14 (opraveno 2026-10-14) → **Jak otestovat** (Ctrl+F5):
+  1. **Pořadí kategorií v gearlistu:** přetáhni kategorii (úchyt vlevo u nadpisu, objeví se při najetí) na jinou — nahoru i **dolů**, i o jedno místo. Příčina: přetažení „před cíl“ nešlo posunout o jedno místo dolů ani na konec; teď se při tažení dolů vloží za cíl. Platí i pro položky, gearlisty a kategorie ve Vaultu.
+  2. **Klik do poznámky a pak na kategorii:** poznámka se uloží a rovnou se otevře výběr kategorie (ve Vaultu i v gearlistu). Stejně funguje klik z poznámky na název, váhu nebo množství.
 
 ## ✅ Hotovo
 
@@ -208,3 +204,13 @@ _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, př
   3. ~~Ve svém okně pak gearlist změň → už odeslaný odkaz změnu neukáže (je to kopie).~~
   4. ~~Otevření odkazu ve vlastním prohlížeči nic nezmění na tvých datech.~~
   5. ~~Pozn.: lokálně odkaz začíná `http://localhost:5173`, takže funguje jen na tvém počítači. Skutečně poslat ho půjde až po nasazení na web (FR-20).
+- [ ] ~~[BUG/CR/UI] Opravy z Martinova testu (BACKLOG „Teď“, 9 z 11 bodů; implementováno 2026-10-14, PRD v28) → **Jak otestovat** (obnov stránku, Ctrl+F5):~~
+  1. ~~**Clothing:** kategorie „Worn clothing“ se jmenuje „Clothing“ (ve Vaultu, v gearlistech i v rozpadu pod batohem). Starý snapshot zůstane „Worn clothing“.~~
+  2. ~~**Poznámka v „Add gear to this gearlist“:** u položek se stejným názvem (dvě trička) je vedle názvu vidět jejich poznámka.~~
+  3. ~~**Food:** kategorie „Consumables“ se jmenuje „Food“ (s jablkem). Přidej do gearlistu položku z kategorie „Food“ (tlačítkem i přetažením) → je rovnou označená jako Consumable (příbor zapnutý). Jde ji vypnout.~~
+  4. ~~**Pořadí kategorií v gearlistu:** najeď na nadpis kategorie, vlevo se ukáže úchyt → přetáhni ji nad jinou kategorii. Pořadí ve Vaultu se nemění.~~
+  5. ~~**Tečka u poznámky:** při najetí na řádek už vedle poznámky není tečka a dlouhý název kategorie se zkrátí na „…“ místo přetečení.~~
+  6. ~~**Tooltip „Load demo data“:** s připojeným datovým souborem je tlačítko šedé; najeď myší → vysvětlení je celé vidět pod tlačítkem.~~
+  7. ~~**Výběr kategorie u položky ve Vaultu:** klikni na kategorii u položky použité v gearlistu → rozbalovátko nepřekrývá štítek „N lists“.~~
+  8. ~~**Poznámka ve Vaultu:** změň poznámku položky, která je v gearlistu → dialog Cancel / Create a copy / Continue s výpisem gearlistů. Continue změní poznámku i v gearlistech (snapshot ne). U položky, která nikde není, dialog není. Poznámku přímo v gearlistu dál změníš bez dialogu.~~
+  9. ~~**Nová položka:** ve formuláři je u váhy šedá „0“; když ji nezměníš, uloží se 0 g.
