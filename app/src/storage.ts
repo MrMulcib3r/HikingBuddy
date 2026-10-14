@@ -14,7 +14,7 @@ import type { AppState } from './types';
  * loadState() below applies every migration in sequence up to CURRENT_SCHEMA_VERSION, so a
  * user who hasn't opened the app in months still gets their data upgraded correctly.
  */
-export const CURRENT_SCHEMA_VERSION = 6;
+export const CURRENT_SCHEMA_VERSION = 7;
 
 interface StoredPayload {
   schemaVersion: number;
@@ -192,12 +192,42 @@ const migrateV5ToV6: Migration = (raw) => {
   };
 };
 
+/**
+ * Schema 7 = same shape; content only. The category "Consumables" is renamed to "Food"
+ * (Martin, 2026-10-14: Consumable is a flag on a gearlist row, not a category). Same one-time
+ * rename as migrateV5ToV6; skipped when "Food" already exists.
+ */
+const migrateV6ToV7: Migration = (raw) => {
+  const state = (raw ?? {}) as Record<string, any>;
+  const categories: any[] = Array.isArray(state.categories) ? state.categories : [];
+  const NEW_NAME = 'Food';
+  const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();
+  if (categories.some((c) => norm(c?.name) === norm(NEW_NAME))) return state;
+  const old = categories.find((c) => norm(c?.name) === 'consumables');
+  if (!old) return state;
+  const gearItems: any[] = Array.isArray(state.gearItems) ? state.gearItems : [];
+  const itemIds = new Set(gearItems.filter((g) => g?.categoryId === old.id).map((g) => g.id));
+  const renameRows = (l: any) => ({
+    ...l,
+    items: (Array.isArray(l?.items) ? l.items : []).map((it: any) =>
+      it?.gearItemId && itemIds.has(it.gearItemId) ? { ...it, categoryName: NEW_NAME } : it
+    ),
+  });
+  return {
+    ...state,
+    categories: categories.map((c) => (c === old ? { ...c, name: NEW_NAME } : c)),
+    gearLists: (Array.isArray(state.gearLists) ? state.gearLists : []).map(renameRows),
+    templates: (Array.isArray(state.templates) ? state.templates : []).map(renameRows),
+  };
+};
+
 const MIGRATIONS: Record<number, Migration> = {
   1: migrateV1ToV2,
   2: migrateV2ToV3,
   3: migrateV3ToV4,
   4: migrateV4ToV5,
   5: migrateV5ToV6,
+  6: migrateV6ToV7,
 };
 
 function runMigrations(state: unknown, fromVersion: number): AppState {

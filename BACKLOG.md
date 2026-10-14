@@ -108,7 +108,7 @@ _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, př
 - [ ] [BUG/CR/UI] Opravy z Martinova testu (BACKLOG „Teď“, 9 z 11 bodů; implementováno 2026-10-14, PRD v28) → **Jak otestovat** (obnov stránku, Ctrl+F5):
   1. **Clothing:** kategorie „Worn clothing“ se jmenuje „Clothing“ (ve Vaultu, v gearlistech i v rozpadu pod batohem). Starý snapshot zůstane „Worn clothing“.
   2. **Poznámka v „Add gear to this gearlist“:** u položek se stejným názvem (dvě trička) je vedle názvu vidět jejich poznámka.
-  3. **Consumables:** přidej do gearlistu položku z kategorie „Consumables“ (tlačítkem i přetažením) → je rovnou označená jako Consumable (příbor zapnutý). Jde ji vypnout.
+  3. **Food:** kategorie „Consumables“ se jmenuje „Food“ (s jablkem). Přidej do gearlistu položku z kategorie „Food“ (tlačítkem i přetažením) → je rovnou označená jako Consumable (příbor zapnutý). Jde ji vypnout.
   4. **Pořadí kategorií v gearlistu:** najeď na nadpis kategorie, vlevo se ukáže úchyt → přetáhni ji nad jinou kategorii. Pořadí ve Vaultu se nemění.
   5. **Tečka u poznámky:** při najetí na řádek už vedle poznámky není tečka a dlouhý název kategorie se zkrátí na „…“ místo přetečení.
   6. **Tooltip „Load demo data“:** s připojeným datovým souborem je tlačítko šedé; najeď myší → vysvětlení je celé vidět pod tlačítkem.
