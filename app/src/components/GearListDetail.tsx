@@ -141,13 +141,11 @@ export function GearListDetail({ list, onDeleted, isTemplate = false, switcher }
     };
   }
 
-  /** A row dragged into another category: the category is the Vault item's, so this is the
-   * same category edit as clicking the row's category — including the Cancel / Copy / Continue
-   * dialog when the item is used elsewhere. Custom entries just take the new category name. */
+  /** A row dragged into another category: a change of this gearlist only — no dialog, the
+   * Vault item and the other gearlists are untouched (Martin, 2026-10-15). */
   function moveRowToCategory(item: GearListItem, categoryName: string) {
     if (item.categoryName === categoryName) return;
-    if (item.gearItemId) requestCoreEdit(item, { categoryId: categoryForName(categoryName, state.categories)?.id ?? null });
-    else updateUnlinkedListItem(list.id, item.id, { categoryName });
+    updateUnlinkedListItem(list.id, item.id, { categoryName });
   }
 
   /** Drag handlers of a category slot: the category itself can be reordered, and a row

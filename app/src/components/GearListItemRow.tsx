@@ -39,11 +39,10 @@ export function GearListItemRow({ listId, item, onRequestCoreEdit, onReorder }: 
     else updateUnlinkedListItem(listId, item.id, { name });
   }
 
+  /** The category of a row is local to this gearlist: no dialog, the Vault item and the other
+   * gearlists keep theirs (Martin, 2026-10-15). Change the Vault item's category to change it
+   * everywhere. */
   function handleCategoryChange(categoryId: string | null) {
-    if (linked) {
-      onRequestCoreEdit(item, { categoryId });
-      return;
-    }
     const name = categoryId ? state.categories.find((c) => c.id === categoryId)?.name ?? item.categoryName : 'Uncategorized';
     updateUnlinkedListItem(listId, item.id, { categoryName: name });
   }

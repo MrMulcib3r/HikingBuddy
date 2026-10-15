@@ -20,7 +20,7 @@ Single-page web app for planning hiking gear, inspired by lighterpack.com.
 ### Rules that must not be broken (see PRD section 3 and FRs)
 - Gearlists are **always editable**; there is no Draft/Finalized state (removed in v7).
 - **Snapshot**: one per gearlist, read-only copy, re-saving overwrites it after a confirmation.
-- Editing name/category/weight — and, in the Vault, the **note** (PRD v28) — of a Gear Vault item that is used elsewhere **always** shows the blocking 3-way dialog **Cancel / Create a copy of the item / Continue** — never a toast, never silent. Same logic whether the edit starts in the Vault or inside a gearlist.
+- Editing name/category/weight — and, in the Vault, the **note** (PRD v28) — of a Gear Vault item that is used elsewhere **always** shows the blocking 3-way dialog **Cancel / Create a copy of the item / Continue** — never a toast, never silent. Same logic whether the edit starts in the Vault or inside a gearlist, **except the category inside a gearlist**: changing a row's category there (click or drag) is local to that gearlist, no dialog, Vault untouched (PRD v29).
 - **Worn / Consumable** are two independent flags on the *gearlist row*, not on the Vault item. Toggling them, or changing quantity/note in a gearlist, never shows a dialog.
 - Adding an item that is already in a gearlist increases its quantity; no duplicate rows.
 - Weights are stored in **grams**; metric/imperial is display only.

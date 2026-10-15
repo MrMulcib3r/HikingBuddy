@@ -4,6 +4,7 @@ import { newId } from '../utils/id';
 import { reorderById, sortByOrder, withSequentialOrder } from '../utils/reorder';
 import { categoryNameFor, isConsumablesCategory, mirrorFromVault } from './logic';
 import { TEMPLATE_NAME } from '../constants';
+import { UNCATEGORIZED } from '../types';
 import type { AppState, Category, GearItem, GearList, GearListItem, UnitPreference } from '../types';
 
 type GearItemPatch = Omit<GearItem, 'id' | 'order'>;
@@ -51,12 +52,18 @@ function reducer(state: AppState, action: Action): AppState {
       // Přejmenování kategorie se u "linked" položek v gearlistech promítne hned
       // (categoryName je jen zrcadlo, dokud item odkazuje na Vault). U odpojených
       // (unlinked) položek zůstává zmrazené jméno — to je záměr.
-      return mapAllLists({ ...state, categories }, (list) => syncLinkedItemsAfterCategoryRename(list, state.gearItems, categories));
+      const oldName = state.categories.find((c) => c.id === action.id)?.name;
+      const newName = categories.find((c) => c.id === action.id)?.name;
+      if (oldName === undefined || newName === undefined) return { ...state, categories };
+      return mapAllLists({ ...state, categories }, (list) => renameCategoryInRows(list, oldName, newName));
     }
     case 'DELETE_CATEGORY': {
       const categories = state.categories.filter((c) => c.id !== action.id);
       const gearItems = state.gearItems.map((item) => (item.categoryId === action.id ? { ...item, categoryId: null } : item));
-      return mapAllLists({ ...state, categories, gearItems }, (list) => syncLinkedItemsAfterCategoryRename(list, gearItems, categories));
+      const deletedName = state.categories.find((c) => c.id === action.id)?.name;
+      return mapAllLists({ ...state, categories, gearItems }, (list) =>
+        deletedName === undefined ? list : renameCategoryInRows(list, deletedName, UNCATEGORIZED)
+      );
     }
     case 'REORDER_CATEGORIES': {
       const reordered = reorderById(sortByOrder(state.categories), action.sourceId, action.targetId, action.after);
@@ -74,7 +81,12 @@ function reducer(state: AppState, action: Action): AppState {
       // the dialog); other updates carry the unchanged note and must not overwrite the notes
       // people wrote per gearlist.
       const noteChanged = before !== undefined && before.note !== updated.note;
-      return mapAllLists({ ...state, gearItems }, (list) => syncLinkedItemsAfterVaultEdit(list, updated, state.categories, noteChanged));
+      // Likewise the category: a row may have been moved to another category inside its own
+      // gearlist (a local change), and an unrelated Vault edit (weight…) must not undo that.
+      const categoryChanged = before !== undefined && before.categoryId !== updated.categoryId;
+      return mapAllLists({ ...state, gearItems }, (list) =>
+        syncLinkedItemsAfterVaultEdit(list, updated, state.categories, noteChanged, categoryChanged)
+      );
     }
     case 'DELETE_GEAR_ITEM': {
       const gearItems = state.gearItems.filter((g) => g.id !== action.id);
@@ -272,11 +284,22 @@ function mapListById(state: AppState, listId: string, fn: (list: GearList) => Ge
 }
 
 /** FR-5: propaguje editaci Gear Vault položky do všech gearlistů, kde je "linked". */
-function syncLinkedItemsAfterVaultEdit(list: GearList, updated: GearItem, categories: Category[], noteChanged: boolean): GearList {
+function syncLinkedItemsAfterVaultEdit(
+  list: GearList,
+  updated: GearItem,
+  categories: Category[],
+  noteChanged: boolean,
+  categoryChanged: boolean
+): GearList {
   const mirror = mirrorFromVault(updated, categories);
   const items = list.items.map((item) => {
     if (item.gearItemId !== updated.id) return item;
-    const synced = { ...item, name: mirror.name, categoryName: mirror.categoryName, weightGrams: mirror.weightGrams };
+    const synced = {
+      ...item,
+      name: mirror.name,
+      weightGrams: mirror.weightGrams,
+      categoryName: categoryChanged ? mirror.categoryName : item.categoryName,
+    };
     return noteChanged ? { ...synced, note: updated.note } : synced;
   });
   return { ...list, items };
@@ -292,13 +315,10 @@ function removeDeletedItem(list: GearList, deletedGearItemId: string): GearList 
   return { ...list, items: withSequentialOrder(items) };
 }
 
-function syncLinkedItemsAfterCategoryRename(list: GearList, gearItems: GearItem[], categories: Category[]): GearList {
-  const items = list.items.map((item) => {
-    if (!item.gearItemId) return item;
-    const gearItem = gearItems.find((g) => g.id === item.gearItemId);
-    if (!gearItem) return item;
-    return { ...item, categoryName: categoryNameFor(gearItem.categoryId, categories) };
-  });
+/** Category renamed (or deleted → "Uncategorized"): every linked row currently shown in it
+ * follows, including rows moved there inside their gearlist. Custom entries keep their name. */
+function renameCategoryInRows(list: GearList, oldName: string, newName: string): GearList {
+  const items = list.items.map((item) => (item.gearItemId && item.categoryName === oldName ? { ...item, categoryName: newName } : item));
   return { ...list, items };
 }
 
