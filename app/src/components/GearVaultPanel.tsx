@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type DragEvent } from 'react';
 import { useApp } from '../state/AppContext';
 import { describeUsage, findAffectedLists, findAffectedTemplates } from '../state/logic';
 import { TEMPLATE_NAME } from '../constants';
@@ -6,7 +6,7 @@ import type { GearItem } from '../types';
 import { UNCATEGORIZED } from '../types';
 import { fromGrams, formatWeight, toGrams } from '../utils/weight';
 import { sortByOrder } from '../utils/reorder';
-import { makeDragHandlers } from '../utils/dnd';
+import { dragMime, isDragging, makeDragHandlers } from '../utils/dnd';
 import { ConfirmDialog } from './ConfirmDialog';
 import { plural } from '../utils/text';
 import { VaultEditDialog } from './VaultEditDialog';
@@ -133,6 +133,29 @@ export function GearVaultPanel() {
     });
   }
 
+  /** Drag handlers of a category slot: the category can be reordered, and a Vault item
+   * dropped anywhere on it (heading, gap) moves into that category — as a normal category
+   * edit, so the "used elsewhere" dialog still appears when it applies. */
+  function slotHandlers(categoryId: string | null) {
+    const base = categoryId ? makeDragHandlers(categoryId, reorderCategories, 'category') : null;
+    return {
+      ...(base ?? {}),
+      onDragOver: (e: DragEvent) => {
+        if (!isDragging(e, 'gear')) return base?.onDragOver(e);
+        e.preventDefault();
+        e.stopPropagation();
+        e.dataTransfer.dropEffect = 'move';
+      },
+      onDrop: (e: DragEvent) => {
+        if (!isDragging(e, 'gear')) return base?.onDrop(e);
+        e.preventDefault();
+        e.stopPropagation();
+        const item = state.gearItems.find((g) => g.id === e.dataTransfer.getData(dragMime('gear')));
+        if (item && item.categoryId !== categoryId) requestCoreEdit(item, { categoryId });
+      },
+    };
+  }
+
   function requestDelete(item: GearItem) {
     const affected = findAffectedLists(state, item.id);
     const templates = findAffectedTemplates(state, item.id);
@@ -188,7 +211,7 @@ export function GearVaultPanel() {
             const category = key === UNCATEGORIZED_FILTER ? null : state.categories.find((c) => c.id === key) ?? null;
             const total = items.reduce((sum, g) => sum + g.weightGrams * g.defaultQuantity, 0);
             return (
-              <div key={key} className="category-slot" {...(category ? makeDragHandlers(category.id, reorderCategories, 'category') : {})}>
+              <div key={key} className="category-slot" {...slotHandlers(category?.id ?? null)}>
                <div className="vault-category-group">
                 <h3 className="vault-category-title">
                   {category && (
@@ -221,7 +244,13 @@ export function GearVaultPanel() {
                     onEditQuantity={(defaultQuantity) => updateGearItem(item.id, { ...item, defaultQuantity })}
                     onEditNote={(note) => requestCoreEdit(item, { note })}
                     onDelete={() => requestDelete(item)}
-                    onReorder={(sourceId, targetId, after) => reorderGearItems(sourceId, targetId, item.categoryId, after)}
+                    onReorder={(sourceId, targetId, after) => {
+                      // Position next to the target first; a different category is then a
+                      // regular category edit (dialog when the item is used elsewhere).
+                      const dragged = state.gearItems.find((g) => g.id === sourceId);
+                      reorderGearItems(sourceId, targetId, dragged?.categoryId ?? null, after);
+                      if (dragged && dragged.categoryId !== item.categoryId) requestCoreEdit(dragged, { categoryId: item.categoryId });
+                    }}
                   />
                 ))}
                 <AddItemButton onClick={() => setAddForm({ categoryId: category?.id ?? null })} />

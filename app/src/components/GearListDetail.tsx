@@ -49,6 +49,7 @@ export function GearListDetail({ list, onDeleted, isTemplate = false, switcher }
     deleteList,
     reorderListItems,
     reorderListCategories,
+    updateUnlinkedListItem,
     saveAsTemplate,
     deleteTemplate,
     dismissTemplateBanner,
@@ -138,6 +139,45 @@ export function GearListDetail({ list, onDeleted, isTemplate = false, switcher }
       defaultQuantity: vaultItem.defaultQuantity,
       note: vaultItem.note,
     };
+  }
+
+  /** A row dragged into another category: the category is the Vault item's, so this is the
+   * same category edit as clicking the row's category — including the Cancel / Copy / Continue
+   * dialog when the item is used elsewhere. Custom entries just take the new category name. */
+  function moveRowToCategory(item: GearListItem, categoryName: string) {
+    if (item.categoryName === categoryName) return;
+    if (item.gearItemId) requestCoreEdit(item, { categoryId: categoryForName(categoryName, state.categories)?.id ?? null });
+    else updateUnlinkedListItem(list.id, item.id, { categoryName });
+  }
+
+  /** Drag handlers of a category slot: the category itself can be reordered, and a row
+   * dropped anywhere on the slot (heading, gap) moves into that category. */
+  function slotHandlers(category: string) {
+    const base = makeDragHandlers(category, (src, target, after) => reorderListCategories(list.id, src, target, after), 'list-category');
+    return {
+      ...base,
+      onDragOver: (e: DragEvent) => {
+        if (!isDragging(e, 'list-item')) return base.onDragOver(e);
+        e.preventDefault();
+        e.stopPropagation();
+        e.dataTransfer.dropEffect = 'move';
+      },
+      onDrop: (e: DragEvent) => {
+        if (!isDragging(e, 'list-item')) return base.onDrop(e);
+        e.preventDefault();
+        e.stopPropagation();
+        const row = list.items.find((i) => i.id === e.dataTransfer.getData(dragMime('list-item')));
+        if (row) moveRowToCategory(row, category);
+      },
+    };
+  }
+
+  /** A row dropped on another row: placed next to it, and moved into its category if that differs. */
+  function dropRowOnRow(sourceId: string, targetId: string, after?: boolean) {
+    reorderListItems(list.id, sourceId, targetId, after);
+    const source = list.items.find((i) => i.id === sourceId);
+    const target = list.items.find((i) => i.id === targetId);
+    if (source && target) moveRowToCategory(source, target.categoryName);
   }
 
   const hasTemplate = state.templates.length > 0;
@@ -262,7 +302,7 @@ export function GearListDetail({ list, onDeleted, isTemplate = false, switcher }
               </div>
             )}
             {[...grouped.entries()].map(([category, items]) => (
-              <div key={category} className="category-slot" {...makeDragHandlers(category, (src, target, after) => reorderListCategories(list.id, src, target, after), 'list-category')}>
+              <div key={category} className="category-slot" {...slotHandlers(category)}>
                <div className="list-category-group">
                 <h4 className="list-category-title">
                   <span className="vault-category-handle" title="Drag to reorder categories">
@@ -280,7 +320,7 @@ export function GearListDetail({ list, onDeleted, isTemplate = false, switcher }
                     listId={list.id}
                     item={item}
                     onRequestCoreEdit={requestCoreEdit}
-                    onReorder={(sourceId, targetId, after) => reorderListItems(list.id, sourceId, targetId, after)}
+                    onReorder={dropRowOnRow}
                   />
                 ))}
                </div>
