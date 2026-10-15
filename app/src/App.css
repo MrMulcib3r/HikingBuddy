@@ -118,7 +118,36 @@
   display: grid;
   grid-template-columns: minmax(320px, 2fr) minmax(0, 3fr);
   gap: var(--space-6);
-  padding: 0 var(--space-6) var(--space-12);
+  padding: 0 var(--space-6) var(--space-4);
+}
+
+/* ============ Footer (FR-21) ============ */
+.app-footer {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  padding: 0 var(--space-6) var(--space-4);
+}
+/* Small link on a surface pill: the landscape is behind the footer and must never sit
+   directly under text (AppShell rule). */
+.footer-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--ink-muted);
+  font-family: var(--font-sans);
+  font-size: var(--text-ui);
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.12s, color 0.12s;
+}
+.footer-link:hover {
+  background: var(--surface-hover);
+  color: var(--ink);
 }
 
 /* ============ Panels ============ */
@@ -438,6 +467,49 @@ select.inline-edit-input,
 }
 .dialog .inline-edit-input {
   height: auto;
+}
+.field textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--line-control);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--text-body);
+  line-height: var(--lh-body, 22px);
+  resize: vertical;
+}
+.field textarea::placeholder {
+  color: var(--ink-subtle);
+}
+.field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+/* TextField error state (design system: is-error + a line that says how to fix it). */
+.field.is-error input,
+.field.is-error textarea {
+  border-color: var(--danger);
+}
+.field-error {
+  color: var(--danger);
+  font-size: var(--text-small);
+  line-height: var(--lh-small);
+}
+/* Contact form (FR-21): honeypot field kept off-screen for people, visible to naive bots. */
+.contact-honeypot {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.contact-captcha {
+  display: grid;
+  gap: var(--space-2);
+  min-height: 78px; /* hCaptcha checkbox height — the dialog doesn't jump when it loads */
 }
 .form-error {
   margin: 0;

@@ -119,6 +119,13 @@ _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, př
   3. **Ve Vaultu** přetáhni položku do jiné kategorie (nebo ji změň výběrem) → použitá jinde = dialog Cancel / Create a copy / Continue; změní výchozí kategorii.
   4. Změň váhu položky ve Vaultu (Continue) → lokálně přesunutá položka v gearlistu zůstane v nové kategorii. Přejmenuj kategorii → přesunuté řádky ji následují.
 
+- [ ] [FEATURE] Kontaktní formulář v patičce (2026-10-15, Martin; implementováno 2026-10-15, PRD v30 FR-21) → **Jak otestovat:**
+  0. **Nejdřív klíč:** na https://web3forms.com zadej svou pracovní adresu → klíč přijde e-mailem → vlož ho do `app/src/contact.ts` do `CONTACT_FORM_ACCESS_KEY = '…'` (nebo ho pošli Claudovi). Bez klíče dialog jen napíše „The contact form isn't set up yet.“
+  1. Dole uprostřed klikni na „Contact“ → otevře se formulář. Odešli prázdný → pod e-mailem, zprávou a captchou se ukáže, co doplnit.
+  2. Klik mimo okno ho nezavře, Escape a Cancel ano.
+  3. Vyplň, zaškrtni „I am human“, „Send message“ → „Message sent“ a e-mail s předmětem „HikingBuddy: …“ v pracovní schránce. Odpověď v Gmailu jde rovnou odesílateli. **Lokálně (localhost) může hCaptcha nefungovat → odeslání naostro ověř po nasazení (FR-20).**
+  4. Odkaz „Contact“ je i na sdílené stránce gearlistu.
+
 ## ✅ Hotovo
 
 - [x] [UI] "+ Add item" v Gear Vaultu přesunuto z hlavičky na konec každé kategorie (jako lighterpack.com), kategorie se ve formuláři předvybere. Viz PRD v12. (2026-10-08, požadavek Martina)
