@@ -4,3 +4,6 @@
 # Personal HikingBuddy data files (FR-16) — never commit personal data
 data/
 MartinsDataFile/
+
+# Obsidian pasted images (notes only, not part of the app) — kept out of the repo to keep it small
+attachments/
