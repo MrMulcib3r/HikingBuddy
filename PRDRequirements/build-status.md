@@ -244,3 +244,9 @@ Run locally: in the `app/` folder, run `npm install` then `npm run dev`. Data is
 - **Verified:** build passes, lint has only the pre-existing warnings. Playwright (Chromium) with hCaptcha and Web3Forms mocked (the container can't reach them; real sending to be checked after FR-20): empty submit shows the three errors; click outside doesn't close, Escape and Cancel do; failed send shows the error and resets the captcha; successful send posts the expected payload and shows "Message sent"; honeypot filled → no request; no key → "not set up" and no hCaptcha request. Screenshots at 1440 px (welcome, demo data, shared page) and 375 px.
 
 - **Verified by Martin (2026-10-15, 16:39):** real message sent from `localhost:5173` arrived in the contact inbox; reply-to is the sender's e-mail, subject "HikingBuddy: …". hCaptcha worked locally too.
+
+**2026-10-19 (decision only, PRD v31):**
+- Martin decided the first feature after the MVP: Gear advisor (FR-22), the app's first GenAI feature, built right after deployment (FR-20). Spec in PRD section 7 point 10, decision in 8x; added to BACKLOG (🟡 Brzy, after deployment) and CLAUDE.md. Nothing implemented. Open before building: where the API key lives (serverless function vs. visitor's own key), which model.
+
+**2026-10-19 (repo housekeeping, no app change):**
+- The `Pasted image *.png` files in the repo root were Obsidian attachments (pasted into BACKLOG / ad hoc notes), not app files. Copied to `attachments/` (the 20261014230518 file was a byte-identical duplicate, dropped); Martin deletes the root copies. `attachments/` is git-ignored, and Obsidian's attachment folder is set to it (`.obsidian/app.json`), so future pastes land there and stay out of the repo. The `![[...]]` links in BACKLOG.md resolve by file name in Obsidian, so they keep working without edits.

@@ -7,7 +7,7 @@ Martin is the Product Manager and owner of this project. He is **not a developer
 - Product decisions (what the app does, how it behaves for the user) are Martin's. If a requirement is unclear or contradicts the PRD, ask him before building. Implementation details (how the code is written) are yours to decide, but tell him what you chose and why.
 
 ## Source of truth
-- **`PRDRequirements/PRD-MVP.md`** (currently v30 — **final scope**, see sections 0 and 2; FR-16 to FR-19 and FR-21 (contact form) built, FR-20 (deployment) remains) — what we are building and why. Read it before any feature work. Code must match it; if they disagree, flag it to Martin.
+- **`PRDRequirements/PRD-MVP.md`** (currently v31 — **final scope**, see sections 0 and 2; FR-16 to FR-19 and FR-21 (contact form) built, FR-20 (deployment) remains) — what we are building and why. Read it before any feature work. Code must match it; if they disagree, flag it to Martin.
 - **`PRDRequirements/build-status.md`** — log of what has been built, decided and verified. Read it at the start of a session; **append an entry after every meaningful change**.
 - `PRDRequirements/gemini-code-*.txt` — the original long-term vision (v1). Reference only, *not* the current scope.
 - If a product decision changes during work, update the PRD (bump the version, add a line to its history and to section 8/8a "Rozhodnutí") in the same change.
@@ -28,6 +28,7 @@ Single-page web app for planning hiking gear, inspired by lighterpack.com.
 - UI text is **English**. Code comments may be Czech or English.
 - **Scope is closed (PRD v16, 2026-10-09).** The app is Martin's personal tool and a portfolio piece for job interviews, not a product to monetize. In scope beyond what exists today: auto-save to a local data file (FR-16), "Load demo data" (FR-17), read-only gearlist sharing via URL with the data encoded in the link (FR-18), design system + "backpack" weight visualization (FR-19, waits for Martin's design system), public deployment as a static site (FR-20, last). Contact form in the footer (FR-21, PRD v30) — sends through the third-party Web3Forms service; the contact e-mail address must never appear in the code or the UI.
 - **Out of scope — do not build, even if it seems like a natural next step:** accounts/login, any server or server database, sync between devices, offline/PWA, mobile optimization, pie chart, multiple snapshots, duplicate gearlist, multiple templates, community sharing, monetization. The app must stay a **static app** (no backend).
+- **First feature after the MVP (PRD v31, 2026-10-19): Gear advisor (FR-22, PRD section 7 point 10)**, the app's first GenAI feature. Build it only after FR-20 (deployment) is done and only after Martin decides the open questions there (where the API key lives, which model). Never put an API key in the frontend code or in Git; keep it in `.env` (git-ignored) locally.
 
 ## Data storage — read this before touching `src/types.ts` or `src/storage.ts`
 

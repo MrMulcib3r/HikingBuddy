@@ -82,6 +82,7 @@ _Zbývají jen dvě položky, které jdou ověřit až po nasazení na web (FR-2
 ## 🟡 Brzy
 
 - [ ] [FEATURE] Nasazení na web jako statická appka (Cloudflare Pages / Netlify / Vercel, zdarma) – PRD FR-20. Proč: veřejný odkaz pro pohovory. Až po dokončení všeho v Teď + design (FR-19) a Martinově testu lokálně. Při nasazení rozhodnout: veřejný, nebo soukromý repozitář (a zkontrolovat, že v repu není nic osobního). (2026-10-09, Martin; původně navrhl Claude 2026-09-23)
+- [ ] [FEATURE] Gear advisor (GenAI) – v gearlistu popíšu trek běžnou řečí a appka mi z Gear Vaultu navrhne vybavení s důvody a označí, co chybí; návrh přijmu celý nebo po položkách. Proč: první vlastní GenAI funkce, ukázka pro AI PM pozice. **Hned po nasazení (FR-20)**, před implementací rozhodnout otevřené otázky (API klíč, model). Viz PRD FR-22, sekce 7 bod 10. (2026-10-19, Martin)
 
 ## ⚪ Někdy
 
@@ -109,22 +110,6 @@ _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, př
 
 
 
-- [ ] [BUG] Dvě chyby z druhého testu 2026-10-14 (opraveno 2026-10-14) → **Jak otestovat** (Ctrl+F5):
-  1. **Pořadí kategorií v gearlistu (i ve Vaultu):** přetáhni kategorii za úchyt vlevo u nadpisu — a pusť ji **mezi dvě kategorie** (do mezery), na nadpis nebo na řádek jiné kategorie. Mezera pod kategorií = „vlož za ni“; jinak se přetažená kategorie posadí na místo cíle (nahoru před něj, dolů za něj). Příčina předchozích chyb: mezera mezi kategoriemi nebyla cíl pro puštění (kurzor 🚫), a posun o jedno místo dolů nic neudělal.
-  2. **Klik do poznámky a pak na kategorii:** poznámka se uloží a rovnou se otevře výběr kategorie (ve Vaultu i v gearlistu). Stejně funguje klik z poznámky na název, váhu nebo množství.
-
-- [ ] [BUG] Přesun položky do jiné kategorie (z videa 2026-10-15; opraveno 2026-10-15, PRD v29) → **Jak otestovat** (Ctrl+F5):
-  1. **V gearlistu** přetáhni položku (úchyt vlevo) na položku jiné kategorie, na nadpis jiné kategorie nebo do mezery pod ní → položka je v té kategorii, **bez dialogu**. Ve Vaultu a v ostatních gearlistech zůstává původní kategorie.
-  2. **V gearlistu** klikni na kategorii u řádku a vyber jinou → totéž, bez dialogu, jen tento gearlist.
-  3. **Ve Vaultu** přetáhni položku do jiné kategorie (nebo ji změň výběrem) → použitá jinde = dialog Cancel / Create a copy / Continue; změní výchozí kategorii.
-  4. Změň váhu položky ve Vaultu (Continue) → lokálně přesunutá položka v gearlistu zůstane v nové kategorii. Přejmenuj kategorii → přesunuté řádky ji následují.
-
-- [ ] [FEATURE] Kontaktní formulář v patičce (2026-10-15, Martin; implementováno 2026-10-15, PRD v30 FR-21) → **Jak otestovat:**
-  0. **Nejdřív klíč:** na https://web3forms.com zadej svou pracovní adresu → klíč přijde e-mailem → vlož ho do `app/src/contact.ts` do `CONTACT_FORM_ACCESS_KEY = '…'` (nebo ho pošli Claudovi). Bez klíče dialog jen napíše „The contact form isn't set up yet.“
-  1. Dole uprostřed klikni na „Contact“ → otevře se formulář. Odešli prázdný → pod e-mailem, zprávou a captchou se ukáže, co doplnit.
-  2. Klik mimo okno ho nezavře, Escape a Cancel ano.
-  3. Vyplň, zaškrtni „I am human“, „Send message“ → „Message sent“ a e-mail s předmětem „HikingBuddy: …“ v pracovní schránce. Odpověď v Gmailu jde rovnou odesílateli. **Lokálně (localhost) může hCaptcha nefungovat → odeslání naostro ověř po nasazení (FR-20).**
-  4. Odkaz „Contact“ je i na sdílené stránce gearlistu.
 
 ## ✅ Hotovo
 
@@ -227,3 +212,19 @@ _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, př
   7. ~~**Výběr kategorie u položky ve Vaultu:** klikni na kategorii u položky použité v gearlistu → rozbalovátko nepřekrývá štítek „N lists“.~~
   8. ~~**Poznámka ve Vaultu:** změň poznámku položky, která je v gearlistu → dialog Cancel / Create a copy / Continue s výpisem gearlistů. Continue změní poznámku i v gearlistech (snapshot ne). U položky, která nikde není, dialog není. Poznámku přímo v gearlistu dál změníš bez dialogu.~~
   9. ~~**Nová položka:** ve formuláři je u váhy šedá „0“; když ji nezměníš, uloží se 0 g.
+- [x] [BUG] Dvě chyby z druhého testu 2026-10-14 (opraveno 2026-10-14) → **Jak otestovat** (Ctrl+F5):
+  1. **Pořadí kategorií v gearlistu (i ve Vaultu):** přetáhni kategorii za úchyt vlevo u nadpisu — a pusť ji **mezi dvě kategorie** (do mezery), na nadpis nebo na řádek jiné kategorie. Mezera pod kategorií = „vlož za ni“; jinak se přetažená kategorie posadí na místo cíle (nahoru před něj, dolů za něj). Příčina předchozích chyb: mezera mezi kategoriemi nebyla cíl pro puštění (kurzor 🚫), a posun o jedno místo dolů nic neudělal.
+  2. **Klik do poznámky a pak na kategorii:** poznámka se uloží a rovnou se otevře výběr kategorie (ve Vaultu i v gearlistu). Stejně funguje klik z poznámky na název, váhu nebo množství.
+
+- [x] [BUG] Přesun položky do jiné kategorie (z videa 2026-10-15; opraveno 2026-10-15, PRD v29) → **Jak otestovat** (Ctrl+F5):
+  1. **V gearlistu** přetáhni položku (úchyt vlevo) na položku jiné kategorie, na nadpis jiné kategorie nebo do mezery pod ní → položka je v té kategorii, **bez dialogu**. Ve Vaultu a v ostatních gearlistech zůstává původní kategorie.
+  2. **V gearlistu** klikni na kategorii u řádku a vyber jinou → totéž, bez dialogu, jen tento gearlist.
+  3. **Ve Vaultu** přetáhni položku do jiné kategorie (nebo ji změň výběrem) → použitá jinde = dialog Cancel / Create a copy / Continue; změní výchozí kategorii.
+  4. Změň váhu položky ve Vaultu (Continue) → lokálně přesunutá položka v gearlistu zůstane v nové kategorii. Přejmenuj kategorii → přesunuté řádky ji následují.
+
+- [x] [FEATURE] Kontaktní formulář v patičce (2026-10-15, Martin; implementováno 2026-10-15, PRD v30 FR-21) → **Jak otestovat:**
+  0. **Nejdřív klíč:** na https://web3forms.com zadej svou pracovní adresu → klíč přijde e-mailem → vlož ho do `app/src/contact.ts` do `CONTACT_FORM_ACCESS_KEY = '…'` (nebo ho pošli Claudovi). Bez klíče dialog jen napíše „The contact form isn't set up yet.“
+  1. Dole uprostřed klikni na „Contact“ → otevře se formulář. Odešli prázdný → pod e-mailem, zprávou a captchou se ukáže, co doplnit.
+  2. Klik mimo okno ho nezavře, Escape a Cancel ano.
+  3. Vyplň, zaškrtni „I am human“, „Send message“ → „Message sent“ a e-mail s předmětem „HikingBuddy: …“ v pracovní schránce. Odpověď v Gmailu jde rovnou odesílateli. **Lokálně (localhost) může hCaptcha nefungovat → odeslání naostro ověř po nasazení (FR-20).**
+  4. Odkaz „Contact“ je i na sdílené stránce gearlistu.
