@@ -75,9 +75,6 @@ _Finální scope appky je v PRD v16 (sekce 0 a 2). Položky níže jsou seřazen
 
 _Zbývají jen dvě položky, které jdou ověřit až po nasazení na web (FR-20). Opravy z Martinova testu 2026-10-14 jsou v 🧪 Test._
 
-1. Sdílená stránka na telefonu: u ×1 jen jedna váha. → netestovatelné lokálně, sdílené gearlisty nefungují s lokální adresou. Znovu otestovat po nasazení.
-2. Share gearlist feature not working locally. This is ok but will need to retest while deployed online.
-
 
 ## 🟡 Brzy
 
@@ -88,6 +85,7 @@ _Zbývají jen dvě položky, které jdou ověřit až po nasazení na web (FR-2
 _Ve v16 (2026-10-09) Martin uzavřel scope: všechno přeškrtnuté je vyřazené, ne jen odložené._
 
 - [ ] [FEATURE] Obvyklé teploty v místě a období treku – u gearlistu zadám období (měsíc nebo dny) a místo (např. Kvikkjokk) a uvidím obvyklé denní a noční teploty. Proč: vím, na jaké teploty balím (spacák, oblečení). Nice-to-have, mimo uzavřený scope, ale jde to bez serveru. Viz PRD sekce 7, bod 9. (2026-10-13, Martin)
+- [ ] [FEATURE] URL shortener: Současná URL sdíleného linku vypadá např. [takto](https://hikingbuddy.hikingbuddy-mmalinek.workers.dev/#share=v2:N4IgdiBcIOoKZwNZzAEwAQAkCWyDOIANCAK5QgC2RIAxlANr0gBCAhjYgA7uLUBGPbhxABdQkwDKACzgAbAC5wATugkBPPIqrE8MhctHiQE2Qk6qNW6nlNxOhpgGFZAe3lTsYAObUar954+Yk4uLoiBvqHh3g4gAGKhqNQAZomxMKyKStQA7pkGwSAAoqY08kouYNg0BMRycGUVVTWxmGpe2Chw1FLtnWDdhQCy2Hh0xBSjdCJiINgMTADiLnh4rBTK6ItwrCoAMi5Ko+gAbgBMRAAMhACsNwDMhACMxFeFEkMAIlv5OYnoNFYnG6z0I9ye1xeIDeRgAKih5OhNKx8EQXgAOQgANlehEuhU+LhyYHQAEcSNgFEQztizpDcfijABJMDJWSZVh8UxI2ycQLobhJQg0+4AFnp0LxhVhSlYlPQShIYAGSlqjyx4tBkqehRw0S8AtYYHkauF6IlaOlAFpdNglPIiI8nvdMVDLUYJC4OKbRU6GQSiSSAFY8OAOsFgiFamFMABKcuDofDjzO9wtUqMzBIyWSjsImrdGaWrhOcB9fsljKYRVLSgGOXQsOw8iN2BIFHQAFU9ugAApuIii55PIeFqsgRyZAFGpHyFylwfPUf+owwTyoMZKBAQfPCgCc0aLID22C8Uiyi6eN0P44knFCO6HrpXknv3hBQ+XlcKcRIcnQAAUrCyDQLhSC4sgAJSXpc6ZnO8zTIKqRDXjc1w0pK8FGI4Mg5PyXjtihS6HlhIQ5ggRGikOGHUoUjiHGAahEWhwq4qRIAssixqGsiREjgA7KxmGFDWyj1ugfBuPI3JPAAdDcshEDi9w4mO7ysDkaibCMNAVKo5IIAAXiCOJYteamrvk2TYs8aFwbqOwYHOSg0FIRCCaK5kviA-Y5MoAhgLwhCCSOB4WUwnYSMwVqONOXIgiFXnfkYAAa2CsC4kzoFe7nPHuz7JZIlRqOgMBxFaEKwSlQyirlNyqd5MpEnIRCuhWMYgLCLiUmGhrAtZmKigVHVxHamjoHKGDhOGrp0je0pbog+oChBZZEAeopzYWOpGEMhysOgzisKs1ToGALiyegFyEGFW3eb27KaKdAg+DdtnzSIAC+QA).
 - [ ] ~~[FEATURE] Duplicate gearlist – nový gearlist jako kopie existujícího. Viz PRD sekce 7, bod 8. (2026-10-07)~~ Vyřazeno ve v16.
 - [ ] ~~[FEATURE] Víc snapshotů na gearlist (historie). Viz PRD sekce 7, bod 6.~~
 - [ ] ~~[FEATURE] Koláčový graf rozložení váhy podle kategorie. Viz PRD sekce 7, bod 4.~~ Nahrazeno batohem (🟡 Brzy, FR-19).
@@ -229,3 +227,6 @@ _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, př
   2. Klik mimo okno ho nezavře, Escape a Cancel ano.
   3. Vyplň, zaškrtni „I am human“, „Send message“ → „Message sent“ a e-mail s předmětem „HikingBuddy: …“ v pracovní schránce. Odpověď v Gmailu jde rovnou odesílateli. **Lokálně (localhost) může hCaptcha nefungovat → odeslání naostro ověř po nasazení (FR-20).**
   4. Odkaz „Contact“ je i na sdílené stránce gearlistu.
+  
+   ~~Sdílená stránka na telefonu: u ×1 jen jedna váha. → netestovatelné lokálně, sdílené gearlisty nefungují s lokální adresou. Znovu otestovat po nasazení.~~
+   ~~Share gearlist feature not working locally. This is ok but will need to retest while deployed online.~~
