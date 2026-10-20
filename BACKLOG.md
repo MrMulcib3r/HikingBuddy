@@ -229,4 +229,4 @@ _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, př
   4. Odkaz „Contact“ je i na sdílené stránce gearlistu.
   
    ~~Sdílená stránka na telefonu: u ×1 jen jedna váha. → netestovatelné lokálně, sdílené gearlisty nefungují s lokální adresou. Znovu otestovat po nasazení.~~
-   ~~Share gearlist feature not working locally. This is ok but will need to retest while deployed online.~~
+  ~~Share gearlist feature not working locally. This is ok but will need to retest while deployed online.~~
