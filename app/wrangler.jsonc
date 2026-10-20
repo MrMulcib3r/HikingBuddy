@@ -1,0 +1,13 @@
+// Cloudflare Workers config: the app is published as static files only (no server code).
+// Cloudflare runs `npm run build` and then `npx wrangler deploy`, which uploads ./dist.
+{
+  "name": "hikingbuddy",
+  "compatibility_date": "2026-10-20",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  },
+  "workers_dev": true,
+  "preview_urls": true,
+  "observability": { "enabled": true }
+}

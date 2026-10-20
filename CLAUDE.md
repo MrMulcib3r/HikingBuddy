@@ -7,7 +7,7 @@ Martin is the Product Manager and owner of this project. He is **not a developer
 - Product decisions (what the app does, how it behaves for the user) are Martin's. If a requirement is unclear or contradicts the PRD, ask him before building. Implementation details (how the code is written) are yours to decide, but tell him what you chose and why.
 
 ## Source of truth
-- **`PRDRequirements/PRD-MVP.md`** (currently v31 — **final scope**, see sections 0 and 2; FR-16 to FR-19 and FR-21 (contact form) built, FR-20 (deployment) remains) — what we are building and why. Read it before any feature work. Code must match it; if they disagree, flag it to Martin.
+- **`PRDRequirements/PRD-MVP.md`** (currently v32 — **final scope**, see sections 0 and 2; MVP complete: FR-16 to FR-21 built, FR-20 deployed 2026-10-20 to Cloudflare, waiting for Martin's test) — what we are building and why. Read it before any feature work. Code must match it; if they disagree, flag it to Martin.
 - **`PRDRequirements/build-status.md`** — log of what has been built, decided and verified. Read it at the start of a session; **append an entry after every meaningful change**.
 - `PRDRequirements/gemini-code-*.txt` — the original long-term vision (v1). Reference only, *not* the current scope.
 - If a product decision changes during work, update the PRD (bump the version, add a line to its history and to section 8/8a "Rozhodnutí") in the same change.
@@ -54,6 +54,10 @@ Single-page web app for planning hiking gear, inspired by lighterpack.com.
 - `npm run lint` — lint
 
 There is no automated test suite in the repo yet (earlier checks were one-off Playwright smoke tests). When you add or change behaviour, verify it by running the app; adding a proper test setup is a welcome improvement — see `BACKLOG.md` Inbox, propose it to Martin first.
+
+## Deployment and public repo
+- The repo is **public**. Every push to `main` goes live automatically (Cloudflare Workers, static assets, config in `app/wrangler.jsonc`). A failed build keeps the previous version online — but still run `npm run build` before pushing.
+- Never commit Martin's private files (see `.gitignore`): personal data, `Ad hoc notes …md`, `attachments/`, `TrackingProjectProgress/`, `Claude outputs/`.
 
 ## Working style
 - Small, focused changes; commit each logical step to git with a clear message, so any step can be undone.

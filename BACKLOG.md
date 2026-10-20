@@ -81,7 +81,6 @@ _Zbývají jen dvě položky, které jdou ověřit až po nasazení na web (FR-2
 
 ## 🟡 Brzy
 
-- [ ] [FEATURE] Nasazení na web jako statická appka (Cloudflare Pages / Netlify / Vercel, zdarma) – PRD FR-20. Proč: veřejný odkaz pro pohovory. Až po dokončení všeho v Teď + design (FR-19) a Martinově testu lokálně. Při nasazení rozhodnout: veřejný, nebo soukromý repozitář (a zkontrolovat, že v repu není nic osobního). (2026-10-09, Martin; původně navrhl Claude 2026-09-23)
 - [ ] [FEATURE] Gear advisor (GenAI) – v gearlistu popíšu trek běžnou řečí a appka mi z Gear Vaultu navrhne vybavení s důvody a označí, co chybí; návrh přijmu celý nebo po položkách. Proč: první vlastní GenAI funkce, ukázka pro AI PM pozice. **Hned po nasazení (FR-20)**, před implementací rozhodnout otevřené otázky (API klíč, model). Viz PRD FR-22, sekce 7 bod 10. (2026-10-19, Martin)
 
 ## ⚪ Někdy
@@ -106,6 +105,8 @@ _Mimo scope. Uložené nápady pro případ, že by appka vyšla veřejně s mon
 ## 🧪 Test
 
 _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, přesuň do ✅ Hotovo; když ne, napiš k položce, co je špatně, a vrať ji do 🔴 Teď._
+
+- [ ] [FEATURE] Nasazení na web (PRD FR-20) – nasazeno 2026-10-20 na https://hikingbuddy.hikingbuddymmalinek.workers.dev, repo veřejné, historie vyčištěná od osobních souborů. → **Jak otestovat:** (1) appka se otevře a „Load demo data“ funguje; (2) „Connect data file“ a připojení tvého datového souboru; (3) sdílení gearlistu: odkaz otevři i v telefonu (body 1 a 2 z 🔴 Teď); (4) kontaktní formulář odešle zprávu z veřejné adresy.
 
 
 

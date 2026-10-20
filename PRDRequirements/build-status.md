@@ -250,3 +250,10 @@ Run locally: in the `app/` folder, run `npm install` then `npm run dev`. Data is
 
 **2026-10-19 (repo housekeeping, no app change):**
 - The `Pasted image *.png` files in the repo root were Obsidian attachments (pasted into BACKLOG / ad hoc notes), not app files. Copied to `attachments/` (the 20261014230518 file was a byte-identical duplicate, dropped); Martin deletes the root copies. `attachments/` is git-ignored, and Obsidian's attachment folder is set to it (`.obsidian/app.json`), so future pastes land there and stay out of the repo. The `![[...]]` links in BACKLOG.md resolve by file name in Obsidian, so they keep working without edits.
+
+**2026-10-20 (FR-20 deployment + public repo, PRD v32):**
+- **Hosting:** Cloudflare Workers with static assets (Martin set it up in the dashboard; Cloudflare now offers Workers instead of Pages for new projects). Build: root `app`, `npm run build`, deploy `npx wrangler deploy`. Added `app/wrangler.jsonc` (serves `./dist`, no server code) so Cloudflare no longer auto-generates a config on every build. Live: https://hikingbuddy.hikingbuddymmalinek.workers.dev.
+- **Public repo prep:** git history rewritten with `git filter-repo`: removed `Ad hoc notes …md`, `Claude outputs/`, `TrackingProjectProgress/` and all `Pasted image *.png`; commit author e-mail replaced with the GitHub noreply address. These paths are now in `.gitignore` (files stay on Martin's disk). `data/` and `MartinsDataFile/` were never committed. Full pre-rewrite history kept as a private bundle on Martin's disk (`MartinsDataFile/`).
+- README updated (data storage, live URL, deployment). FR-20 moved to 🧪 Test in BACKLOG.
+- **Verified:** clean `npm ci` + `npm run build` pass; `wrangler deploy --dry-run` reads `app/wrangler.jsonc` and the 75 files from `dist`; no removed path or personal e-mail left anywhere in history.
+
