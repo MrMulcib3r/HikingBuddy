@@ -172,7 +172,7 @@ Tenhle dialog se **nikdy** nezobrazuje při přepínání příznaků Worn/Consu
   - Martin může na veřejné adrese používat appku se svým datovým souborem (FR-16): stačí na ní připojit stejný soubor a zvolit „Load data from file“.
   - **Rozhodnout při nasazení:** veřejný, nebo soukromý repozitář na GitHubu. Veřejný znamená, že recruiter uvidí i kód, PRD a BACKLOG (dobrá ukázka procesu); předtím je potřeba zkontrolovat, že v repozitáři není nic osobního.
   - **Až po** dokončení FR-16 až FR-19 a Martinově testu lokálně.
-  - **Stav (v32, 2026-10-20): nasazeno.** Cloudflare Workers se statickými soubory (Cloudflare novým projektům nabízí Workers místo Pages; pro statickou appku je to totéž a zdarma). Adresa `https://hikingbuddy.hikingbuddymmalinek.workers.dev`. Cloudflare po každém pushi do `main` sám spustí `npm run build` a `npx wrangler deploy`; nastavení je v `app/wrangler.jsonc`. Repozitář je veřejný (sekce 8y).
+  - **Stav (v32, 2026-10-20): nasazeno.** Cloudflare Workers se statickými soubory (Cloudflare novým projektům nabízí Workers místo Pages; pro statickou appku je to totéž a zdarma). Adresa `https://hikingbuddy.hikingbuddy-mmalinek.workers.dev`. Cloudflare po každém pushi do `main` sám spustí `npm run build` a `npx wrangler deploy`; nastavení je v `app/wrangler.jsonc`. Repozitář je veřejný (sekce 8y).
 
 - **FR-21. Kontaktní formulář (v30, Martin 2026-10-15):**
   - **Proč:** návštěvníci veřejné appky (FR-20), včetně recruiterů, mají mít jak Martina kontaktovat. Martin si pro práci na AI projektech založil obecnou pracovní adresu (pro HikingBuddy i budoucí projekty). Adresa nesmí být na webu veřejně vidět, aby na ni nechodil spam od robotů, kteří stránky procházejí a sbírají e-maily.

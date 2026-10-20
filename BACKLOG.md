@@ -106,7 +106,7 @@ _Mimo scope. Uložené nápady pro případ, že by appka vyšla veřejně s mon
 
 _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, přesuň do ✅ Hotovo; když ne, napiš k položce, co je špatně, a vrať ji do 🔴 Teď._
 
-- [ ] [FEATURE] Nasazení na web (PRD FR-20) – nasazeno 2026-10-20 na https://hikingbuddy.hikingbuddymmalinek.workers.dev, repo veřejné, historie vyčištěná od osobních souborů. → **Jak otestovat:** (1) appka se otevře a „Load demo data“ funguje; (2) „Connect data file“ a připojení tvého datového souboru; (3) sdílení gearlistu: odkaz otevři i v telefonu (body 1 a 2 z 🔴 Teď); (4) kontaktní formulář odešle zprávu z veřejné adresy.
+- [ ] [FEATURE] Nasazení na web (PRD FR-20) – nasazeno 2026-10-20 na https://hikingbuddy.hikingbuddy-mmalinek.workers.dev, repo veřejné, historie vyčištěná od osobních souborů. → **Jak otestovat:** (1) appka se otevře a „Load demo data“ funguje; (2) „Connect data file“ a připojení tvého datového souboru; (3) sdílení gearlistu: odkaz otevři i v telefonu (body 1 a 2 z 🔴 Teď); (4) kontaktní formulář odešle zprávu z veřejné adresy.
 
 
 
