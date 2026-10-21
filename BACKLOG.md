@@ -78,19 +78,31 @@ _Zbývají jen dvě položky, které jdou ověřit až po nasazení na web (FR-2
 
 ## 🟡 Brzy
 
-- [ ] [FEATURE] Gear advisor (GenAI) – v gearlistu popíšu trek běžnou řečí a appka mi z Gear Vaultu navrhne vybavení s důvody a označí, co chybí; návrh přijmu celý nebo po položkách. Proč: první vlastní GenAI funkce, ukázka pro AI PM pozice. **Hned po nasazení (FR-20)**, před implementací rozhodnout otevřené otázky (API klíč, model). Viz PRD FR-22, sekce 7 bod 10. (2026-10-19, Martin)
+_Cíl (PRD v33, 2026-10-21): uživatel si připojí vlastní AI klienta (Claude, ChatGPT) přes MCP server HikingBuddy; AI umí všechno, co uživatel, a odpovídá s widgety HikingBuddy přímo v chatu. Pořadí je závazné, každý krok zvlášť. Zadání pro Claude Code: `PRDRequirements/mcp-integration/claude-code-prompts.md`, pro Claude Design: `PRDRequirements/mcp-integration/claude-design-prompt.md`._
+
+- [ ] [UI] Design pro účty, Connect to AI, Activity a widgety MCP Apps – zadat Claude Design (`claude-design-prompt.md`). Proč: widgety v chatu a nové obrazovky zatím nemají design; potřeba před krokem 5, ideálně dřív. (2026-10-21, Martin)
+- [ ] [FEATURE] Krok 1: Server, databáze D1 a přihlášení přes Google – režim bez účtu zůstává, po přihlášení data na serveru, import lokálních dat. Proč: základ pro MCP server a stejná data na všech zařízeních. PRD FR-23, FR-24. (2026-10-21, Martin)
+- [ ] [FEATURE] Krok 2: Historie změn a Undo – panel Activity, značka You / AI, Undo i pro smazání. Proč: AI smí mazat, uživatel musí vidět a vrátit, co agent udělal. PRD FR-25. (2026-10-21, Martin)
+- [ ] [FEATURE] Krok 3: MCP server s OAuth (zatím jen text) – AI klient umí všechno, co uživatel; pravidla PRD platí i pro AI (FR-5 jako povinná volba). PRD FR-26. (2026-10-21, Martin)
+- [ ] [FEATURE] Krok 4: Pop-up „Connect to AI“ – krátký návod, adresa MCP serveru s Copy, OK. PRD FR-28. (2026-10-21, Martin)
+- [ ] [FEATURE] Krok 5: Widgety MCP Apps v AI klientovi – souhrn gearlistu, seznam, návrh změn s Confirm / Reject. Až po designu. PRD FR-27. (2026-10-21, Martin)
+- [ ] [FEATURE] Krok 6: Eval MCP serveru – 10 zadání, před/po úpravě popisů nástrojů. PRD FR-26. (2026-10-21, Martin)
+- [ ] ~~[FEATURE] Gear advisor (GenAI) – návrh vybavení s vlastním API klíčem. PRD FR-22.~~ **Nahrazeno MCP serverem ve v33 (2026-10-21)**, viz PRD sekce 8z.
 
 ## ⚪ Někdy
 
 _Ve v16 (2026-10-09) Martin uzavřel scope: všechno přeškrtnuté je vyřazené, ne jen odložené._
 
+- [ ] [FEATURE] GDPR minimum – zásady ochrany osobních údajů, možnost smazat účet a data. Proč: s účty appka ukládá osobní údaje (Google účet, data na serveru); potřeba dřív, než appku s účtem začnou používat cizí lidé. PRD sekce 8z. (2026-10-21, Martin)
+- [ ] [UI] Tmavý režim widgetů v AI klientovi – návrh připraví Claude Design (součást `claude-design-prompt.md`), implementace později. Proč: AI klienty běží často tmavě. PRD FR-27. (2026-10-21, Martin)
+- [ ] ~~[FEATURE] Přihlašování a synchronizace mezi zařízeními.~~ → přihlášení přes Google a data na serveru jsou od v33 v 🟡 Brzy (krok 1).
+
 - [ ] [FEATURE] Obvyklé teploty v místě a období treku – u gearlistu zadám období (měsíc nebo dny) a místo (např. Kvikkjokk) a uvidím obvyklé denní a noční teploty. Proč: vím, na jaké teploty balím (spacák, oblečení). Nice-to-have, mimo uzavřený scope, ale jde to bez serveru. Viz PRD sekce 7, bod 9. (2026-10-13, Martin)
-- [ ] [FEATURE] URL shortener: Současná URL sdíleného linku vypadá např. [takto](https://hikingbuddy.hikingbuddy-mmalinek.workers.dev/#share=v2:N4IgdiBcIOoKZwNZzAEwAQAkCWyDOIANCAK5QgC2RIAxlANr0gBCAhjYgA7uLUBGPbhxABdQkwDKACzgAbAC5wATugkBPPIqrE8MhctHiQE2Qk6qNW6nlNxOhpgGFZAe3lTsYAObUar954+Yk4uLoiBvqHh3g4gAGKhqNQAZomxMKyKStQA7pkGwSAAoqY08kouYNg0BMRycGUVVTWxmGpe2Chw1FLtnWDdhQCy2Hh0xBSjdCJiINgMTADiLnh4rBTK6ItwrCoAMi5Ko+gAbgBMRAAMhACsNwDMhACMxFeFEkMAIlv5OYnoNFYnG6z0I9ye1xeIDeRgAKih5OhNKx8EQXgAOQgANlehEuhU+LhyYHQAEcSNgFEQztizpDcfijABJMDJWSZVh8UxI2ycQLobhJQg0+4AFnp0LxhVhSlYlPQShIYAGSlqjyx4tBkqehRw0S8AtYYHkauF6IlaOlAFpdNglPIiI8nvdMVDLUYJC4OKbRU6GQSiSSAFY8OAOsFgiFamFMABKcuDofDjzO9wtUqMzBIyWSjsImrdGaWrhOcB9fsljKYRVLSgGOXQsOw8iN2BIFHQAFU9ugAApuIii55PIeFqsgRyZAFGpHyFylwfPUf+owwTyoMZKBAQfPCgCc0aLID22C8Uiyi6eN0P44knFCO6HrpXknv3hBQ+XlcKcRIcnQAAUrCyDQLhSC4sgAJSXpc6ZnO8zTIKqRDXjc1w0pK8FGI4Mg5PyXjtihS6HlhIQ5ggRGikOGHUoUjiHGAahEWhwq4qRIAssixqGsiREjgA7KxmGFDWyj1ugfBuPI3JPAAdDcshEDi9w4mO7ysDkaibCMNAVKo5IIAAXiCOJYteamrvk2TYs8aFwbqOwYHOSg0FIRCCaK5kviA-Y5MoAhgLwhCCSOB4WUwnYSMwVqONOXIgiFXnfkYAAa2CsC4kzoFe7nPHuz7JZIlRqOgMBxFaEKwSlQyirlNyqd5MpEnIRCuhWMYgLCLiUmGhrAtZmKigVHVxHamjoHKGDhOGrp0je0pbog+oChBZZEAeopzYWOpGEMhysOgzisKs1ToGALiyegFyEGFW3eb27KaKdAg+DdtnzSIAC+QA).
+- [ ] [FEATURE] URL shortener: Současná URL sdíleného linku vypadá např. [takto](https://hikingbuddy.mmalinek.workers.dev/#share=v2:N4IgdiBcIOoKZwNZzAEwAQAkCWyDOIANCAK5QgC2RIAxlANr0gBCAhjYgA7uLUBGPbhxABdQkwDKACzgAbAC5wATugkBPPIqrE8MhctHiQE2Qk6qNW6nlNxOhpgGFZAe3lTsYAObUar954+Yk4uLoiBvqHh3g4gAGKhqNQAZomxMKyKStQA7pkGwSAAoqY08kouYNg0BMRycGUVVTWxmGpe2Chw1FLtnWDdhQCy2Hh0xBSjdCJiINgMTADiLnh4rBTK6ItwrCoAMi5Ko+gAbgBMRAAMhACsNwDMhACMxFeFEkMAIlv5OYnoNFYnG6z0I9ye1xeIDeRgAKih5OhNKx8EQXgAOQgANlehEuhU+LhyYHQAEcSNgFEQztizpDcfijABJMDJWSZVh8UxI2ycQLobhJQg0+4AFnp0LxhVhSlYlPQShIYAGSlqjyx4tBkqehRw0S8AtYYHkauF6IlaOlAFpdNglPIiI8nvdMVDLUYJC4OKbRU6GQSiSSAFY8OAOsFgiFamFMABKcuDofDjzO9wtUqMzBIyWSjsImrdGaWrhOcB9fsljKYRVLSgGOXQsOw8iN2BIFHQAFU9ugAApuIii55PIeFqsgRyZAFGpHyFylwfPUf+owwTyoMZKBAQfPCgCc0aLID22C8Uiyi6eN0P44knFCO6HrpXknv3hBQ+XlcKcRIcnQAAUrCyDQLhSC4sgAJSXpc6ZnO8zTIKqRDXjc1w0pK8FGI4Mg5PyXjtihS6HlhIQ5ggRGikOGHUoUjiHGAahEWhwq4qRIAssixqGsiREjgA7KxmGFDWyj1ugfBuPI3JPAAdDcshEDi9w4mO7ysDkaibCMNAVKo5IIAAXiCOJYteamrvk2TYs8aFwbqOwYHOSg0FIRCCaK5kviA-Y5MoAhgLwhCCSOB4WUwnYSMwVqONOXIgiFXnfkYAAa2CsC4kzoFe7nPHuz7JZIlRqOgMBxFaEKwSlQyirlNyqd5MpEnIRCuhWMYgLCLiUmGhrAtZmKigVHVxHamjoHKGDhOGrp0je0pbog+oChBZZEAeopzYWOpGEMhysOgzisKs1ToGALiyegFyEGFW3eb27KaKdAg+DdtnzSIAC+QA).
 - [ ] ~~[FEATURE] Duplicate gearlist – nový gearlist jako kopie existujícího. Viz PRD sekce 7, bod 8. (2026-10-07)~~ Vyřazeno ve v16.
 - [ ] ~~[FEATURE] Víc snapshotů na gearlist (historie). Viz PRD sekce 7, bod 6.~~
 - [ ] ~~[FEATURE] Koláčový graf rozložení váhy podle kategorie. Viz PRD sekce 7, bod 4.~~ Nahrazeno batohem (🟡 Brzy, FR-19).
 - [ ] ~~[FEATURE] Offline PWA (instalace na telefon, přístup bez signálu). Viz PRD sekce 7, bod 1.~~
-- [ ] ~~[FEATURE] Přihlašování a synchronizace mezi zařízeními. Viz PRD sekce 7, bod 2.~~
 
 ## 🔭 Vize
 
@@ -225,4 +237,4 @@ _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, př
   
    ~~Sdílená stránka na telefonu: u ×1 jen jedna váha. → netestovatelné lokálně, sdílené gearlisty nefungují s lokální adresou. Znovu otestovat po nasazení.~~
   ~~Share gearlist feature not working locally. This is ok but will need to retest while deployed online.~~
-- [x] [FEATURE] Nasazení na web (PRD FR-20) – nasazeno 2026-10-20 na https://hikingbuddy.hikingbuddy-mmalinek.workers.dev, repo veřejné, historie vyčištěná od osobních souborů. → **Jak otestovat:** (1) appka se otevře a „Load demo data“ funguje; (2) „Connect data file“ a připojení tvého datového souboru; (3) sdílení gearlistu: odkaz otevři i v telefonu (body 1 a 2 z 🔴 Teď); (4) kontaktní formulář odešle zprávu z veřejné adresy.
+- [x] [FEATURE] Nasazení na web (PRD FR-20) – nasazeno 2026-10-20 na https://hikingbuddy.mmalinek.workers.dev, repo veřejné, historie vyčištěná od osobních souborů. → **Jak otestovat:** (1) appka se otevře a „Load demo data“ funguje; (2) „Connect data file“ a připojení tvého datového souboru; (3) sdílení gearlistu: odkaz otevři i v telefonu (body 1 a 2 z 🔴 Teď); (4) kontaktní formulář odešle zprávu z veřejné adresy.

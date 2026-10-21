@@ -252,8 +252,14 @@ Run locally: in the `app/` folder, run `npm install` then `npm run dev`. Data is
 - The `Pasted image *.png` files in the repo root were Obsidian attachments (pasted into BACKLOG / ad hoc notes), not app files. Copied to `attachments/` (the 20261014230518 file was a byte-identical duplicate, dropped); Martin deletes the root copies. `attachments/` is git-ignored, and Obsidian's attachment folder is set to it (`.obsidian/app.json`), so future pastes land there and stay out of the repo. The `![[...]]` links in BACKLOG.md resolve by file name in Obsidian, so they keep working without edits.
 
 **2026-10-20 (FR-20 deployment + public repo, PRD v32):**
-- **Hosting:** Cloudflare Workers with static assets (Martin set it up in the dashboard; Cloudflare now offers Workers instead of Pages for new projects). Build: root `app`, `npm run build`, deploy `npx wrangler deploy`. Added `app/wrangler.jsonc` (serves `./dist`, no server code) so Cloudflare no longer auto-generates a config on every build. Live: https://hikingbuddy.hikingbuddy-mmalinek.workers.dev.
+- **Hosting:** Cloudflare Workers with static assets (Martin set it up in the dashboard; Cloudflare now offers Workers instead of Pages for new projects). Build: root `app`, `npm run build`, deploy `npx wrangler deploy`. Added `app/wrangler.jsonc` (serves `./dist`, no server code) so Cloudflare no longer auto-generates a config on every build. Live: https://hikingbuddy.hikingbuddy-mmalinek.workers.dev (changed 2026-10-21, see below).
 - **Public repo prep:** git history rewritten with `git filter-repo`: removed `Ad hoc notes …md`, `Claude outputs/`, `TrackingProjectProgress/` and all `Pasted image *.png`; commit author e-mail replaced with the GitHub noreply address. These paths are now in `.gitignore` (files stay on Martin's disk). `data/` and `MartinsDataFile/` were never committed. Full pre-rewrite history kept as a private bundle on Martin's disk (`MartinsDataFile/`).
 - README updated (data storage, live URL, deployment). FR-20 moved to 🧪 Test in BACKLOG.
 - **Verified:** clean `npm ci` + `npm run build` pass; `wrangler deploy --dry-run` reads `app/wrangler.jsonc` and the 75 files from `dist`; no removed path or personal e-mail left anywhere in history.
 
+
+**2026-10-21 (new public address, no app change):**
+- Martin renamed the account's workers.dev subdomain in the Cloudflare dashboard (`hikingbuddy-mmalinek` → `mmalinek`). The app is now live at **https://hikingbuddy.mmalinek.workers.dev**; the old address no longer works (Cloudflare does not redirect).
+- No code change needed: the app has no hard-coded domain. Share links (`src/share.ts`) and the contact form's page URL (`src/contact.ts`) are built from `window.location.origin`, so they follow the new address automatically. `app/wrangler.jsonc` only names the Worker (`hikingbuddy`), not the subdomain.
+- Updated the address in README.md, BACKLOG.md and PRD-MVP.md (FR-20 status). Shared gearlist links created before today point to the old address and must be re-shared.
+- For FR-23+ (Google sign-in, MCP): the Google OAuth redirect URIs must use the new address.

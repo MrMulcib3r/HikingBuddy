@@ -7,7 +7,7 @@ Martin is the Product Manager and owner of this project. He is **not a developer
 - Product decisions (what the app does, how it behaves for the user) are Martin's. If a requirement is unclear or contradicts the PRD, ask him before building. Implementation details (how the code is written) are yours to decide, but tell him what you chose and why.
 
 ## Source of truth
-- **`PRDRequirements/PRD-MVP.md`** (currently v32 — **final scope**, see sections 0 and 2; MVP complete: FR-16 to FR-21 built, FR-20 deployed 2026-10-20 to Cloudflare, waiting for Martin's test) — what we are building and why. Read it before any feature work. Code must match it; if they disagree, flag it to Martin.
+- **`PRDRequirements/PRD-MVP.md`** (currently v33; MVP complete: FR-16 to FR-21 built, FR-20 deployed 2026-10-20 to Cloudflare; **v33 adds accounts, a server and an MCP server, section 4a, FR-23 to FR-28**) — what we are building and why. Read it before any feature work. Code must match it; if they disagree, flag it to Martin.
 - **`PRDRequirements/build-status.md`** — log of what has been built, decided and verified. Read it at the start of a session; **append an entry after every meaningful change**.
 - `PRDRequirements/gemini-code-*.txt` — the original long-term vision (v1). Reference only, *not* the current scope.
 - If a product decision changes during work, update the PRD (bump the version, add a line to its history and to section 8/8a "Rozhodnutí") in the same change.
@@ -26,9 +26,15 @@ Single-page web app for planning hiking gear, inspired by lighterpack.com.
 - Weights are stored in **grams**; metric/imperial is display only.
 - All editing is inline (click a value → edit; Enter/blur saves; Escape cancels). No "Edit" buttons. No batch editing (deliberate).
 - UI text is **English**. Code comments may be Czech or English.
-- **Scope is closed (PRD v16, 2026-10-09).** The app is Martin's personal tool and a portfolio piece for job interviews, not a product to monetize. In scope beyond what exists today: auto-save to a local data file (FR-16), "Load demo data" (FR-17), read-only gearlist sharing via URL with the data encoded in the link (FR-18), design system + "backpack" weight visualization (FR-19, waits for Martin's design system), public deployment as a static site (FR-20, last). Contact form in the footer (FR-21, PRD v30) — sends through the third-party Web3Forms service; the contact e-mail address must never appear in the code or the UI.
-- **Out of scope — do not build, even if it seems like a natural next step:** accounts/login, any server or server database, sync between devices, offline/PWA, mobile optimization, pie chart, multiple snapshots, duplicate gearlist, multiple templates, community sharing, monetization. The app must stay a **static app** (no backend).
-- **First feature after the MVP (PRD v31, 2026-10-19): Gear advisor (FR-22, PRD section 7 point 10)**, the app's first GenAI feature. Build it only after FR-20 (deployment) is done and only after Martin decides the open questions there (where the API key lives, which model). Never put an API key in the frontend code or in Git; keep it in `.env` (git-ignored) locally.
+- **Scope (PRD v16, reopened in v33 for FR-23 to FR-28 only).** The app is Martin's personal tool and a portfolio piece for job interviews, not a product to monetize. In scope beyond what exists today: auto-save to a local data file (FR-16), "Load demo data" (FR-17), read-only gearlist sharing via URL with the data encoded in the link (FR-18), design system + "backpack" weight visualization (FR-19, waits for Martin's design system), public deployment as a static site (FR-20, last). Contact form in the footer (FR-21, PRD v30) — sends through the third-party Web3Forms service; the contact e-mail address must never appear in the code or the UI.
+- **Next work (PRD v33, 2026-10-21): accounts, server and MCP server (PRD section 4a, FR-23 to FR-28).** Goal: users connect their own AI client (Claude, ChatGPT) to HikingBuddy through a remote MCP server; the AI can do everything the user can (incl. delete, soft delete + Undo) and answers with interactive HikingBuddy widgets in the chat (MCP Apps). Build it **step by step** in the order of `PRDRequirements/mcp-integration/claude-code-prompts.md`, one step per task, Martin tests between steps. Key rules:
+  - Sign-in **only with Google**. **Guest mode stays**: without an account the app works exactly as today (localStorage, data file FR-16, demo FR-17). Logged in = server data is the source of truth.
+  - Stack: the same Cloudflare Worker serves static assets + `/api`, `/auth`, `/mcp`; database **Cloudflare D1**; MCP via Cloudflare Agents SDK (`McpAgent`) + `workers-oauth-provider` (OAuth 2.1 + PKCE) with Google as the identity provider. Do not hand-roll OAuth. Everything must stay on **free tiers** (Martin pays nothing) — ask before adding any paid service.
+  - **One operations layer** on the server enforces the PRD rules for both the web app and MCP tools (e.g. the 3-way dialog from FR-5 becomes a required `create_copy` / `update_everywhere` choice in the MCP tool).
+  - Every query is scoped to the signed-in user. Every change is written to the activity history (FR-25).
+  - **Secrets** (Google client secret, signing keys) only in Cloudflare secrets (`wrangler secret put`) and locally in `app/.dev.vars` (git-ignored). The repo is public.
+- **No longer built: Gear advisor (FR-22)** — replaced by the MCP server in v33. No in-app chat, no own LLM API key.
+- **Out of scope — do not build, even if it seems like a natural next step:** sign-in methods other than Google, offline/PWA, mobile optimization, pie chart, multiple snapshots, duplicate gearlist, multiple templates, community sharing, monetization, dark mode (BACKLOG ⚪ Někdy), GDPR pages (BACKLOG ⚪ Někdy).
 
 ## Data storage — read this before touching `src/types.ts` or `src/storage.ts`
 
@@ -41,10 +47,11 @@ Single-page web app for planning hiking gear, inspired by lighterpack.com.
 5. **Next step, in scope since PRD v16: auto-save to a local data file (FR-16)** via the File System Access API. The file uses the **same `{ schemaVersion, state }` payload as Export**, so every migration rule above applies to data loaded from the file too. Once a file is connected, the file is the source of truth and `localStorage` is a working copy. Never write to the file without the user's permission being granted, and never overwrite a file that already has data without the explicit dialog from FR-16. "Load demo data" (FR-17) must never be able to overwrite a connected file.
 6. **Personal data never goes into git.** If a data file lives inside the repo, it must be under `data/` (git-ignored). This matters more once the repo may become public (FR-20).
 7. Shared gearlist links (FR-18) carry data in the URL — give the link format its own version number so old links keep opening after future data-model changes.
-8. A server database is **out of scope** (PRD v16) — don't build it.
+8. **Server database (PRD v33, FR-24): Cloudflare D1, only for signed-in users.** The same discipline applies there: versioned D1 migrations, never drop or rename a table/column without a data migration, test migrations on a copy with old-shape data first. Guest mode keeps using `localStorage` / the data file with the rules above. Importing local data into an account (FR-23) uses the same `{ schemaVersion, state }` payload and migrations, and never deletes the local data.
 
 ## Tech
 - React 19 + Vite + TypeScript, lint with oxlint. Everything lives in `app/`.
+- From PRD v33: server code runs in the Cloudflare Worker (config `app/wrangler.jsonc`), database Cloudflare D1. Explain to Martin in plain Czech any new Cloudflare setting he has to click in the dashboard (Google OAuth client, secrets, D1 database).
 - Key files: `src/types.ts` (data model), `src/state/AppContext.tsx` (state + actions), `src/state/logic.ts` (weight math, affected-lists lookup), `src/storage.ts` (persistence + migrations — see "Data storage" above), `src/components/` (UI).
 
 ## Commands (run inside `app/`)
