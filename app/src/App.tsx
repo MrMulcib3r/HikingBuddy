@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { AppProvider, useApp } from './state/AppContext';
+import { useGuestStore } from './state/guestStore';
 import { DataFileProvider } from './state/DataFileContext';
 import { isEmptyState } from './storage';
 import { GearVaultPanel } from './components/GearVaultPanel';
@@ -26,8 +27,14 @@ function App() {
   const shared = useMemo(() => (isShareHash(hash) ? parseShareHash(hash) : undefined), [hash]);
   if (shared !== undefined) return <SharedGearlistPage key={hash} shared={shared} />;
 
+  return <GuestApp />;
+}
+
+/** No account: data in this browser and the optional data file, exactly as before v33. */
+function GuestApp() {
+  const store = useGuestStore();
   return (
-    <AppProvider>
+    <AppProvider store={store}>
       <DataFileProvider>
         <AppShell />
       </DataFileProvider>

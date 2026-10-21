@@ -304,10 +304,11 @@ export function GearVaultPanel() {
             setPendingCoreEdit(null);
           }}
           onContinue={() => {
-            updateGearItem(pendingCoreEdit.item.id, {
-              ...pendingCoreEdit.patch,
-              defaultQuantity: pendingCoreEdit.item.defaultQuantity,
-            });
+            updateGearItem(
+              pendingCoreEdit.item.id,
+              { ...pendingCoreEdit.patch, defaultQuantity: pendingCoreEdit.item.defaultQuantity },
+              'update_everywhere'
+            );
             setPendingCoreEdit(null);
           }}
         />
