@@ -61,7 +61,20 @@ export type Operation =
   | { type: 'DELETE_TEMPLATE'; templateId: string }
   | { type: 'CREATE_LIST_FROM_TEMPLATE'; id: string; name: string; templateId: string; createdAt: string; rowIdPrefix: string }
   | { type: 'DISMISS_TEMPLATE_BANNER' }
-  | { type: 'SET_UNIT_PREFERENCE'; pref: UnitPreference };
+  | { type: 'SET_UNIT_PREFERENCE'; pref: UnitPreference }
+  /** FR-25 Undo: puts things back to earlier values from the change history (core/history.ts).
+   * Only the server creates it (from its own history), never the browser. */
+  | { type: 'RESTORE'; actions: RestoreAction[] };
+
+/** One thing to put back: `set` null = remove it; `whole` = bring back a removed thing with all
+ * its fields; otherwise only the listed fields are set. `l` = the gearlist of a row. */
+export interface RestoreAction {
+  k: 'category' | 'gearItem' | 'list' | 'row' | 'snapshot';
+  id: string;
+  l?: string;
+  set: Record<string, unknown> | null;
+  whole?: boolean;
+}
 
 /** A rule was broken or the operation points at something that doesn't exist. The message is
  * plain English, safe to show to the user (and later to an AI model). */
@@ -270,7 +283,114 @@ export function applyOperation(state: AppState, op: Operation): AppState {
       return { ...state, templateBannerDismissed: true };
     case 'SET_UNIT_PREFERENCE':
       return { ...state, unitPreference: op.pref };
+    case 'RESTORE':
+      return applyRestore(state, op.actions);
   }
+}
+
+const KIND_ORDER: RestoreAction['k'][] = ['category', 'gearItem', 'list', 'row', 'snapshot'];
+
+/** FR-25: parents first when bringing things back (a gearlist before its rows), children first
+ * when removing them. Removing keeps the data consistent the same way the normal deletes do. */
+function applyRestore(state: AppState, actions: RestoreAction[]): AppState {
+  const rank = (a: RestoreAction) => KIND_ORDER.indexOf(a.k);
+  const puts = actions.filter((a) => a.set !== null).sort((x, y) => rank(x) - rank(y));
+  const removes = actions.filter((a) => a.set === null).sort((x, y) => rank(y) - rank(x));
+  let s = state;
+  for (const a of puts) s = restorePut(s, a);
+  for (const a of removes) s = restoreRemove(s, a);
+  return s;
+}
+
+function restorePut(state: AppState, a: RestoreAction): AppState {
+  const set = a.set as Record<string, unknown>;
+  switch (a.k) {
+    case 'category': {
+      const exists = state.categories.some((c) => c.id === a.id);
+      if (!exists && !a.whole) return state;
+      const categories = exists
+        ? state.categories.map((c) => (c.id === a.id ? ({ ...c, ...set, id: a.id } as Category) : c))
+        : [...state.categories, { ...(set as unknown as Category), id: a.id }];
+      return { ...state, categories };
+    }
+    case 'gearItem': {
+      const exists = state.gearItems.some((g) => g.id === a.id);
+      if (!exists && !a.whole) return state;
+      const merged = (g: GearItem): GearItem => ({ ...g, ...set, id: a.id }) as GearItem;
+      let gearItems = exists ? state.gearItems.map((g) => (g.id === a.id ? merged(g) : g)) : [...state.gearItems, merged(set as unknown as GearItem)];
+      // A category that no longer exists → Uncategorized (same as deleting the category).
+      gearItems = gearItems.map((g) => (g.id === a.id && g.categoryId && !state.categories.some((c) => c.id === g.categoryId) ? { ...g, categoryId: null } : g));
+      return { ...state, gearItems };
+    }
+    case 'list': {
+      const kind = set.kind;
+      const header = (l: GearList): GearList => ({
+        ...l,
+        name: typeof set.name === 'string' ? set.name : l.name,
+        createdAt: typeof set.createdAt === 'string' ? set.createdAt : l.createdAt,
+        order: typeof set.order === 'number' ? set.order : l.order,
+      });
+      if (state.gearLists.some((l) => l.id === a.id)) return { ...state, gearLists: state.gearLists.map((l) => (l.id === a.id ? header(l) : l)) };
+      if (state.templates.some((t) => t.id === a.id)) return { ...state, templates: state.templates.map((t) => (t.id === a.id ? header(t) : t)) };
+      if (!a.whole) return state;
+      const list = header({ id: a.id, name: '', createdAt: '', items: [], snapshot: null, order: 0 });
+      if (kind === 'template') return state.templates.length > 0 ? state : { ...state, templates: [{ ...list, name: TEMPLATE_NAME }] };
+      return { ...state, gearLists: [...state.gearLists, list] };
+    }
+    case 'row': {
+      const listId = a.l ?? '';
+      const linkOk = (row: GearListItem): GearListItem =>
+        row.gearItemId && !state.gearItems.some((g) => g.id === row.gearItemId) ? { ...row, gearItemId: null } : row;
+      const put = (list: GearList): GearList => {
+        const exists = list.items.some((i) => i.id === a.id);
+        if (!exists && !a.whole) return list;
+        const items = exists
+          ? list.items.map((i) => (i.id === a.id ? linkOk({ ...i, ...set, id: a.id } as GearListItem) : i))
+          : [...list.items, linkOk({ ...(set as unknown as GearListItem), id: a.id })];
+        return { ...list, items };
+      };
+      return mapListIfExists(state, listId, put);
+    }
+    case 'snapshot':
+      return mapListIfExists(state, a.id, (list) => {
+        if (!list.snapshot && !a.whole) return list;
+        const merged = { ...(list.snapshot ?? {}), ...set } as GearList['snapshot'];
+        return { ...list, snapshot: merged };
+      });
+  }
+}
+
+function restoreRemove(state: AppState, a: RestoreAction): AppState {
+  switch (a.k) {
+    case 'category': {
+      const category = state.categories.find((c) => c.id === a.id);
+      if (!category) return state;
+      const categories = state.categories.filter((c) => c.id !== a.id);
+      const gearItems = state.gearItems.map((item) => (item.categoryId === a.id ? { ...item, categoryId: null } : item));
+      return mapAllLists({ ...state, categories, gearItems }, (list) => renameCategoryInRows(list, category.name, UNCATEGORIZED));
+    }
+    case 'gearItem': {
+      if (!state.gearItems.some((g) => g.id === a.id)) return state;
+      // Rows that still link to it stay as custom entries; the template only holds linked rows (T-6).
+      return {
+        ...state,
+        gearItems: state.gearItems.filter((g) => g.id !== a.id),
+        gearLists: state.gearLists.map((l) => detachDeletedItem(l, a.id)),
+        templates: state.templates.map((t) => removeDeletedItem(t, a.id)),
+      };
+    }
+    case 'list':
+      return { ...state, gearLists: state.gearLists.filter((l) => l.id !== a.id), templates: state.templates.filter((t) => t.id !== a.id) };
+    case 'row':
+      return mapListIfExists(state, a.l ?? '', (list) => ({ ...list, items: list.items.filter((i) => i.id !== a.id) }));
+    case 'snapshot':
+      return mapListIfExists(state, a.id, (list) => ({ ...list, snapshot: null }));
+  }
+}
+
+function mapListIfExists(state: AppState, listId: string, fn: (list: GearList) => GearList): AppState {
+  if (!state.gearLists.some((l) => l.id === listId) && !state.templates.some((t) => t.id === listId)) return state;
+  return mapListById(state, listId, fn);
 }
 
 /** Applies operations in order, skipping (and reporting) any that break a rule — the rest

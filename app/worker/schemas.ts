@@ -53,9 +53,23 @@ export const operationSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('SET_UNIT_PREFERENCE'), pref: z.enum(['metric', 'imperial']) }),
 ]);
 
-export const opsRequestSchema = z.object({
-  schemaVersion: z.number().int(),
-  ops: z.array(operationSchema).min(1).max(200),
+export const opsRequestSchema = z
+  .object({
+    schemaVersion: z.number().int(),
+    ops: z.array(operationSchema).min(1).max(200),
+    /** FR-25: one id per op; ops of one web action share it and become one history entry.
+     * Optional: changes queued by an older app version come without it (one entry each). */
+    actions: z.array(z.string().max(100).nullish()).max(200).optional(),
+  })
+  .refine((r) => !r.actions || r.actions.length === r.ops.length);
+
+/** FR-25 Undo: one change (`change`), one entry, or all AI changes of a day (local day as UTC times). */
+export const undoRequestSchema = z.object({
+  target: z.union([
+    z.object({ entryId: id, change: z.number().int().min(0).max(LIMITS.maxRowsPerList * 10).optional() }),
+    z.object({ day: z.object({ from: iso, to: iso }) }),
+  ]),
+  mode: z.enum(['check', 'auto', 'all', 'keep_later']),
 });
 
 /** Import (FR-23), Import backup and demo data while signed in. The state is migrated on the

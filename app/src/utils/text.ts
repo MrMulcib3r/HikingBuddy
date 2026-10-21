@@ -13,3 +13,24 @@ export function formatDateTime(iso: string): string {
   const minutes = String(d.getMinutes()).padStart(2, '0');
   return `${d.getDate()} ${MONTHS[d.getMonth()]} ${d.getFullYear()}, ${d.getHours()}:${minutes}`;
 }
+
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+/** "14:02" in the user's time zone (Activity, FR-25). */
+export function formatClock(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return `${d.getHours()}:${String(d.getMinutes()).padStart(2, '0')}`;
+}
+
+/** "20 Nov" — e.g. "Restorable until 20 Nov". */
+export function formatDayMonth(d: Date): string {
+  return `${d.getDate()} ${MONTHS[d.getMonth()]}`;
+}
+
+/** "Tue 21 Oct" — a day in Activity. */
+export function formatDayShort(iso: string | Date): string {
+  const d = typeof iso === 'string' ? new Date(iso) : iso;
+  if (Number.isNaN(d.getTime())) return '';
+  return `${WEEKDAYS[d.getDay()]} ${formatDayMonth(d)}`;
+}

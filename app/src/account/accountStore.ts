@@ -2,7 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { applyOperation, applyOperations, OperationError, type Operation } from '../core/operations';
 import { CURRENT_SCHEMA_VERSION, isEmptyState } from '../core/schema';
 import { api, ApiError } from './api';
-import { readAccountCache, writeAccountCache, type AccountCache } from './accountCache';
+import { readAccountCache, writeAccountCache, type AccountCache, type PendingOp } from './accountCache';
+import { newId } from '../utils/id';
+import type { RichPart } from '../core/history';
 import type { AppStore } from '../state/AppContext';
 import type { AppState } from '../types';
 
@@ -54,7 +56,23 @@ export interface AccountSync {
   retry: () => void;
   /** FR-23 import, Import backup and demo data: sent right away, never queued. */
   importState: (state: AppState, mode: 'replace_empty' | 'as_new') => Promise<void>;
+  /** FR-25: sends unsent changes first, then asks the server to undo. */
+  undo: (target: UndoTargetRequest, mode: UndoMode) => Promise<UndoResponse>;
+  /** Grows with every saved change — Activity reloads when it changes. */
+  dataVersion: number;
 }
+
+export type UndoTargetRequest = { entryId: string; change?: number } | { day: { from: string; to: string } };
+export type UndoMode = 'check' | 'auto' | 'all' | 'keep_later';
+export interface UndoConflict {
+  actor: 'you' | 'ai';
+  client: string | null;
+  at: string;
+  text: RichPart[];
+}
+export type UndoResponse =
+  | { applied: true }
+  | { applied: false; count: number; conflicting: number; byClient: { client: string; count: number }[]; conflicts: UndoConflict[] };
 
 export function useAccountStore(userId: string): { store: AppStore; sync: AccountSync } {
   // `data` drives rendering; `dataRef` is the same value for the async sending code.
@@ -75,7 +93,7 @@ export function useAccountStore(userId: string): { store: AppStore; sync: Accoun
     },
     [userId]
   );
-  const acceptServerState = useCallback((res: ServerState, pending: Operation[]) => commit({ confirmed: res.state, version: res.version, pending }), [commit]);
+  const acceptServerState = useCallback((res: ServerState, pending: PendingOp[]) => commit({ confirmed: res.state, version: res.version, pending }), [commit]);
 
   // `sync` and `schedule` call each other; the ref breaks the cycle for the linter.
   const syncRef = useRef<() => Promise<void>>(async () => {});
@@ -105,7 +123,10 @@ export function useAccountStore(userId: string): { store: AppStore; sync: Accoun
         }
         let res: ServerState;
         try {
-          res = await api<ServerState>('/api/ops', { method: 'POST', body: { schemaVersion: CURRENT_SCHEMA_VERSION, ops: batch } });
+          res = await api<ServerState>('/api/ops', {
+            method: 'POST',
+            body: { schemaVersion: CURRENT_SCHEMA_VERSION, ops: batch.map((p) => p.op), actions: batch.map((p) => p.action) },
+          });
         } catch (err) {
           // The server can't read this batch at all — it would never go through. Drop it and
           // reload the account rather than block every later change.
@@ -160,12 +181,15 @@ export function useAccountStore(userId: string): { store: AppStore; sync: Accoun
     };
   }, [sync]);
 
-  const state = useMemo(() => (data.confirmed ? applyOperations(data.confirmed, data.pending).state : null), [data]);
+  const state = useMemo(() => (data.confirmed ? applyOperations(data.confirmed, opsOf(data.pending)).state : null), [data]);
+
+  // Changes dispatched in the same moment (one click) share an action id → one Activity entry.
+  const currentAction = useRef<string | null>(null);
 
   const dispatch = useCallback(
     (op: Operation) => {
       const { confirmed, pending } = dataRef.current;
-      const current = confirmed ? applyOperations(confirmed, pending).state : null;
+      const current = confirmed ? applyOperations(confirmed, opsOf(pending)).state : null;
       if (!current) return;
       try {
         applyOperation(current, op); // same rules as the server; a refused change is never queued
@@ -176,7 +200,11 @@ export function useAccountStore(userId: string): { store: AppStore; sync: Accoun
         }
         throw err;
       }
-      commit({ pending: [...pending, op] });
+      if (!currentAction.current) {
+        currentAction.current = newId('act');
+        queueMicrotask(() => (currentAction.current = null));
+      }
+      commit({ pending: [...pending, { op, action: currentAction.current }] });
       setStatus((s) => (s.kind === 'saved' ? { kind: 'saving' } : s));
       schedule(SEND_DELAY_MS);
     },
@@ -199,6 +227,20 @@ export function useAccountStore(userId: string): { store: AppStore; sync: Accoun
         setStatus(err instanceof ApiError && err.kind === 'daily_limit' ? { kind: 'limit' } : { kind: 'saved' });
         throw err;
       }
+    },
+    [acceptServerState, sync]
+  );
+
+  const undo = useCallback(
+    async (target: UndoTargetRequest, mode: UndoMode): Promise<UndoResponse> => {
+      // Unsent changes first: Undo must see everything the user did.
+      if (dataRef.current.pending.length > 0) {
+        await sync();
+        if (dataRef.current.pending.length > 0) throw new ApiError('offline', 'Your latest changes are not saved yet. Try again in a moment.');
+      }
+      const res = await api<UndoResponse & Partial<ServerState>>('/api/undo', { method: 'POST', body: { target, mode } });
+      if (res.applied) acceptServerState(res as unknown as ServerState, dataRef.current.pending);
+      return res;
     },
     [acceptServerState, sync]
   );
@@ -226,12 +268,16 @@ export function useAccountStore(userId: string): { store: AppStore; sync: Accoun
       dismissNotice,
       retry,
       importState,
+      undo,
+      dataVersion: data.version,
     }),
-    [status, state, notice, dismissNotice, retry, importState]
+    [status, state, notice, dismissNotice, retry, importState, undo, data.version]
   );
 
   return { store, sync: sync_ };
 }
+
+const opsOf = (pending: PendingOp[]): Operation[] => pending.map((p) => p.op);
 
 /** Rendered only for the instant before the account's data arrives (the UI shows a loading card). */
 const EMPTY_PLACEHOLDER: AppState = {

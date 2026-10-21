@@ -2154,3 +2154,285 @@ select.inline-edit-input,
   align-items: center;
   gap: 6px;
 }
+
+/* ============ Activity (PRD v33, FR-25; design system ActivityPanel, UndoDialog, Badge) ============ */
+.badge-ai {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+.badge-you {
+  background: var(--surface-sunken);
+  color: var(--ink);
+  font-weight: 600;
+  border: 1px solid var(--line);
+}
+.badge-deleted {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+.badge-undone {
+  background: var(--surface-sunken);
+  color: var(--ink-muted);
+}
+/* Side sheet from the right, modal on the scrim; full width on small phones. */
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  display: flex;
+  justify-content: flex-end;
+  background: var(--scrim);
+}
+.sheet {
+  width: min(440px, 100%);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border-left: 1px solid var(--line);
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+  box-shadow: var(--shadow-overlay);
+  color: var(--ink);
+  outline: none;
+}
+.sheet-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) var(--space-3) var(--space-6);
+  border-bottom: 1px solid var(--line);
+}
+.sheet-title {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.sheet-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 0 var(--space-6);
+}
+.sheet-intro {
+  margin: 0;
+  padding: var(--space-3) var(--space-6);
+  color: var(--ink-muted);
+  font-size: var(--text-small);
+  line-height: var(--lh-small);
+}
+@media (max-width: 560px) {
+  .sheet {
+    width: 100%;
+    border-radius: 0;
+    border-left: 0;
+  }
+}
+.act-day {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4) var(--space-2) var(--space-6);
+  background: var(--surface);
+  border-bottom: 1px solid var(--line);
+}
+.act-day .label {
+  flex: 1 0 auto;
+  color: var(--ink);
+}
+.act-entry {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  column-gap: var(--space-3);
+  row-gap: var(--space-2);
+  padding: var(--space-3) var(--space-4) var(--space-3) var(--space-6);
+  border-bottom: 1px solid var(--line);
+}
+.act-ico {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--surface-sunken);
+  color: var(--ink-muted);
+}
+.act-entry-ai .act-ico {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+.act-main {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.act-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px var(--space-2);
+}
+.act-time {
+  color: var(--ink-muted);
+  font-size: var(--text-small);
+  line-height: var(--lh-small);
+  font-variant-numeric: tabular-nums;
+}
+.act-desc {
+  margin: 0;
+  font-size: var(--text-ui);
+  line-height: var(--lh-ui);
+  overflow-wrap: anywhere;
+}
+.act-desc b,
+.act-change b,
+.act-conflict b,
+.undo-conflicts b {
+  font-weight: 600;
+}
+.act-actions,
+.act-changes,
+.act-more,
+.act-conflict,
+.act-error {
+  grid-column: 2;
+}
+.act-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+.act-toggle {
+  color: var(--ink-muted);
+}
+.act-toggle svg {
+  transition: transform 0.15s;
+}
+.act-toggle[aria-expanded='true'] svg:last-child {
+  transform: rotate(180deg);
+}
+.act-changes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+.act-change {
+  display: grid;
+  grid-template-columns: 44px 18px minmax(0, 1fr) auto;
+  gap: var(--space-2);
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: var(--text-ui);
+  line-height: var(--lh-ui);
+}
+.act-change:last-child {
+  border-bottom: 0;
+}
+.act-change .act-time {
+  font-size: var(--text-caption);
+}
+.act-change > svg {
+  color: var(--ink-muted);
+}
+.act-change .btn-small {
+  height: 28px;
+  padding: 0 var(--space-2);
+  font-size: var(--text-small);
+}
+.act-change-full {
+  grid-column: 1 / -1;
+}
+.act-more {
+  justify-self: start;
+}
+.act-older {
+  margin: var(--space-3) var(--space-6) 0;
+}
+.act-entry.is-undone .act-desc,
+.act-change.is-undone > span:not(.badge) {
+  color: var(--ink-subtle);
+}
+.act-del {
+  color: var(--ink-muted);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+}
+.act-empty {
+  margin: 0;
+  padding: var(--space-6);
+  color: var(--ink-muted);
+  text-align: center;
+}
+.act-error {
+  margin: 0;
+  color: var(--danger);
+  font-size: var(--text-small);
+  line-height: var(--lh-small);
+}
+.act-load-error,
+.act-day-error {
+  padding: var(--space-2) var(--space-6);
+}
+/* Conflict: Undo would overwrite a later change */
+.act-conflict {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--warning-soft);
+  font-size: var(--text-ui);
+  line-height: var(--lh-ui);
+}
+.act-conflict-head {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+}
+.act-conflict-head > svg,
+.undo-conflicts-head > svg {
+  flex: none;
+  color: var(--warning);
+  margin-top: 1px;
+}
+.act-conflict ul,
+.undo-conflicts ul {
+  margin: 0;
+  padding-left: 26px;
+  display: grid;
+  gap: 2px;
+}
+.act-conflict-who {
+  color: var(--ink-muted);
+}
+.act-conflict-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+.undo-conflicts {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--warning-soft);
+  font-size: var(--text-ui);
+  line-height: var(--lh-ui);
+}
+.undo-conflicts-head {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0;
+}
+@media (pointer: coarse) {
+  .act-change .btn-small {
+    height: 40px;
+  }
+}

@@ -36,6 +36,9 @@
     // Google OAuth client id (public; Google Cloud Console → Credentials). Empty = sign-in off.
     "GOOGLE_CLIENT_ID": "811787571787-akqkd2dae59fu1dm2blvk8uvijl1rv4m.apps.googleusercontent.com"
   },
+  // FR-25: daily cleanup at 03:00 UTC: history and soft-deleted things older than 30 days
+  // (worker/index.ts, scheduled). Cron Triggers are part of the free plan.
+  "triggers": { "crons": ["0 3 * * *"] },
   "workers_dev": true,
   "preview_urls": true,
   "observability": { "enabled": true }

@@ -1,16 +1,17 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { ChevronDown, Cloud, CloudOff, Hourglass, LogIn, LogOut, RefreshCw, TriangleAlert } from 'lucide-react';
+import { ChevronDown, Cloud, CloudOff, History, Hourglass, LogIn, LogOut, RefreshCw, TriangleAlert } from 'lucide-react';
 import { useAuth } from '../account/AuthContext';
 import { useAccount } from '../account/AccountContext';
 import type { AccountUser } from '../account/api';
 import type { SaveStatus } from '../account/accountStore';
+import { ActivityPanel } from './ActivityPanel';
 import { SignInDialog } from './SignInDialog';
 import { Icon } from './ui';
 
 /**
  * Design system AccountMenu (PRD v33, FR-23): the right end of the header.
- * Guest: "Sign in". Signed in: avatar + first name with a menu (Sign out; Connect to AI and
- * Activity arrive with steps 4 and 2). "Connect to AI" in the header comes with step 4.
+ * Guest: "Sign in". Signed in: avatar + first name with a menu (Activity, Sign out; Connect to
+ * AI arrives with step 4). "Connect to AI" in the header comes with step 4.
  */
 export function SignInButton() {
   const [open, setOpen] = useState(false);
@@ -77,6 +78,7 @@ export function AccountMenu() {
   const account = useAccount();
   const { signOut } = useAuth();
   const [open, setOpen] = useState(false);
+  const [activityOpen, setActivityOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLUListElement>(null);
 
@@ -154,6 +156,20 @@ export function AccountMenu() {
               role="menuitem"
               onClick={() => {
                 setOpen(false);
+                setActivityOpen(true);
+              }}
+            >
+              <Icon icon={History} />
+              Activity
+            </button>
+          </li>
+          <li role="none">
+            <button
+              type="button"
+              className="account-menu-item"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false);
                 void signOut();
               }}
             >
@@ -162,6 +178,14 @@ export function AccountMenu() {
             </button>
           </li>
         </ul>
+      )}
+      {activityOpen && (
+        <ActivityPanel
+          onClose={() => {
+            setActivityOpen(false);
+            buttonRef.current?.focus();
+          }}
+        />
       )}
     </div>
   );

@@ -9,6 +9,7 @@
  */
 import { DEFAULT_CATEGORIES } from '../src/constants';
 import { stableStringify } from '../src/core/schema';
+import { HISTORY_DAYS, type HistoryEntry } from '../src/core/history';
 import type { AppState, GearList, GearListItem } from '../src/types';
 
 export interface LoadedState {
@@ -98,7 +99,15 @@ export async function loadState(db: D1Database, userId: string): Promise<LoadedS
 
 /** Writes the difference between `before` (as loaded at `version`) and `after`. Throws
  * VersionConflict if someone else saved in between — nothing is written then. */
-export async function saveState(db: D1Database, userId: string, version: number, before: AppState, after: AppState): Promise<number> {
+export async function saveState(
+  db: D1Database,
+  userId: string,
+  version: number,
+  before: AppState,
+  after: AppState,
+  /** Written in the same transaction (FR-25: the history entry of this change). */
+  extra: D1PreparedStatement[] = []
+): Promise<number> {
   const now = nowIso();
   const statements: D1PreparedStatement[] = [
     // Guard first: aborts the whole batch (transaction) if data_version moved on.
@@ -193,6 +202,7 @@ export async function saveState(db: D1Database, userId: string, version: number,
   const snapshotsToRemove = snapshots.remove.filter((listId) => !removedLists.has(listId));
   if (snapshotsToRemove.length) statements.push(softDelete(db, 'snapshots', 'list_id', userId, snapshotsToRemove, now));
 
+  statements.push(...extra);
   statements.push(
     db
       .prepare('UPDATE users SET data_version = data_version + 1, unit_preference = ?2, template_banner_dismissed = ?3 WHERE id = ?1')
@@ -285,4 +295,45 @@ export async function findSessionUser(db: D1Database, tokenHash: string): Promis
 
 export async function deleteSession(db: D1Database, tokenHash: string): Promise<void> {
   await db.prepare('DELETE FROM sessions WHERE token_hash = ?').bind(tokenHash).run();
+}
+
+// ---------------------------------------------------------------------------------------------
+// Change history (FR-25)
+
+/** The user's history of the last 30 days, oldest first. */
+export async function loadHistory(db: D1Database, userId: string, now = new Date()): Promise<HistoryEntry[]> {
+  const since = new Date(now.getTime() - HISTORY_DAYS * 86_400_000).toISOString();
+  const res = await db
+    .prepare('SELECT entry_json FROM activity WHERE user_id = ? AND created_at >= ? ORDER BY created_at, id')
+    .bind(userId, since)
+    .all<{ entry_json: string }>();
+  return res.results.map((r) => JSON.parse(r.entry_json) as HistoryEntry);
+}
+
+export function insertEntryStatement(db: D1Database, userId: string, entry: HistoryEntry): D1PreparedStatement {
+  return db
+    .prepare('INSERT INTO activity (user_id, id, created_at, actor, client, entry_json) VALUES (?, ?, ?, ?, ?, ?)')
+    .bind(userId, entry.id, entry.at, entry.actor, entry.client, JSON.stringify(entry));
+}
+
+export function updateEntryStatement(db: D1Database, userId: string, entry: HistoryEntry): D1PreparedStatement {
+  return db.prepare('UPDATE activity SET entry_json = ? WHERE user_id = ? AND id = ?').bind(JSON.stringify(entry), userId, entry.id);
+}
+
+/** Daily cleanup (FR-25): history older than 30 days, and things soft-deleted more than 30 days
+ * ago, are removed for good. A deleted gearlist takes its rows and snapshot with it. */
+export async function purgeOld(db: D1Database, now = new Date()): Promise<void> {
+  const cutoff = new Date(now.getTime() - HISTORY_DAYS * 86_400_000).toISOString();
+  const deletedLists = `SELECT user_id, id FROM gear_lists WHERE deleted_at IS NOT NULL AND deleted_at < ?1`;
+  const results = await db.batch([
+    db.prepare('DELETE FROM activity WHERE created_at < ?1').bind(cutoff),
+    db.prepare(`DELETE FROM gear_list_rows WHERE (user_id, list_id) IN (${deletedLists})`).bind(cutoff),
+    db.prepare(`DELETE FROM snapshots WHERE (user_id, list_id) IN (${deletedLists})`).bind(cutoff),
+    db.prepare('DELETE FROM gear_lists WHERE deleted_at IS NOT NULL AND deleted_at < ?1').bind(cutoff),
+    db.prepare('DELETE FROM gear_list_rows WHERE deleted_at IS NOT NULL AND deleted_at < ?1').bind(cutoff),
+    db.prepare('DELETE FROM snapshots WHERE deleted_at IS NOT NULL AND deleted_at < ?1').bind(cutoff),
+    db.prepare('DELETE FROM gear_items WHERE deleted_at IS NOT NULL AND deleted_at < ?1').bind(cutoff),
+    db.prepare('DELETE FROM categories WHERE deleted_at IS NOT NULL AND deleted_at < ?1').bind(cutoff),
+  ]);
+  console.log('purged', { rowsWritten: results.reduce((n, r) => n + (r.meta.rows_written ?? 0), 0) });
 }

@@ -15,7 +15,22 @@ export interface AccountCache {
   schemaVersion: number;
   version: number;
   confirmed: AppState | null;
-  pending: Operation[];
+  pending: PendingOp[];
+}
+
+/** A change not sent yet. `action`: changes from one click share it and become one entry in
+ * Activity (FR-25). */
+export interface PendingOp {
+  op: Operation;
+  action?: string;
+}
+
+/** Queues written before PRD v35 hold bare operations. */
+function readPending(raw: unknown): PendingOp[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((x): x is Record<string, unknown> => !!x && typeof x === 'object')
+    .map((x) => ('op' in x && x.op && typeof x.op === 'object' ? { op: x.op as Operation, action: typeof x.action === 'string' ? x.action : undefined } : { op: x as unknown as Operation }));
 }
 
 const keyFor = (userId: string) => `hikingbuddy-account-${userId}`;
@@ -25,7 +40,7 @@ export function readAccountCache(userId: string): AccountCache {
     const raw = window.localStorage.getItem(keyFor(userId));
     if (raw) {
       const cache = JSON.parse(raw) as AccountCache;
-      const pending = Array.isArray(cache.pending) ? cache.pending : [];
+      const pending = readPending(cache.pending);
       // A copy from an older app version is only a display hint — the server copy is reloaded
       // anyway; unsent changes are kept (operations, not data shapes).
       if (cache.schemaVersion !== CURRENT_SCHEMA_VERSION) return { schemaVersion: CURRENT_SCHEMA_VERSION, version: -1, confirmed: null, pending };

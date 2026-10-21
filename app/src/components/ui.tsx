@@ -130,7 +130,8 @@ export function Banner({ tone = 'neutral', icon, children, actions, onClose, clo
 }
 
 interface BadgeProps {
-  tone?: 'neutral' | 'linked' | 'success' | 'warning';
+  /** ai / you: who made a change; deleted / undone: Activity states (PRD v33, FR-25). */
+  tone?: 'neutral' | 'linked' | 'success' | 'warning' | 'ai' | 'you' | 'deleted' | 'undone';
   icon?: IconComponent;
   /** Icon-only badge: the text goes to the tooltip and aria-label. */
   iconOnly?: boolean;

@@ -5,14 +5,29 @@
  * before this code runs (wrangler.jsonc: assets.run_worker_first).
  */
 import { Hono, type Context } from 'hono';
-import { applyOperations, type Operation } from '../src/core/operations';
+import type { Operation } from '../src/core/operations';
+import {
+  compareEntries,
+  diffStates,
+  entryFromGroup,
+  entryUndoneAt,
+  importEntry,
+  laterChangesFor,
+  recordOperations,
+  setUndone,
+  undoChanges,
+  type Actor,
+  type HistoryEntry,
+  type RichPart,
+  type UndoTarget,
+} from '../src/core/history';
 import { importIntoAccount } from '../src/core/importState';
 import { CURRENT_SCHEMA_VERSION, isEmptyState, runMigrations } from '../src/core/schema';
-import { loadState, saveState, upsertGoogleUser, VersionConflict } from './db';
+import { insertEntryStatement, loadHistory, loadState, purgeOld, saveState, updateEntryStatement, upsertGoogleUser, VersionConflict } from './db';
 import { endSession, sessionUser, startSession, verifyGoogleCredential } from './auth';
-import { appStateSchema, importRequestSchema, opsRequestSchema } from './schemas';
+import { appStateSchema, importRequestSchema, opsRequestSchema, undoRequestSchema } from './schemas';
 import { rateLimit } from './rateLimit';
-import type { AppEnv } from './env';
+import type { AppEnv, Env } from './env';
 import type { AppState } from '../src/types';
 
 const app = new Hono<AppEnv>();
@@ -90,6 +105,14 @@ app.post('/auth/dev-login', async (c) => {
   return c.json({ user: publicUser(user) });
 });
 
+/** Local automated tests only: runs the daily cleanup as if it were `now`. */
+app.post('/auth/dev-purge', async (c) => {
+  if (!isLocalDev(c)) return c.notFound();
+  const body = await c.req.json<{ now?: string }>().catch(() => ({}) as { now?: string });
+  await purgeOld(c.env.DB, body.now ? new Date(body.now) : new Date());
+  return c.json({ ok: true });
+});
+
 app.post('/auth/logout', async (c) => {
   await endSession(c);
   return c.json({ ok: true });
@@ -124,7 +147,18 @@ app.post('/api/ops', async (c) => {
   }
   const userId = c.get('user')!.id;
   const ops = parsed.data.ops as Operation[];
-  return c.json(await saveWithRetry(c.env.DB, userId, (state) => applyOperations(state, ops)));
+  const who = actorOf(c);
+  return c.json(
+    await saveWithRetry(c.env.DB, userId, (state) => {
+      // FR-25: every change is recorded; ops of one web action (same action id) are one entry.
+      const recorded = recordOperations(state, ops, parsed.data.actions);
+      const base = Date.now();
+      const entries = recorded.groups.map((group, i) =>
+        entryFromGroup(group, { id: crypto.randomUUID(), at: new Date(base + i).toISOString(), ...who })
+      );
+      return { state: recorded.state, rejected: recorded.rejected, entries };
+    })
+  );
 });
 
 /** FR-23 import (also Import backup and demo data while signed in). */
@@ -135,6 +169,7 @@ app.post('/api/import', async (c) => {
   if (!local.success) return fail(c, 400, 'invalid', 'This data does not look like HikingBuddy data, or it is too large.');
   const mode = parsed.data.mode;
   const userId = c.get('user')!.id;
+  const who = actorOf(c);
   let refused = false;
   const result = await saveWithRetry(c.env.DB, userId, (account) => {
     // "Replace" is only ever allowed into an empty account — never a silent overwrite.
@@ -142,24 +177,160 @@ app.post('/api/import', async (c) => {
       refused = true;
       return { state: account, rejected: [] };
     }
-    return { state: importIntoAccount(account, local.data as AppState, (prefix) => `${prefix}-${crypto.randomUUID()}`), rejected: [] };
+    const state = importIntoAccount(account, local.data as AppState, (prefix) => `${prefix}-${crypto.randomUUID()}`);
+    // FR-25 (PRD v35 B): the whole import is one entry with Undo.
+    const entry = importEntry(account, state, { id: crypto.randomUUID(), at: new Date().toISOString(), ...who });
+    return { state, rejected: [], entries: entry ? [entry] : [] };
   });
   if (refused) return fail(c, 409, 'invalid', 'Your account already has data. Import it as new items and gearlists instead.');
   return c.json(result);
 });
 
+// ---------------------------------------------------------------------------------------------
+// FR-25: Activity and Undo
+
+/** The last 30 days, newest first, without the before/after values (only what the panel shows). */
+app.get('/api/activity', async (c) => {
+  const entries = (await loadHistory(c.env.DB, c.get('user')!.id)).reverse();
+  return c.json({
+    entries: entries.map((e) => ({
+      id: e.id,
+      at: e.at,
+      actor: e.actor,
+      client: e.client,
+      kind: e.kind,
+      text: e.text,
+      undoable: e.undoable,
+      undoneAt: entryUndoneAt(e),
+      changes: e.changes.map((ch) => ({ text: ch.text, icon: ch.icon, deleted: ch.deleted ?? false, undoneAt: ch.undoneAt ?? null })),
+    })),
+  });
+});
+
+/**
+ * Undo of one change, one entry (an AI step or one of your own edits), or all AI changes of a
+ * day. mode "check" only reports what would happen (count, conflicts); "auto" undoes right away
+ * unless there is a conflict; "all" overwrites later changes; "keep_later" skips them.
+ */
+app.post('/api/undo', async (c) => {
+  const parsed = undoRequestSchema.safeParse(await c.req.json().catch(() => null));
+  if (!parsed.success) return fail(c, 400, 'invalid', 'The request could not be read.');
+  const { target, mode } = parsed.data;
+  const db = c.env.DB;
+  const userId = c.get('user')!.id;
+  const who = actorOf(c);
+
+  for (let attempt = 0; ; attempt++) {
+    const [loaded, history] = await Promise.all([loadState(db, userId), loadHistory(db, userId)]);
+    const byId = new Map(history.map((e) => [e.id, e]));
+
+    // Which changes to undo (already undone ones are not counted again).
+    let picked: { entry: HistoryEntry; index: number }[];
+    if ('entryId' in target) {
+      const entry = byId.get(target.entryId);
+      if (!entry) return fail(c, 400, 'invalid', 'This change is older than 30 days and can no longer be undone.');
+      if (!entry.undoable) return fail(c, 400, 'invalid', 'This change is too large to undo.');
+      const indices = target.change !== undefined ? [target.change] : entry.changes.map((_, i) => i);
+      picked = indices.filter((i) => entry.changes[i] && !entry.changes[i].undoneAt).map((index) => ({ entry, index }));
+    } else {
+      picked = history
+        .filter((e) => e.actor === 'ai' && e.undoable && e.kind === 'change' && e.at >= target.day.from && e.at < target.day.to)
+        .flatMap((entry) => entry.changes.map((ch, index) => ({ entry, index, ch })).filter((x) => !x.ch.undoneAt));
+    }
+    if (picked.length === 0) return fail(c, 409, 'invalid', 'This was already undone.');
+
+    const targets = picked.map(({ entry, index }) => ({ target: { entryId: entry.id, change: index } as UndoTarget, change: entry.changes[index] }));
+    const result = undoChanges(loaded.state, targets, mode === 'keep_later' ? 'keep_later' : 'all');
+
+    // Conflicts, as the later changes they would overwrite (design system: "Undo would overwrite 1 later change:").
+    const first = picked[0];
+    const exclude = new Set(picked.map(({ entry, index }) => `${entry.id}#${index}`));
+    const isLater = (entry: HistoryEntry, index: number) => {
+      const order = compareEntries(entry, first.entry);
+      return order > 0 || (order === 0 && index > first.index);
+    };
+    const conflicts: { actor: Actor; client: string | null; at: string; text: RichPart[] }[] = laterChangesFor(history, isLater, result.conflicts, exclude).map(
+      ({ entry, change }) => ({ actor: entry.actor, client: entry.client, at: entry.at, text: change.text })
+    );
+    // A conflict whose later change isn't in the history (older than 30 days): name the thing.
+    if (result.conflicts.length > 0 && conflicts.length === 0) {
+      for (const name of new Set(result.conflicts.map((x) => x.name))) conflicts.push({ actor: 'you', client: null, at: '', text: [{ b: name }, ' was changed later'] });
+    }
+
+    if (mode === 'check' || (mode === 'auto' && conflicts.length > 0)) {
+      const byClient = new Map<string, number>();
+      for (const { entry } of picked) {
+        const name = entry.client ?? 'You';
+        byClient.set(name, (byClient.get(name) ?? 0) + 1);
+      }
+      return c.json({
+        applied: false,
+        count: picked.length,
+        conflicting: conflicts.length > 0 ? Math.max(1, result.conflicting) : 0,
+        byClient: [...byClient].map(([client, count]) => ({ client, count })),
+        conflicts,
+      });
+    }
+
+    // The Undo is itself an entry, with its own Undo (= redo).
+    const undone = 'entryId' in target ? byId.get(target.entryId)! : null;
+    const at = new Date().toISOString();
+    const text = undoText(target, first.entry, result.applied.length);
+    const undoEntry: HistoryEntry = {
+      id: crypto.randomUUID(),
+      at,
+      ...who,
+      kind: undone?.kind === 'undo' ? 'redo' : 'undo',
+      text,
+      changes: [{ text, icon: 'undo', diffs: diffStates(loaded.state, result.state) }],
+      undoes: result.applied,
+      undoable: true,
+    };
+    const touched = new Set<string>();
+    for (const t of result.applied) setUndone(byId, t, true, undoEntry.id, at, touched);
+    const statements = [insertEntryStatement(db, userId, undoEntry), ...[...touched].map((entryId) => updateEntryStatement(db, userId, byId.get(entryId)!))];
+    try {
+      const version = await saveState(db, userId, loaded.version, loaded.state, result.state, statements);
+      return c.json({ applied: true, schemaVersion: CURRENT_SCHEMA_VERSION, version, state: result.state, rejected: [] });
+    } catch (err) {
+      if (err instanceof VersionConflict && attempt < 3) continue;
+      throw err;
+    }
+  }
+});
+
+/** "Undid Claude's change from 14:02" · "Redid your change from 14:02" · "Undid 41 AI changes from Tue 21 Oct". */
+function undoText(target: { entryId: string } | { day: { from: string } }, entry: HistoryEntry, count: number): RichPart[] {
+  if ('day' in target) return ['Undid ', `${count === 1 ? '1 AI change' : `${count} AI changes`} from `, { date: target.day.from }];
+  // Undoing an Undo: the same sentence with "Redid" (and back to "Undid" when undoing a redo).
+  if (entry.kind === 'undo' || entry.kind === 'redo') {
+    const [verb, ...rest] = entry.text;
+    return [verb === 'Undid ' ? 'Redid ' : 'Undid ', ...rest];
+  }
+  const whose = entry.actor === 'ai' ? `${entry.client ?? 'AI'}'s` : 'your';
+  return ['Undid ', `${whose} ${entry.kind === 'import' ? 'import' : 'change'} from `, { time: entry.at }];
+}
+
+/** Who made the change (FR-25): on the web always the user ("You"). The MCP server (step 3)
+ * records the AI client. Local automated tests may act as an AI client (DEV_LOGIN only). */
+function actorOf(c: Context<AppEnv>): { actor: Actor; client: string | null } {
+  const testClient = isLocalDev(c) ? c.req.header('x-test-actor') : undefined;
+  return testClient ? { actor: 'ai', client: testClient.slice(0, 60) } : { actor: 'you', client: null };
+}
+
 async function saveWithRetry(
   db: D1Database,
   userId: string,
-  change: (state: AppState) => { state: AppState; rejected: { index: number; error: Error }[] }
+  change: (state: AppState) => { state: AppState; rejected: { index: number; error: Error }[]; entries?: HistoryEntry[] }
 ) {
   for (let attempt = 0; ; attempt++) {
     const loaded = await loadState(db, userId);
-    const { state, rejected } = change(loaded.state);
+    const { state, rejected, entries = [] } = change(loaded.state);
     const rejectedOut = rejected.map((r) => ({ index: r.index, message: r.error.message }));
-    if (state === loaded.state) return { schemaVersion: CURRENT_SCHEMA_VERSION, version: loaded.version, state, rejected: rejectedOut };
+    if (state === loaded.state && entries.length === 0) return { schemaVersion: CURRENT_SCHEMA_VERSION, version: loaded.version, state, rejected: rejectedOut };
     try {
-      const version = await saveState(db, userId, loaded.version, loaded.state, state);
+      // The history entries are written in the same transaction as the change (FR-25).
+      const version = await saveState(db, userId, loaded.version, loaded.state, state, entries.map((e) => insertEntryStatement(db, userId, e)));
       return { schemaVersion: CURRENT_SCHEMA_VERSION, version, state, rejected: rejectedOut };
     } catch (err) {
       // Another device saved in between: start over from its result (ops are intents, so they
@@ -182,4 +353,10 @@ function publicUser(u: { id: string; email: string; name: string; picture_url: s
 app.all('/api/*', (c) => fail(c, 400, 'invalid', 'Unknown address.'));
 app.all('/auth/*', (c) => fail(c, 400, 'invalid', 'Unknown address.'));
 
-export default app;
+export default {
+  fetch: app.fetch,
+  // FR-25: daily cleanup of history and soft-deleted things older than 30 days (wrangler.jsonc triggers).
+  async scheduled(_event: ScheduledController, env: Env, ctx: ExecutionContext) {
+    ctx.waitUntil(purgeOld(env.DB));
+  },
+} satisfies ExportedHandler<Env>;
