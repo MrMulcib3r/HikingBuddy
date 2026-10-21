@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { useApp } from '../state/AppContext';
+import { useAccount } from '../account/AccountContext';
 import { buildBackup, parseBackup } from '../storage';
 import { ConfirmDialog } from './ConfirmDialog';
 import { plural } from '../utils/text';
@@ -17,6 +18,10 @@ import { Icon } from './ui';
  */
 export function BackupControls() {
   const { state, replaceState } = useApp();
+  // Signed in (PRD v33, FR-23): a backup goes into the account like the local-data import —
+  // into an empty account as it is, otherwise added as new; the account is never overwritten.
+  const account = useAccount();
+  const addsAsNew = account !== null && !account.sync.accountEmpty;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pendingImport, setPendingImport] = useState<ReturnType<typeof parseBackup> | null>(null);
   const [importError, setImportError] = useState<string | null>(null);
@@ -84,9 +89,13 @@ export function BackupControls() {
       {pendingImport && (
         <ConfirmDialog
           title="Import backup"
-          danger
-          message={`This replaces everything currently in Gear Vault and your gearlists (${plural(state.gearItems.length, 'item')}, ${plural(state.gearLists.length, 'gearlist')}) with the contents of the backup file (${plural(pendingImport.gearItems.length, 'item')}, ${plural(pendingImport.gearLists.length, 'gearlist')}). This can't be undone unless you have another backup. Continue?`}
-          confirmLabel="Replace with backup"
+          danger={!account}
+          message={addsAsNew
+            ? `The backup's ${plural(pendingImport.gearItems.length, 'item')} and ${plural(pendingImport.gearLists.length, 'gearlist')} are added to your account as new items and gearlists. Nothing in your account is overwritten. Continue?`
+            : account
+              ? `This imports the backup (${plural(pendingImport.gearItems.length, 'item')}, ${plural(pendingImport.gearLists.length, 'gearlist')}) into your account. Continue?`
+              : `This replaces everything currently in Gear Vault and your gearlists (${plural(state.gearItems.length, 'item')}, ${plural(state.gearLists.length, 'gearlist')}) with the contents of the backup file (${plural(pendingImport.gearItems.length, 'item')}, ${plural(pendingImport.gearLists.length, 'gearlist')}). This can't be undone unless you have another backup. Continue?`}
+          confirmLabel={addsAsNew ? 'Import as new' : account ? 'Import backup' : 'Replace with backup'}
           confirmIcon={ActionIcon.importBackup}
           onConfirm={() => {
             replaceState(pendingImport);

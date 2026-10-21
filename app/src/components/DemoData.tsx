@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useApp } from '../state/AppContext';
-import { useDataFile } from '../state/DataFileContext';
+import { useOptionalDataFile } from '../state/DataFileContext';
 import { isEmptyState, parseBackup } from '../storage';
 import demoFileText from '../demo/demo-data.json?raw';
 import { ConfirmDialog } from './ConfirmDialog';
@@ -14,7 +14,8 @@ import { LogoMark } from './icons/HikerIcons';
  * loading correctly after future data-model changes.
  *
  * Never available while a data file is connected or remembered (FR-16): loading the demo
- * would then be auto-saved over Martin's real data.
+ * would then be auto-saved over Martin's real data. Signed in (PRD v33, FR-23) it is offered
+ * only while the account is empty — App.tsx hides the header button otherwise.
  */
 function loadDemoState() {
   return parseBackup(demoFileText);
@@ -26,7 +27,7 @@ type Step = 'idle' | 'confirm' | 'blocked';
 
 function useLoadDemo() {
   const { state, replaceState } = useApp();
-  const { fileInUse } = useDataFile();
+  const fileInUse = useOptionalDataFile()?.fileInUse ?? false;
   const [step, setStep] = useState<Step>('idle');
 
   function start() {

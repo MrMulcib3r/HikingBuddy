@@ -46,7 +46,10 @@ app.use('/auth/*', async (c, next) => {
 });
 app.use('*', async (c, next) => {
   const user = c.get('user');
-  const key = user ? `user:${user.id}` : `ip:${c.req.header('cf-connecting-ip') ?? 'local'}`;
+  // Local automated tests run many browsers from one address; there each test browser may name
+  // its own "address" (only with DEV_LOGIN on localhost — never in production).
+  const testKey = isLocalDev(c) ? c.req.header('x-test-client') : undefined;
+  const key = user ? `user:${user.id}` : `ip:${testKey ?? c.req.header('cf-connecting-ip') ?? 'local'}`;
   if (!(await rateLimit(c.env, key))) return fail(c, 429, 'rate_limited', 'Too many requests. Wait a minute and try again.');
   return next();
 });
@@ -80,8 +83,7 @@ app.post('/auth/google', async (c) => {
 /** Local automated tests only: signs in a fake account without Google. Works only when
  * app/.dev.vars sets DEV_LOGIN=1 AND the request is to localhost — never in production. */
 app.post('/auth/dev-login', async (c) => {
-  const host = new URL(c.req.url).hostname;
-  if (c.env.DEV_LOGIN !== '1' || !['localhost', '127.0.0.1'].includes(host)) return c.notFound();
+  if (!isLocalDev(c)) return c.notFound();
   const body = await c.req.json<{ sub: string; name: string; email: string }>();
   const user = await upsertGoogleUser(c.env.DB, { sub: `dev-${body.sub}`, name: body.name, email: body.email, picture: null }, crypto.randomUUID());
   await startSession(c, user.id);
@@ -166,6 +168,11 @@ async function saveWithRetry(
       throw err;
     }
   }
+}
+
+/** app/.dev.vars sets DEV_LOGIN=1 and the request goes to localhost: local development only. */
+function isLocalDev(c: Context<AppEnv>): boolean {
+  return c.env.DEV_LOGIN === '1' && ['localhost', '127.0.0.1'].includes(new URL(c.req.url).hostname);
 }
 
 function publicUser(u: { id: string; email: string; name: string; picture_url: string | null }) {

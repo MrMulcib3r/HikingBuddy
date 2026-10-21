@@ -52,6 +52,10 @@
   --cat-custom-2: #4e7c8c;
   --cat-custom-3: #8a9a5b;
   --cat-custom-4: #c9a27a;
+  /* "Sign in with Google" — Google's own light button colours (tokens.json v2, PRD v33) */
+  --gsi-fill: #ffffff;
+  --gsi-stroke: #747775;
+  --gsi-text: #1f1f1f;
   --cat-none: #c9bcb0; /* Uncategorized / unknown — neutral, not one of the palette colours */
 
   /* type */

@@ -303,3 +303,8 @@ export function useDataFile(): DataFileContextValue {
   if (!ctx) throw new Error('useDataFile must be used inside <DataFileProvider>.');
   return ctx;
 }
+
+/** Null while signed in: the data file (FR-16) isn't used with an account (PRD v33, FR-23). */
+export function useOptionalDataFile(): DataFileContextValue | null {
+  return useContext(DataFileContext);
+}
