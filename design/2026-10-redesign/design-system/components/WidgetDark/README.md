@@ -1,6 +1,6 @@
 # WidgetDark
 
-**Prepared, not implemented.** Dark variant of the in-chat widgets for AI apps running dark (BACKLOG ⚪ Někdy, PRD FR-27 "tmavý režim zatím ne"). The web app stays light only.
+**Prepared, not implemented.** Dark variant of the in-chat widgets for AI apps running dark (PRD FR-27). Martin, 2026-10-21: built at the very end of the project, if tokens allow. The web app stays light only.
 
 - Tokens: the `dark` theme in `tokens.json` (every colour the widgets use; landscape colours have no dark value because widgets don't use them). Text: ink 13.4:1, ink-muted 8.4:1, ink-subtle 6.0:1 on the dark surface; ember `accent` #E3784B with dark `on-accent` text (5.9:1).
 - Ground: transparent in dark, so the chat shows through (`[data-theme="dark"] .hbw`); hairlines in `line`. Light v1 keeps its own `surface` card, because a transparent light-only widget would put dark text on a dark chat.

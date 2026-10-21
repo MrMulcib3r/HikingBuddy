@@ -336,7 +336,7 @@
 }
 .hb-menu-head { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-2) var(--space-3) var(--space-3); border-bottom: 1px solid var(--line); margin-bottom: 4px; }
 .hb-menu-head strong { display: block; font-weight: 600; }
-.hb-menu-head span { display: block; color: var(--ink-muted); font-size: 13px; line-height: 18px; }
+.hb-menu-head > div > span { display: block; color: var(--ink-muted); font-size: 13px; line-height: 18px; }
 .hb-menu-item {
   display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 40px; padding: 0 var(--space-3);
   border: 0; border-radius: var(--radius-sm); background: none; color: var(--ink); font: 500 14px/20px var(--font-sans); text-align: left; cursor: pointer;
@@ -359,7 +359,7 @@
 .hb-benefits li { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: var(--space-3); align-items: start; }
 .hb-benefits .hb-benefit-ico { width: 36px; height: 36px; border-radius: var(--radius-md); display: grid; place-items: center; background: var(--surface-sunken); color: var(--ink); }
 .hb-benefits strong { display: block; font-weight: 600; }
-.hb-benefits span { display: block; color: var(--ink-muted); font-size: 14px; line-height: 20px; }
+.hb-benefits li > div > span { display: block; color: var(--ink-muted); font-size: 14px; line-height: 20px; }
 .hb-fineprint { margin: 0; color: var(--ink-muted); font-size: 13px; line-height: 18px; }
 
 /* ---------- Counts (first sign-in import dialog) ---------- */
@@ -404,14 +404,14 @@
 .hb-act-app { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; }
 .hb-act-app-ico { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--surface); color: var(--ink); border: 1px solid var(--line); }
 .hb-act-app strong { display: block; font-weight: 600; font-size: 14px; line-height: 20px; }
-.hb-act-app span { display: block; color: var(--ink-muted); font-size: 13px; line-height: 18px; }
+.hb-act-app > div > span { display: block; color: var(--ink-muted); font-size: 13px; line-height: 18px; }
 /* Day: a section header, display only. The one action on it is "Undo all AI changes from this day". */
 .hb-act-day {
   position: sticky; top: 0; z-index: 1; display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap;
   padding: var(--space-3) var(--space-4) var(--space-2) var(--space-6); background: var(--surface); border-bottom: 1px solid var(--line);
 }
 .hb-act-day .hb-label { flex: 1 0 auto; color: var(--ink); } /* the day name never wraps; the day action drops to its own line when space runs out */
-/* Entry: an AI session (the main Undo unit) or one of the user's own edits */
+/* Entry: one AI step (all changes of one tool call: the main Undo unit, PRD FR-25) or one of the user's own edits */
 .hb-act-entry { display: grid; grid-template-columns: 32px minmax(0, 1fr); column-gap: var(--space-3); row-gap: var(--space-2); padding: var(--space-3) var(--space-4) var(--space-3) var(--space-6); border-bottom: 1px solid var(--line); }
 .hb-act-ico { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-sunken); color: var(--ink-muted); }
 .hb-act-entry--ai .hb-act-ico { background: var(--accent-soft); color: var(--accent-ink); }
@@ -425,7 +425,7 @@
 .hb-act-toggle { color: var(--ink-muted); }
 .hb-act-toggle .lucide { transition: transform .15s; }
 .hb-act-toggle[aria-expanded="true"] .lucide:last-child { transform: rotate(180deg); }
-/* Single changes inside an expanded session */
+/* Single changes inside an expanded AI step */
 .hb-act-changes { grid-column: 2; list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
 .hb-act-change { display: grid; grid-template-columns: 44px 18px minmax(0, 1fr) auto; gap: var(--space-2); align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); font-size: 14px; line-height: 20px; }
 .hb-act-change:last-child { border-bottom: 0; }

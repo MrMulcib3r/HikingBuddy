@@ -17,8 +17,8 @@ HikingBuddy is a personal gear planner for long-distance treks: a Gear Vault of 
 - Weights: stored in grams, shown as `1 020 g` under a kilo and `9.47 kg` above (imperial: `oz` / `lb`). Always tabular numbers, right-aligned in columns.
 - Example content uses real trails and real gear (Nordkalottleden 2027, Durston X-Mid 1), never lorem ipsum.
 - **Who changed it:** "You" for the user's own edits, the AI app's name for AI changes ("Claude", "ChatGPT", as the client registered itself). Never "the assistant" or "the bot".
-- **Activity descriptions:** past tense, names in bold, values with units: "Changed weight of **Sawyer Squeeze**: 85 g → 79 g". A session summary is one sentence: "Created gearlist **Jeseníky, 3 days** with 25 items and changed 2 Gear Vault items."
-- **Undo** is always the word "Undo" (with Lucide `undo-2` on bigger buttons), whatever its size: one change, one session, a whole day's AI changes. Restoring a deleted thing is also "Undo".
+- **Activity descriptions:** past tense, names in bold, values with units: "Changed weight of **Sawyer Squeeze**: 85 g → 79 g". An AI step's summary is one sentence: "Created gearlist **Jeseníky, 3 days** with 25 items." One AI step (one tool call) is one Activity entry (PRD FR-25).
+- **Undo** is always the word "Undo" (with Lucide `undo-2` on bigger buttons), whatever its size: one change, one AI step, a whole day's AI changes. Restoring a deleted thing is also "Undo".
 - **In the chat** the widget speaks as HikingBuddy, not as the AI: "Ask in the chat to add gear", never "Ask me". The AI's own text stays the AI's.
 
 ## Colour
@@ -116,7 +116,7 @@ What stays from the web: the tokens (colours, spacing, radii), the category colo
 
 ## Dark widgets (PREPARED, NOT IMPLEMENTED)
 
-Kept separate on purpose: BACKLOG ⚪ Někdy, PRD FR-27. Nothing here is built until Martin moves it.
+Kept separate on purpose (PRD FR-27). Martin, 2026-10-21: built at the very end of the project, if tokens allow. Until then nothing here is implemented.
 
 - Tokens: theme `dark` in `tokens.json` gives a dark value for every colour a widget uses (grounds, lines, inks, ember, status, category colours). Landscape colours have none: widgets don't use them. Ratios on the dark surface: ink 13.4:1, ink-muted 8.4:1, ink-subtle 6.0:1, accent 5.3:1, text on accent (dark `on-accent`) 5.9:1, line-control 3.9:1.
 - The dark ember is lighter (#E3784B), so text on it turns dark. Category colours are lifted to at least 3:1 on the dark ground and keep the light set's lightness order, so neighbouring pack layers still differ in lightness.
@@ -133,9 +133,9 @@ Kept separate on purpose: BACKLOG ⚪ Někdy, PRD FR-27. Nothing here is built u
 
 ### PRD v33 additions (accounts, MCP widgets, Activity)
 
-The step-by-step brief is in the repo: `design/2026-10-mcp/claude-code-prompt.md`. In short:
+The build steps are in the repo: `PRDRequirements/mcp-integration/claude-code-prompts.md` (the only brief; each step names its components). Design rules for all steps: `design/2026-10-mcp/README.md`, section "Pro Claude Code". In short:
 - **Tokens:** regenerate CSS variables from `tokens.json`. The web app uses only the `light` values. The `dark` values go into a `[data-theme="dark"]` block that only the widget bundle may use, and only when dark mode is built (not now). New: `gsi-*`, the `chat` font family, the widget type styles, the `layout` sizes.
-- **Web, new components:** AccountMenu (header states, save status, menu), SignInWithGoogle, ImportDialog, ConnectAIDialog, ActivityPanel (sheet, day headers, AI sessions, your edits, single changes, conflict, undone, deleted, connected apps with Revoke access), UndoDialog; Badge `--ai` `--you` `--deleted` `--undone`; Banner limit / offline. Same `hb-*` classes, same rules as the rest of the web app.
+- **Web, new components:** AccountMenu (header states, save status, menu), SignInWithGoogle, ImportDialog, ConnectAIDialog, ActivityPanel (sheet, day headers, AI steps, your edits, single changes, conflict, undone, deleted, connected apps with Revoke access), UndoDialog; Badge `--ai` `--you` `--deleted` `--undone`; Banner limit / offline. Same `hb-*` classes, same rules as the rest of the web app.
 - **Widgets:** a separate small bundle served as MCP App resources (`ui://`), not the web app. Port the `hbw-*` classes and `HB.miniPack` (same geometry as `HB.backpack`, keep `PACK`, `GEAR`, `TIERS`, `layerHeights`). Load the tokens, not Overpass; set `--hbw-font` to the host's `--font-sans` when the host provides it. Keep the widget's light `surface` card and ignore the host theme in v1.
 - **Do not change** web behaviour beyond what PRD v33 asks; the FR-5 rule keeps its three outcomes in the widget.
 

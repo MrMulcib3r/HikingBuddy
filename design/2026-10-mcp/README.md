@@ -2,11 +2,11 @@
 
 Podklady pro vzhled novinek z PRD v33 (sekce 4a, FR-23 až FR-28). Zadání bylo `PRDRequirements/mcp-integration/claude-design-prompt.md`.
 
-Stav: **návrh hotový, čeká na Martinovo schválení** (otázky na konci). Po schválení ho Claude Code staví po krocích podle `claude-code-prompt.md` v této složce.
+Stav: **návrh hotový, hlavní otázky rozhodnuté** (2026-10-21). Zbývá pár drobností na konci. Claude Code ho staví spolu s funkcemi po krocích podle jediného zadání `PRDRequirements/mcp-integration/claude-code-prompts.md`; tahle složka říká jen, jak má co vypadat.
 
 ## Kde co je
 
-- **Design systém (zdroj pravdy):** artefakt „HikingBuddy“ (typ Design System), https://claude.ai/artifact/B57Xu9jGwHkA76fyoXW3tu. Aktualizovaný na místě (verze 26), nic původního se neodstranilo.
+- **Design systém (zdroj pravdy):** artefakt „HikingBuddy“ (typ Design System), https://claude.ai/artifact/B57Xu9jGwHkA76fyoXW3tu. Aktualizovaný na místě (verze 27), nic původního se neodstranilo.
 - **Kopie pro Claude Code:** `design/2026-10-redesign/design-system/` (stejná složka jako dosud, aktualizované soubory a nové komponenty, screenshoty nových komponent v `screenshots/`; screenshoty jsou s náhradním písmem).
 - **Makety obrazovek:** artefakt Design „HikingBuddy · PRD v33“, https://claude.ai/artifact/QaAWrvG3T3Vco7fnD9i35o: widgety v chatu na telefonu (390 px) a na desktopu (sloupec 680 px), stavy widgetů, webové obrazovky v 1280 px, tmavé widgety zvlášť.
 
@@ -14,7 +14,11 @@ Stav: **návrh hotový, čeká na Martinovo schválení** (otázky na konci). Po
 
 1. Design systém se aktualizuje na místě, ne kopie. Zadání pro Claude Code ve stejné struktuře jako minule.
 2. **Widgety v chatu: hybridní vzhled.** Písmo AI aplikace pro text, Barlow Condensed jen pro velké číslo Total a popisky, ember jen pro hlavní akce, barvy kategorií a batoh beze změny.
-3. Tmavý režim: jen připravit (tokeny + návrh), nestavět.
+3. **Tmavý režim widgetů až na úplný konec stavby, pokud vyjdou tokeny.** Teď jen připravené tokeny a návrh.
+4. **Změny od AI se v Activity seskupují podle kroku AI, jak říká PRD (FR-25):** všechno, co AI udělá jedním krokem (např. „vytvořil gearlist s 25 položkami“), je jeden řádek s jedním Undo. Několik kroků za sebou jsou samostatné řádky; žádná vyšší úroveň „sezení“ není.
+5. **Confirm u jedné navržené změny ve widgetu ji uloží hned** (je to samostatný krok AI a samostatný řádek v Activity). „Confirm all“ uloží zbytek jedním krokem. Když chat v půlce zavřeš, potvrzené změny zůstanou.
+6. „Confirm all“ přeskočí položky s volbou podle FR-5 a napíše to.
+7. Připojení ChatGPT jen na Plus nebo Pro, na webu (v pop-upu je to napsané).
 
 ## Co je nové
 
@@ -23,7 +27,7 @@ Stav: **návrh hotový, čeká na Martinovo schválení** (otázky na konci). Po
 - Dialog „Sign in“ (co účet přidá) a tlačítko „Sign in with Google“ podle pravidel Google.
 - Dialog importu lokálních dat po prvním přihlášení (prázdný účet / účet s daty), s počty.
 - Pop-up „Connect to AI“: záložky Claude / ChatGPT, 3 kroky, adresa serveru s Copy, OK. Varianta pro hosta.
-- Panel Activity (boční panel zprava): připojené AI aplikace s „Revoke access“, den jako nadpis s „Undo all AI changes from this day“, AI sezení jako hlavní jednotka Undo (rozbalitelné na jednotlivé změny), vlastní změny se štítkem „You“, konflikt při Undo, vrácené a smazané položky.
+- Panel Activity (boční panel zprava): připojené AI aplikace s „Revoke access“, den jako nadpis s „Undo all AI changes from this day“, krok AI jako hlavní jednotka Undo (rozbalitelný na jednotlivé změny), vlastní změny se štítkem „You“, konflikt při Undo, vrácené a smazané položky.
 - Potvrzení „Undo AI changes from today?“ s počtem a konflikty, potvrzení „Revoke access“.
 - Bannery pro denní limit a offline.
 
@@ -53,19 +57,36 @@ Ostatní (barvy, rozestupy, kategorie, tvar batohu, pořadí vrstev, formát vah
 
 V `tokens.json` je téma `dark` jen pro widgety: tmavé hodnoty všech barev, které widget používá, s ověřeným kontrastem (text 13,4 : 1, tlumený text 8,4 : 1, ember 5,3 : 1). Barvy kategorií jsou světlejší, aby byly vidět na tmavém pozadí, a drží pořadí světlosti, takže sousední vrstvy batohu se dál liší. V tmavém režimu je pozadí widgetu průhledné. Webová appka zůstává jen světlá.
 
-## Otázky pro Martina (před stavbou)
+## Zbývající drobné otázky (Claude Code se na ně zeptá v plánu)
 
-1. **Co je AI sezení?** PRD (FR-25) říká „změny z jednoho kroku AI jsou jedna skupina“. Zadání pro design chce sezení („Claude, 14:02–14:10, 27 changes“). Návrh: sezení = po sobě jdoucí změny od stejné AI aplikace bez pauzy delší než 30 minut; kroky AI uvnitř sezení se nezobrazují zvlášť. Souhlasíš?
-2. **Confirm u jedné položky uloží změnu hned** (každá je jedna změna v Activity). Alternativa je nic neukládat až do „Confirm all“. Doporučuji ukládat hned, je to srozumitelnější.
-3. **„Confirm all“ přeskočí položky s FR-5 volbou** (Sawyer Squeeze použitý v dalších gearlistech) a řekne to. Nikdy nerozhodne za tebe. OK?
-4. **Activity jako boční panel přes appku** (s ztmavením pozadí). OK, nebo radši vlastní stránka?
-5. **Undo přímo ve widgetu po uložení** nenavrhuji (widget odkazuje na Activity). Chceš ho? Bylo by to nové chování, patří do PRD.
-6. **Tmavé widgety:** Claude ve svých pravidlech píše, že widgety mají podporovat světlý i tmavý režim. V1 je světlá karta, v tmavém Claude bude vypadat jako světlý ostrůvek (čitelný, jen méně „nativní“). Tokeny jsou hotové, takže tmavý režim widgetů je malá práce. Zvážit posun z ⚪ Někdy do kroku 5?
-7. **ChatGPT:** vlastní MCP server jde připojit jen na Plus nebo Pro, na webu (v pop-upu to je napsané). Na bezplatném ChatGPT to nepůjde.
-8. **Tlačítko Google:** buď oficiální tlačítko, které vykreslí Google (načte jejich skript), nebo vlastní podle jejich pravidel s oficiálním logem „G“. Doporučuji oficiální, je to nejjednodušší a splňuje pravidla Googlu.
-9. **„27 new“ u Activity v nabídce účtu** (počet AI změn od posledního otevření) je drobná novinka navíc. Nechat, nebo vyhodit?
-10. **Odvolání přístupu AI je v panelu Activity** (sekce Connected AI apps), ne v nabídce účtu. Zadání kroku 3 v `claude-code-prompts.md` zatím říká „v nabídce účtu“; po schválení ho upravit.
+1. **Undo přímo ve widgetu po uložení** nenavrhuji (widget odkazuje na Activity). Chceš ho? Bylo by to nové chování, patří do PRD.
+2. **Activity jako boční panel přes appku** (s ztmavením pozadí). OK, nebo radši vlastní stránka?
+3. **Tlačítko Google:** doporučuji oficiální tlačítko, které vykreslí Google (splňuje jejich pravidla).
+4. **„27 new“ u Activity v nabídce účtu** (počet AI změn od posledního otevření) je drobná novinka navíc. Nechat, nebo vyhodit?
+5. **Odvolání přístupu AI je v panelu Activity** (Connected AI apps), ne v nabídce účtu. Krok 3 v `claude-code-prompts.md` je podle toho upravený.
+
+## Opraveno po kontrole (2026-10-21)
+
+- Ikony v kruzích (Connected AI apps, výhody v dialogu Sign in) a iniciály v avataru v nabídce účtu nebyly vycentrované. Příčina: obecné CSS pravidlo pro texty (`span`) se omylem vztahovalo i na ikony. Opraveno v `bundle.css`.
 
 ## Pro Claude Code
 
-Zadání: `claude-code-prompt.md` v této složce. Když se návrh a PRD rozcházejí, zeptej se Martina.
+Zadání a pořadí kroků: jen `PRDRequirements/mcp-integration/claude-code-prompts.md`. Tahle sekce platí pro vzhled ve všech krocích. Když se návrh a PRD rozcházejí, zeptej se Martina.
+
+- **Chování se mění jen tam, kde to říká PRD v33.** Inline editace, blokující 3-cestný dialog (FR-5), Worn/Consumable na řádku, snapshot, šablona, drag & drop, sdílení a režim bez účtu zůstávají přesně jako dnes.
+- **Datový model webu se kvůli vzhledu nemění.** Barvy kategorií se dál odvozují (výchozí podle id, vlastní podle pořadí → `cat-custom-1` až `4`).
+- **Tokeny:** CSS proměnné z `tokens.json` (verze 2). Web používá jen světlé hodnoty. Blok `[data-theme="dark"]` patří jen do balíku widgetů a zatím se nezapíná: webová appka nikdy nenastavuje `data-theme`.
+- **Ikony:** Lucide jako dosud. AI aplikace = `bot` všude (tlačítko, Activity, štítky), Activity `history`, Undo `undo-2`, Sign in / out `log-in` / `log-out`, Saved `cloud`, Offline `cloud-off`, limit `hourglass`. Mapa je v README design systému.
+- **Texty v UI anglicky, přesně podle READMEs komponent** (např. „Undo all AI changes from this day“, „HikingBuddy reached today's free limit, try again tomorrow“ ve widgetu jako nadpis + věta). Kdo změnu udělal: „You“ nebo název AI aplikace, jak se zaregistrovala („Claude“, „ChatGPT“).
+- **Tlačítko „Sign in with Google“** podle pravidel Googlu (bílé, šedý okraj, oficiální logo „G“), nebo oficiální tlačítko, které vykreslí Google Identity Services. Logo Googlu nekresli sám.
+- **Widgety (MCP Apps):**
+  - Samostatný malý balík (HTML zdroje `ui://…`), ne webová appka. Žádné Overpass, žádná krajina, žádné logo.
+  - Písmo: výchozí `--font-chat` (systémové); když AI aplikace pošle své proměnné stylu, nastav `--hbw-font: var(--font-sans)` hostitele. Pozor: hostitel posílá `--font-sans`, které má na webu jiný význam (Overpass), proto ve widgetu `--font-sans` z našich tokenů nedefinuj.
+  - **V1 jen světlé ve vlastní kartě `surface`** bez ohledu na téma AI aplikace (PRD FR-27). `prefersBorder: false`, okraj kreslí karta sama.
+  - Šířka od 320 px, výška podle obsahu, uvnitř se nic neposouvá, ovládací prvky 44 px, nejvýš 2 akce dole, žádné tooltipy ani menu.
+  - „Open in HikingBuddy“ otevírej přes hostitele (open-link z MCP Apps SDK), ne přes `<a target>`.
+  - Malý batoh: port `HB.miniPack` se stejnou geometrií jako `BackpackChart` (`PACK`, `GEAR`, `TIERS`, `layerHeights` sdílej, nekopíruj dvakrát).
+  - Ke každému widgetu vrací nástroj i čitelný text (FR-26).
+- Repo je veřejné, nic tajného ani osobních dat do gitu.
+
+**Ověření vzhledu** (v každém kroku, který mění vzhled): Playwright screenshoty desktop 1440 px a telefon 390 px nových obrazovek (hlavička host/přihlášený s otevřenou nabídkou, Sign in, import, Connect to AI obě záložky + host, Activity s rozbaleným krokem AI a konfliktem, potvrzení Undo dne); widgety samostatně v šířce 360 a 680 px. Ulož do `design/2026-10-mcp/implemented/` a porovnej se screenshoty v design systému a s maketami. Proklikej, že se chování webu nezměnilo (inline editace včetně Escape, 3-cestný dialog, Worn/Consumable bez dialogu, režim bez účtu).

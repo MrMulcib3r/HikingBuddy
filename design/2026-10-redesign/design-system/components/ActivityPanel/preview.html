@@ -1,4 +1,4 @@
-<!-- @dsCard group="Activity" height=1260 subtitle="Day headers, AI sessions, your edits, conflict, undone, deleted, connected apps" -->
+<!-- @dsCard group="Activity" height=1260 subtitle="Day headers, AI steps, your edits, conflict, undone, deleted, connected apps" -->
 <!doctype html>
 <html>
 <head><meta charset="utf-8"><title>ActivityPanel — preview</title>
@@ -21,7 +21,7 @@
     <div class="hb-act-entry hb-act-entry--ai">
       <span class="hb-act-ico"><i data-lucide="bot"></i></span>
       <div class="hb-act-main">
-        <div class="hb-act-title"><span class="hb-badge hb-badge--ai">ChatGPT</span><span class="hb-act-time">16:45–16:47 · 3 changes</span></div>
+        <div class="hb-act-title"><span class="hb-badge hb-badge--ai">ChatGPT</span><span class="hb-act-time">16:47 · 3 changes</span></div>
         <p class="hb-act-desc">Added <b>Gas canister 230 g</b> and 2 more items to <b>Jeseníky, 3 days</b>.</p>
       </div>
       <div class="hb-conflict" role="alert">
@@ -43,13 +43,21 @@
     <div class="hb-act-entry hb-act-entry--ai">
       <span class="hb-act-ico"><i data-lucide="bot"></i></span>
       <div class="hb-act-main">
-        <div class="hb-act-title"><span class="hb-badge hb-badge--ai">Claude</span><span class="hb-act-time">14:02–14:10 · 27 changes</span></div>
-        <p class="hb-act-desc">Created gearlist <b>Jeseníky, 3 days</b> with 25 items and changed 2 Gear Vault items.</p>
+        <div class="hb-act-title"><span class="hb-badge hb-badge--ai">Claude</span><span class="hb-act-time">14:10</span></div>
+        <p class="hb-act-desc">Deleted <span class="hb-del">Old rain poncho</span> from Gear Vault</p>
+        <div><span class="hb-badge hb-badge--deleted"><i data-lucide="trash-2"></i>Restorable until 20 Nov</span></div>
       </div>
-      <div class="hb-act-actions"><button class="hb-btn hb-btn--secondary hb-btn--sm"><i data-lucide="undo-2"></i>Undo</button><button class="hb-btn hb-btn--ghost hb-btn--sm hb-act-toggle" aria-expanded="true">27 changes<i data-lucide="chevron-down"></i></button></div>
+      <div class="hb-act-actions"><button class="hb-btn hb-btn--secondary hb-btn--sm"><i data-lucide="undo-2"></i>Undo</button></div>
+    </div>
+
+    <div class="hb-act-entry hb-act-entry--ai">
+      <span class="hb-act-ico"><i data-lucide="bot"></i></span>
+      <div class="hb-act-main">
+        <div class="hb-act-title"><span class="hb-badge hb-badge--ai">Claude</span><span class="hb-act-time">14:02 · 25 changes</span></div>
+        <p class="hb-act-desc">Created gearlist <b>Jeseníky, 3 days</b> with 25 items.</p>
+      </div>
+      <div class="hb-act-actions"><button class="hb-btn hb-btn--secondary hb-btn--sm"><i data-lucide="undo-2"></i>Undo</button><button class="hb-btn hb-btn--ghost hb-btn--sm hb-act-toggle" aria-expanded="true">25 changes<i data-lucide="chevron-down"></i></button></div>
       <ul class="hb-act-changes">
-        <li class="hb-act-change"><span class="hb-act-time">14:10</span><i data-lucide="trash-2"></i><span>Deleted <span class="hb-del">Old rain poncho</span> from Gear Vault <span class="hb-badge hb-badge--deleted"><i data-lucide="trash-2"></i>Restorable until 20 Nov</span></span><button class="hb-btn hb-btn--ghost hb-btn--sm">Undo</button></li>
-        <li class="hb-act-change"><span class="hb-act-time">14:06</span><i data-lucide="pencil"></i><span>Changed weight of <b>Sawyer Squeeze</b>: 85 g → 79 g</span><button class="hb-btn hb-btn--ghost hb-btn--sm">Undo</button></li>
         <li class="hb-act-change"><span class="hb-act-time">14:03</span><i data-lucide="plus"></i><span>Added <b>Durston X-Mid 1</b> to <b>Jeseníky, 3 days</b></span><button class="hb-btn hb-btn--ghost hb-btn--sm">Undo</button></li>
         <li class="hb-act-change"><span class="hb-act-time">14:02</span><i data-lucide="plus"></i><span>Created gearlist <b>Jeseníky, 3 days</b></span><button class="hb-btn hb-btn--ghost hb-btn--sm">Undo</button></li>
       </ul>
@@ -69,7 +77,7 @@
     <div class="hb-act-entry hb-act-entry--ai is-undone">
       <span class="hb-act-ico"><i data-lucide="bot"></i></span>
       <div class="hb-act-main">
-        <div class="hb-act-title"><span class="hb-badge hb-badge--ai">Claude</span><span class="hb-act-time">20:31–20:33 · 4 changes</span><span class="hb-badge hb-badge--undone"><i data-lucide="check"></i>Undone 20:40</span></div>
+        <div class="hb-act-title"><span class="hb-badge hb-badge--ai">Claude</span><span class="hb-act-time">20:33 · 4 changes</span><span class="hb-badge hb-badge--undone"><i data-lucide="check"></i>Undone 20:40</span></div>
         <p class="hb-act-desc">Removed 4 items from <b>Nordkalottleden 2027</b>.</p>
       </div>
     </div>
