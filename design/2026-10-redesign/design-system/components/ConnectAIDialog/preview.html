@@ -1,0 +1,32 @@
+<!-- @dsCard group="Account" height=980 subtitle="Signed in (Claude tab) and guest" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>ConnectAIDialog — preview</title>
+<style>body{margin:0;background:var(--bg)}</style>
+</head>
+<body>
+<div class="hb" style="position:relative;height:600px"><div class="hb-scrim">
+<div class="hb-dialog" role="dialog" aria-labelledby="ca-t" style="width:min(520px,100%)">
+  <h2 class="hb-dialog-title" id="ca-t"><i data-lucide="bot"></i>Connect to AI</h2>
+  <p class="hb-dialog-text">Let your AI app read and edit your HikingBuddy gear. Every change it makes shows up in Activity, where you can undo it.</p>
+  <div class="hb-tabs" role="tablist"><button role="tab" aria-selected="true">Claude</button><button role="tab" aria-selected="false">ChatGPT</button></div>
+  <ol class="hb-steps">
+    <li><span>In Claude, open <b>Customize › Connectors</b> and click <b>Add custom connector</b>.</span></li>
+    <li><span>Name it <b>HikingBuddy</b>, paste the server address below and click <b>Add</b>.</span></li>
+    <li><span>Click <b>Connect</b> and sign in with the same Google account.</span></li>
+  </ol>
+  <div class="hb-field"><span class="hb-label">Server address</span>
+    <div class="hb-copyfield"><input class="hb-input" readonly value="https://hikingbuddy.hikingbuddy-mmalinek.workers.dev/mcp" aria-label="Server address"><button class="hb-btn hb-btn--secondary"><i data-lucide="copy"></i>Copy</button></div>
+  </div>
+  <div class="hb-dialog-actions"><button class="hb-btn hb-btn--primary">OK</button></div>
+</div></div></div>
+<div class="hb" style="position:relative;height:380px"><div class="hb-scrim">
+<div class="hb-dialog" role="dialog" aria-labelledby="cg-t">
+  <h2 class="hb-dialog-title" id="cg-t"><i data-lucide="bot"></i>Connect to AI</h2>
+  <p class="hb-dialog-text">Connecting an AI app needs a HikingBuddy account, so the AI can reach your gear from anywhere.</p>
+  <p class="hb-fineprint">Without an account HikingBuddy keeps working as it does now, in this browser.</p>
+  <div class="hb-dialog-actions"><button class="hb-btn hb-btn--ghost hb-spacer">Not now</button><button class="hb-gsi"><span class="hb-gsi-mark" style="border:1.5px dashed var(--gsi-stroke);border-radius:50%"></span>Sign in with Google</button></div>
+</div></div></div>
+<script>HB.mountIcons();</script>
+</body>
+</html>

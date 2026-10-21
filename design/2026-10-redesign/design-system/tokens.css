@@ -1,6 +1,6 @@
-/* HikingBuddy design tokens: generated from tokens.json. Paste into app/src/index.css (or import it). */
+/* HikingBuddy design tokens (v2, PRD v33): generated from tokens.json. Paste into app/src/index.css (or import it). */
 :root {
-  /* colour */
+  /* colour (light: the only theme of the web app) */
   --bg: #FAF4EE;
   --surface: #FFFCF9;
   --surface-sunken: #F4EBE2;
@@ -43,9 +43,13 @@
   --cat-custom-2: #4E7C8C;
   --cat-custom-3: #8A9A5B;
   --cat-custom-4: #C9A27A;
+  --gsi-fill: #FFFFFF;
+  --gsi-stroke: #747775;
+  --gsi-text: #1F1F1F;
   /* type */
   --font-display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
   --font-sans: Overpass, "Segoe UI", system-ui, sans-serif;
+  --font-chat: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   /* spacing */
   --space-1: 4px;
   --space-2: 8px;
@@ -62,6 +66,52 @@
   /* shadow */
   --shadow-panel: 0 1px 2px rgba(43, 29, 36, 0.06), 0 8px 24px rgba(43, 29, 36, 0.06);
   --shadow-overlay: 0 4px 12px rgba(43, 29, 36, 0.10), 0 24px 48px rgba(43, 29, 36, 0.16);
+  /* layout (PRD v33) */
+  --widget-min-width: 320px;
+  --widget-wide: 440px;
+  --widget-rows-inline: 8;
+  --touch-target: 44px;
+  --sheet-width: 440px;
+}
+
+/* DARK: IN-CHAT WIDGETS ONLY, PREPARED, NOT IMPLEMENTED (BACKLOG "Někdy"). The web app never sets data-theme="dark". */
+[data-theme="dark"] {
+  --bg: #1E171B;
+  --surface: #2A2126;
+  --surface-sunken: #221A1E;
+  --surface-hover: #33292E;
+  --line: #43363C;
+  --line-control: #8E7A82;
+  --ink: #F5ECE6;
+  --ink-muted: #CBBAC0;
+  --ink-subtle: #AE9CA3;
+  --accent: #E3784B;
+  --accent-hover: #EC8C63;
+  --accent-ink: #F29A73;
+  --accent-soft: #4A2C22;
+  --on-accent: #1E171B;
+  --forest: #86C2A2;
+  --forest-soft: #1E3A2E;
+  --danger: #F28C82;
+  --danger-soft: #4C2422;
+  --warning: #E5B862;
+  --warning-soft: #43341A;
+  --scrim: rgba(0, 0, 0, 0.55);
+  --cat-backpack: #D07C5A;
+  --cat-shelter: #8CA98A;
+  --cat-sleep: #8B6A9C;
+  --cat-clothing: #EEBA93;
+  --cat-cooking: #BF5953;
+  --cat-water: #86B1C1;
+  --cat-electronics: #EAC873;
+  --cat-hygiene: #BFAFCE;
+  --cat-food: #3F7E6C;
+  --cat-misc: #B1A190;
+  --cat-custom-1: #DD9696;
+  --cat-custom-2: #5B90A3;
+  --cat-custom-3: #96A669;
+  --cat-custom-4: #CEAB86;
+  --focus-ring: var(--accent);
 }
 
 /* Type styles (sizes from tokens.json type.groups) */
@@ -76,3 +126,8 @@
 .t-weight { font-family: var(--font-sans); font-size: 15px; line-height: 22px; font-weight: 500; }
 .t-weight-xl { font-family: var(--font-sans); font-size: 32px; line-height: 36px; font-weight: 700; }
 .t-caption { font-family: var(--font-sans); font-size: 12px; line-height: 16px; font-weight: 500; }
+.t-w-title { font-family: var(--font-chat); font-size: 16px; line-height: 22px; font-weight: 600; }
+.t-w-body { font-family: var(--font-chat); font-size: 14px; line-height: 20px; font-weight: 400; }
+.t-w-strong { font-family: var(--font-chat); font-size: 14px; line-height: 20px; font-weight: 600; }
+.t-w-caption { font-family: var(--font-chat); font-size: 12px; line-height: 16px; font-weight: 500; }
+.t-w-total { font-family: var(--font-display); font-size: 28px; line-height: 30px; font-weight: 700; }

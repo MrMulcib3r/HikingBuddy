@@ -6,3 +6,4 @@ Modal on a plum scrim (`scrim`) with a display-face uppercase title, body text, 
 - Action buttons carry an icon AND their label: Create a copy `copy-plus`, Continue `check`, Delete everywhere `trash-2`, Keep in gearlists `archive`. In a blocking decision the words stay, the icon helps recognise the choice.
 - Cancel is a ghost button pushed left (`hb-spacer`); the recommended action is primary; destructive is danger.
 - `--wide` for "Add item to Gear Vault" and "Add gear to this gearlist". The add-item dialog does not close on a click outside.
+- PRD v33 dialogs use the same frame: SignInWithGoogle, ImportDialog (blocking), ConnectAIDialog, UndoDialog (`role="alertdialog"`) and the "Revoke access" confirmation (Cancel / Revoke access in danger). The Activity panel is a side sheet (`hb-sheet`) on the same scrim.

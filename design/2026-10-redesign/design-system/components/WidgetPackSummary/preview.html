@@ -1,0 +1,43 @@
+<!-- @dsCard group="In-chat widgets" height=640 subtitle="Pack summary at 360px and 600px chat width" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>WidgetPackSummary — preview</title>
+<style>body{margin:0;background:var(--bg)} .pv{padding:20px;display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start} .pv-cap{font:500 12px/16px var(--font-sans);color:var(--ink-muted);margin-bottom:6px}</style>
+</head>
+<body>
+<div class="pv">
+  <div style="width:360px"><div class="pv-cap">360px (phone)</div><div id="w360"></div></div>
+  <div style="width:600px"><div class="pv-cap">600px (desktop chat column)</div><div id="w600"></div></div>
+</div>
+<template id="tpl">
+<section class="hbw" aria-label="Pack summary, Jeseníky, 3 days">
+  <div class="hbw-head"><div class="hbw-head-main"><h3 class="hbw-title">Jeseníky, 3 days</h3><span class="hbw-meta">27 items · updated 14:10</span></div></div>
+  <div class="hbw-sum">
+    <div style="display:grid;justify-items:center;gap:6px"><div class="pack"></div><span class="hbw-tier hbw-tier--lightweight"><i data-lucide="footprints"></i>Lightweight</span><span class="hbw-meta" style="text-align:center">935 g to Ultralight</span></div>
+    <div class="hbw-total"><span class="hb-label">Total</span><span class="hbw-total-n">9.06 kg</span>
+      <dl class="hbw-split">
+        <div><dt><i data-lucide="backpack"></i>Base</dt><dd>5.47 kg</dd></div>
+        <div><dt><i data-lucide="utensils"></i>Consumables</dt><dd>2.35 kg</dd></div>
+        <div class="hbw-split-worn"><dt><i data-hb-icon="hiker"></i>Worn</dt><dd>+ 1.24 kg</dd></div>
+      </dl>
+    </div>
+    <ul class="hbw-cats" style="grid-column:1/-1"></ul>
+  </div>
+  <div class="hbw-foot"><a class="hbw-link" href="#"><i data-lucide="external-link"></i>Open in HikingBuddy</a></div>
+</section>
+</template>
+<script>
+var D={unit:'metric',base:5470,consumable:2350,worn:1240,categories:[['Food','apple','cat-food',2100],['Sleep System','bed-double','cat-sleep',1450],['Backpack','backpack','cat-backpack',1100],['Shelter System','tent','cat-shelter',1020],['Clothing','shirt','cat-clothing',900],['Cooking','cooking-pot','cat-cooking',420],['Electronics','battery-charging','cat-electronics',380],['Water','droplet','cat-water',180],['Hygiene','bath','cat-hygiene',150],['Misc','package','cat-misc',120]].map(function(c){return{name:c[0],icon:c[1],color:c[2],grams:c[3]}})};
+var tot=D.categories.reduce(function(s,c){return s+c.grams},0);
+['w360','w600'].forEach(function(id){
+  var n=document.getElementById('tpl').content.cloneNode(true); var host=document.getElementById(id); host.appendChild(n);
+  HB.miniPack(host.querySelector('.pack'),D);
+  host.querySelector('.pack').style.width='100%';
+  var ul=host.querySelector('.hbw-cats');
+  if(id==='w600'){ul.style.gridColumn='auto';}
+  ul.innerHTML=D.categories.map(function(c){return '<li class="hbw-cat"><span class="hb-swatch" style="background:var(--'+c.color+')"></span><i data-lucide="'+c.icon+'"></i><span>'+c.name+'</span><span class="hbw-cat-w">'+HB.formatWeight(c.grams,'metric')+'</span><span class="hbw-cat-p">'+Math.round(c.grams/tot*100)+' %</span></li>'}).join('');
+});
+HB.mountIcons();
+</script>
+</body>
+</html>

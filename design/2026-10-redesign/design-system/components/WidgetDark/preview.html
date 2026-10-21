@@ -1,0 +1,41 @@
+<!-- @dsCard group="In-chat widgets · dark (prepared, not implemented)" height=860 subtitle="Dark theme tokens on a dark chat. Not built yet." -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>WidgetDark — preview</title>
+<style>body{margin:0;background:var(--bg)} .host{background:#212121;padding:20px;display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start} .cap{font:600 12px/16px system-ui,sans-serif;color:#d6d6d6;width:100%;letter-spacing:.04em}</style>
+</head>
+<body>
+<div data-theme="dark" class="host">
+  <div class="cap">PREPARED, NOT IMPLEMENTED · dark AI app, widget ground transparent</div>
+  <section class="hbw" style="width:360px" aria-label="Pack summary, dark">
+    <div class="hbw-head"><div class="hbw-head-main"><h3 class="hbw-title">Jeseníky, 3 days</h3><span class="hbw-meta">27 items · updated 14:10</span></div></div>
+    <div class="hbw-sum">
+      <div style="display:grid;justify-items:center;gap:6px"><div id="pk" style="width:100%"></div><span class="hbw-tier hbw-tier--lightweight"><i data-lucide="footprints"></i>Lightweight</span><span class="hbw-meta" style="text-align:center">935 g to Ultralight</span></div>
+      <div class="hbw-total"><span class="hb-label">Total</span><span class="hbw-total-n">9.06 kg</span>
+        <dl class="hbw-split"><div><dt><i data-lucide="backpack"></i>Base</dt><dd>5.47 kg</dd></div><div><dt><i data-lucide="utensils"></i>Consumables</dt><dd>2.35 kg</dd></div><div class="hbw-split-worn"><dt><i data-hb-icon="hiker"></i>Worn</dt><dd>+ 1.24 kg</dd></div></dl>
+      </div>
+      <ul class="hbw-cats" id="cats" style="grid-column:1/-1"></ul>
+    </div>
+    <div class="hbw-foot"><a class="hbw-link" href="#"><i data-lucide="external-link"></i>Open in HikingBuddy</a></div>
+  </section>
+  <div style="display:grid;gap:20px;width:360px">
+    <section class="hbw" aria-label="Proposed changes, dark">
+      <div class="hbw-head"><div class="hbw-head-main"><span class="hb-label">Proposed changes</span><h3 class="hbw-title">Jeseníky, 3 days</h3></div></div>
+      <div class="hbw-impact"><span>Base weight</span><b>5.47 kg → 5.13 kg</b><span class="hbw-delta--down">−340 g</span></div>
+      <ul class="hbw-changes">
+        <li class="hbw-change"><div class="hbw-change-main"><span class="hbw-kind hbw-kind--remove"><i data-lucide="minus"></i>Remove</span><span class="hbw-change-name">Crocs</span><span class="hbw-change-w">340 g</span></div><div class="hbw-change-actions"><button class="hb-btn hb-btn--ghost hb-btn--sm"><i data-lucide="x"></i>Reject</button><button class="hb-btn hb-btn--secondary hb-btn--sm"><i data-lucide="check"></i>Confirm</button></div></li>
+        <li class="hbw-change is-confirmed"><div class="hbw-change-main"><span class="hbw-kind hbw-kind--add"><i data-lucide="plus"></i>Add</span><span class="hbw-change-name">Titanium spork</span><span class="hbw-change-w">18 g</span></div><div class="hbw-change-actions"><span class="hbw-decided hbw-decided--yes"><i data-lucide="check"></i>Confirmed</span></div></li>
+      </ul>
+      <div class="hbw-foot"><div class="hbw-foot-actions"><button class="hb-btn hb-btn--secondary">Reject all</button><button class="hb-btn hb-btn--primary"><i data-lucide="check"></i>Confirm all (1)</button></div></div>
+    </section>
+    <section class="hbw" role="status"><div class="hbw-state hbw-state--limit"><span class="hbw-state-ico"><i data-lucide="hourglass"></i></span><div><h3 class="hbw-state-title">HikingBuddy reached today's free limit</h3><p class="hbw-state-text">Try again tomorrow. Your gear is safe and nothing was changed.</p></div></div></section>
+  </div>
+</div>
+<script>
+var D={unit:'metric',base:5470,consumable:2350,categories:[['Food','apple','cat-food',2100],['Sleep System','bed-double','cat-sleep',1450],['Backpack','backpack','cat-backpack',1100],['Shelter System','tent','cat-shelter',1020],['Clothing','shirt','cat-clothing',900],['Cooking','cooking-pot','cat-cooking',420],['Electronics','battery-charging','cat-electronics',380],['Water','droplet','cat-water',180],['Hygiene','bath','cat-hygiene',150],['Misc','package','cat-misc',120]].map(function(c){return{name:c[0],icon:c[1],color:c[2],grams:c[3]}})};
+HB.miniPack(document.getElementById('pk'),D);
+document.getElementById('cats').innerHTML=D.categories.map(function(c){return '<li class="hbw-cat"><span class="hb-swatch" style="background:var(--'+c.color+')"></span><i data-lucide="'+c.icon+'"></i><span>'+c.name+'</span><span class="hbw-cat-w">'+HB.formatWeight(c.grams,'metric')+'</span><span class="hbw-cat-p">'+Math.round(c.grams/7820*100)+' %</span></li>'}).join('');
+HB.mountIcons();
+</script>
+</body>
+</html>

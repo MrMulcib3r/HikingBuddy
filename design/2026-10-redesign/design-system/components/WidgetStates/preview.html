@@ -1,0 +1,27 @@
+<!-- @dsCard group="In-chat widgets" height=900 subtitle="Loading, saved, empty, limit, error, access ended, out of date" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>WidgetStates — preview</title>
+<style>body{margin:0;background:var(--bg)} .pv{padding:20px;display:grid;grid-template-columns:repeat(2,360px);gap:20px;align-items:start}</style>
+</head>
+<body>
+<div class="pv">
+  <section class="hbw" aria-busy="true" aria-label="Loading pack summary">
+    <div style="display:grid;gap:6px"><span class="hbw-skel" style="width:60%;height:18px"></span><span class="hbw-skel" style="width:35%;height:12px"></span></div>
+    <div class="hbw-sum"><span class="hbw-skel hbw-skel-pack"></span><div style="display:grid;gap:8px"><span class="hbw-skel" style="width:40%;height:12px"></span><span class="hbw-skel" style="width:70%;height:26px"></span><span class="hbw-skel" style="height:12px"></span><span class="hbw-skel" style="height:12px"></span><span class="hbw-skel" style="height:12px"></span></div></div>
+    <div style="display:grid;gap:8px"><span class="hbw-skel" style="height:14px"></span><span class="hbw-skel" style="height:14px"></span><span class="hbw-skel" style="height:14px;width:80%"></span></div>
+  </section>
+  <section class="hbw">
+    <div class="hbw-state hbw-state--success"><span class="hbw-state-ico"><i data-lucide="circle-check"></i></span><div><h3 class="hbw-state-title">Saved to Jeseníky, 3 days</h3><p class="hbw-state-text">4 changes applied, 1 rejected. Base weight is now <b>4.96 kg</b>.</p><p class="hbw-state-text">You can undo any change in Activity on HikingBuddy.</p></div></div>
+    <div class="hbw-foot"><a class="hbw-link" href="#"><i data-lucide="external-link"></i>Open in HikingBuddy</a></div>
+  </section>
+  <section class="hbw"><div class="hbw-state"><span class="hbw-state-ico"><i data-lucide="backpack"></i></span><div><h3 class="hbw-state-title">Jeseníky, 3 days has no gear yet</h3><p class="hbw-state-text">Ask in the chat to add gear from your Gear Vault.</p></div></div></section>
+  <section class="hbw"><div class="hbw-state"><span class="hbw-state-ico"><i data-lucide="package-open"></i></span><div><h3 class="hbw-state-title">Your Gear Vault is empty</h3><p class="hbw-state-text">Ask in the chat to add your gear, or add it in HikingBuddy.</p></div></div><div class="hbw-foot"><a class="hbw-link" href="#"><i data-lucide="external-link"></i>Open in HikingBuddy</a></div></section>
+  <section class="hbw" role="status"><div class="hbw-state hbw-state--limit"><span class="hbw-state-ico"><i data-lucide="hourglass"></i></span><div><h3 class="hbw-state-title">HikingBuddy reached today's free limit</h3><p class="hbw-state-text">Try again tomorrow. Your gear is safe and nothing was changed.</p></div></div></section>
+  <section class="hbw" role="alert"><div class="hbw-state hbw-state--error"><span class="hbw-state-ico"><i data-lucide="circle-x"></i></span><div><h3 class="hbw-state-title">Couldn't reach HikingBuddy</h3><p class="hbw-state-text">Nothing was changed. Try again in a moment.</p></div></div><div class="hbw-foot"><div class="hbw-foot-actions"><button class="hb-btn hb-btn--secondary"><i data-lucide="refresh-cw"></i>Try again</button></div></div></section>
+  <section class="hbw"><div class="hbw-state"><span class="hbw-state-ico"><i data-lucide="key-round"></i></span><div><h3 class="hbw-state-title">HikingBuddy is not connected</h3><p class="hbw-state-text">Your access ended or was revoked. Reconnect HikingBuddy in your AI app's connector settings.</p></div></div></section>
+  <section class="hbw"><div class="hbw-state hbw-state--limit"><span class="hbw-state-ico"><i data-lucide="refresh-cw"></i></span><div><h3 class="hbw-state-title">This proposal is out of date</h3><p class="hbw-state-text">Jeseníky, 3 days changed after it was made. Ask for a new proposal.</p></div></div></section>
+</div>
+<script>HB.mountIcons();</script>
+</body>
+</html>

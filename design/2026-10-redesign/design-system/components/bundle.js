@@ -1,7 +1,9 @@
 /* HikingBuddy design system helpers: window.HB. Plain script, no framework.
    HB.icons      custom hiker icons: boot (Worn), carabiner, hiker, mark (SVG strings, Lucide-style 24px grid, stroke = currentColor)
    HB.mountIcons(root)   replaces <i data-hb-icon="boot"> with the SVG and runs Lucide for <i data-lucide="...">
-   HB.backpack(el, data) renders the backpack weight chart + legend (reference implementation for the app) */
+   HB.backpack(el, data) renders the backpack weight chart + legend (reference implementation for the app)
+   HB.miniPack(el, data) / HB.miniPackSvg(data)  compact pack for the in-chat pack summary widget (PRD v33)
+   HB.tier(baseGrams)    { id, name, icon } of the pack tier */
 (function () {
   var A = 'xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="hb-ico" aria-hidden="true"';
   var icons = {
@@ -197,5 +199,35 @@
     mountIcons(el);
   }
 
-  window.HB = { icons: icons, iconHtml: iconHtml, mountIcons: mountIcons, backpack: backpack, formatWeight: fmt };
+
+  /* Compact pack for the in-chat pack summary widget (PRD v33, FR-27). Same shape, layer order (heaviest at the bottom),
+     MIN_H and tier gear as HB.backpack, but no percentages, no outside labels, no legend, no hover and no animation:
+     the widget lists categories with weight and share as text next to it. Returns an SVG string. */
+  function miniPackSvg(data) {
+    var S = PACK, TOP = S.top, BOTTOM = S.bottom;
+    var cats = data.categories.filter(function (c) { return c.grams > 0; }).slice().sort(function (a, b) { return b.grams - a.grams; });
+    var total = cats.reduce(function (s, c) { return s + c.grams; }, 0);
+    var baseG = data.base != null ? data.base : total - (data.consumable || 0);
+    var tier = tierOf(baseG);
+    var hs = layerHeights(cats.map(function (c) { return c.grams; }), BOTTOM - TOP);
+    var uid = 'hbm' + Math.random().toString(36).slice(2, 7);
+    var y = BOTTOM, layers = '', gaps = '';
+    cats.forEach(function (c, i) {
+      y -= hs[i];
+      layers += '<rect x="20" y="' + y.toFixed(2) + '" width="180" height="' + (hs[i] + 0.5).toFixed(2) + '" fill="var(--' + c.color + ')"/>';
+      if (i < cats.length - 1) gaps += '<line class="hb-pack-gap" x1="20" x2="200" y1="' + y.toFixed(2) + '" y2="' + y.toFixed(2) + '"/>';
+    });
+    var on = { pad: tier >= 1, axe: tier >= 2, pockets: tier >= 2, poles: tier >= 2, boots: tier >= 2 };
+    function g(n) { return on[n] ? GEAR[n] : ''; }
+    return '<svg viewBox="-28 0 284 306" role="img" aria-label="' + TIERS[tier].name + ' pack, ' + fmt(total, data.unit) + ' in the pack">' +
+      '<defs><clipPath id="' + uid + '"><path d="' + S.body + '"/></clipPath></defs>' +
+      g('axe') + g('poles') + S.behind + g('pockets') +
+      '<path d="' + S.body + '" ' + E + '/>' +
+      '<g clip-path="url(#' + uid + ')">' + layers + gaps + '</g>' +
+      S.front + '<path d="' + S.body + '" class="hb-pack-outline"/>' + g('pad') + g('boots') + '</svg>';
+  }
+  function miniPack(el, data) { el.classList.add('hbw-pack'); el.innerHTML = miniPackSvg(data); }
+  function tier(baseGrams) { var t = TIERS[tierOf(baseGrams)]; return { id: t.id, name: t.name, icon: t.icon }; }
+
+  window.HB = { icons: icons, iconHtml: iconHtml, mountIcons: mountIcons, backpack: backpack, miniPack: miniPack, miniPackSvg: miniPackSvg, tier: tier, formatWeight: fmt };
 })();

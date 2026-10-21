@@ -1,0 +1,47 @@
+<!-- @dsCard group="In-chat widgets" height=1120 subtitle="Pending, confirmed, rejected and an FR-5 choice" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>WidgetProposedChanges — preview</title>
+<style>body{margin:0;background:var(--bg)} .pv{padding:20px;display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start} .pv-cap{font:500 12px/16px var(--font-sans);color:var(--ink-muted);margin-bottom:6px}</style>
+</head>
+<body>
+<div class="pv">
+  <div style="width:360px"><div class="pv-cap">360px</div><div class="slot"></div></div>
+  <div style="width:640px"><div class="pv-cap">640px</div><div class="slot"></div></div>
+</div>
+<template id="tpl">
+<section class="hbw" aria-label="Proposed changes for Jeseníky, 3 days">
+  <div class="hbw-head"><div class="hbw-head-main"><span class="hb-label">Proposed changes</span><h3 class="hbw-title">Jeseníky, 3 days</h3><span class="hbw-meta">5 changes · 2 decided</span></div></div>
+  <div class="hbw-impact"><span>Base weight</span><b>5.47 kg → 4.96 kg</b><span class="hbw-delta--down">−508 g</span></div>
+  <ul class="hbw-changes">
+    <li class="hbw-change">
+      <div class="hbw-change-main"><span class="hbw-kind hbw-kind--remove"><i data-lucide="minus"></i>Remove</span><span class="hbw-change-name">Crocs</span><span class="hbw-change-w">340 g</span><span class="hbw-change-detail">Camp shoes are not needed for 3 days on trail runners.</span></div>
+      <div class="hbw-change-actions"><button class="hb-btn hb-btn--ghost hb-btn--sm"><i data-lucide="x"></i>Reject</button><button class="hb-btn hb-btn--secondary hb-btn--sm"><i data-lucide="check"></i>Confirm</button></div>
+    </li>
+    <li class="hbw-change">
+      <div class="hbw-change-main"><span class="hbw-kind hbw-kind--change"><i data-lucide="pencil"></i>Change</span><span class="hbw-change-name">Sawyer Squeeze</span><span class="hbw-change-w">79 g</span><span class="hbw-change-detail">Weight <s>85 g</s> → 79 g, measured without the pouch.</span></div>
+      <div class="hbw-change-note"><i data-hb-icon="carabiner"></i><span>Also in 2 other gearlists: Nordkalottleden 2027, Weekend Beskydy.</span></div>
+      <div class="hbw-change-actions"><button class="hb-btn hb-btn--ghost hb-btn--sm"><i data-lucide="x"></i>Reject</button><button class="hb-btn hb-btn--secondary hb-btn--sm"><i data-lucide="copy-plus"></i>Create a copy</button><button class="hb-btn hb-btn--secondary hb-btn--sm"><i data-lucide="check"></i>Update everywhere</button></div>
+    </li>
+    <li class="hbw-change">
+      <div class="hbw-change-main"><span class="hbw-kind hbw-kind--add"><i data-lucide="plus"></i>Add</span><span class="hbw-change-name">Titanium spork</span><span class="hbw-change-w">18 g</span><span class="hbw-change-detail">From your Gear Vault, to Cooking.</span></div>
+      <div class="hbw-change-actions"><button class="hb-btn hb-btn--ghost hb-btn--sm"><i data-lucide="x"></i>Reject</button><button class="hb-btn hb-btn--secondary hb-btn--sm"><i data-lucide="check"></i>Confirm</button></div>
+    </li>
+    <li class="hbw-change is-confirmed">
+      <div class="hbw-change-main"><span class="hbw-kind hbw-kind--remove"><i data-lucide="minus"></i>Remove</span><span class="hbw-change-name">Power bank 10 000 mAh (second)</span><span class="hbw-change-w">180 g</span></div>
+      <div class="hbw-change-actions"><span class="hbw-decided hbw-decided--yes"><i data-lucide="check"></i>Confirmed</span><button class="hb-btn hb-btn--ghost hb-btn--sm">Undo</button></div>
+    </li>
+    <li class="hbw-change is-rejected">
+      <div class="hbw-change-main"><span class="hbw-kind hbw-kind--change"><i data-lucide="pencil"></i>Change</span><span class="hbw-change-name">Rain jacket</span><span class="hbw-change-w">310 g</span><span class="hbw-change-detail">Mark as Worn</span></div>
+      <div class="hbw-change-actions"><span class="hbw-decided hbw-decided--no"><i data-lucide="x"></i>Rejected</span><button class="hb-btn hb-btn--ghost hb-btn--sm">Undo</button></div>
+    </li>
+  </ul>
+  <div class="hbw-foot" style="display:grid;gap:8px;justify-content:stretch">
+    <div class="hbw-change-note"><i data-lucide="info"></i><span>Sawyer Squeeze needs your choice. Confirm all skips it.</span></div>
+    <div class="hbw-foot-actions"><button class="hb-btn hb-btn--secondary"><i data-lucide="x"></i>Reject all</button><button class="hb-btn hb-btn--primary"><i data-lucide="check"></i>Confirm all (2)</button></div>
+  </div>
+</section>
+</template>
+<script>document.querySelectorAll('.slot').forEach(function(s){s.appendChild(document.getElementById('tpl').content.cloneNode(true))});HB.mountIcons();</script>
+</body>
+</html>

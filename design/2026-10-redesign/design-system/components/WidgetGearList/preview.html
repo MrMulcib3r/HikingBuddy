@@ -1,0 +1,43 @@
+<!-- @dsCard group="In-chat widgets" height=760 subtitle="Gear list: 8 rows, then Show all" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>WidgetGearList — preview</title>
+<style>body{margin:0;background:var(--bg)} .pv{padding:20px;display:flex;flex-wrap:wrap;gap:24px;align-items:flex-start} .pv-cap{font:500 12px/16px var(--font-sans);color:var(--ink-muted);margin-bottom:6px}</style>
+</head>
+<body>
+<div class="pv">
+  <div style="width:360px"><div class="pv-cap">360px</div><div class="slot"></div></div>
+  <div style="width:600px"><div class="pv-cap">600px: notes visible</div><div class="slot"></div></div>
+</div>
+<template id="tpl">
+<section class="hbw" aria-label="Gear list, Jeseníky, 3 days">
+  <div class="hbw-head"><div class="hbw-head-main"><h3 class="hbw-title">Jeseníky, 3 days</h3><span class="hbw-meta">27 items · 9.06 kg</span></div></div>
+  <div>
+    <div class="hbw-group">
+      <div class="hbw-group-head"><span class="hb-dot" style="background:var(--cat-shelter)"></span><i data-lucide="tent"></i><span class="hb-label">Shelter System</span><span class="hbw-num">1.02 kg</span></div>
+      <div class="hbw-row"><div><div class="hbw-row-name">Durston X-Mid 1</div><div class="hbw-row-note">incl. stakes and stuff sack</div></div><span class="hbw-row-flags"></span><span class="hbw-row-w">1.02 kg</span></div>
+    </div>
+    <div class="hbw-group">
+      <div class="hbw-group-head"><span class="hb-dot" style="background:var(--cat-sleep)"></span><i data-lucide="bed-double"></i><span class="hb-label">Sleep System</span><span class="hbw-num">1.45 kg</span></div>
+      <div class="hbw-row"><div><div class="hbw-row-name">Thermarest NeoAir XLite NXT</div><div class="hbw-row-note">regular</div></div><span class="hbw-row-flags"></span><span class="hbw-row-w">370 g</span></div>
+      <div class="hbw-row"><div><div class="hbw-row-name">Quilt 0 °C</div></div><span class="hbw-row-flags"></span><span class="hbw-row-w">1.08 kg</span></div>
+    </div>
+    <div class="hbw-group">
+      <div class="hbw-group-head"><span class="hb-dot" style="background:var(--cat-clothing)"></span><i data-lucide="shirt"></i><span class="hb-label">Clothing</span><span class="hbw-num">2.14 kg</span></div>
+      <div class="hbw-row"><div><div class="hbw-row-name">Rain jacket</div></div><span class="hbw-row-flags"><span class="hb-badge">Worn</span></span><span class="hbw-row-w">310 g</span></div>
+      <div class="hbw-row"><div><div class="hbw-row-name">Merino socks</div></div><span class="hbw-row-flags"></span><span class="hbw-row-w"><span class="hbw-row-q">2×</span>60 g</span></div>
+      <div class="hbw-row"><div><div class="hbw-row-name">Trail runners</div></div><span class="hbw-row-flags"><span class="hb-badge">Worn</span></span><span class="hbw-row-w">640 g</span></div>
+    </div>
+    <div class="hbw-group">
+      <div class="hbw-group-head"><span class="hb-dot" style="background:var(--cat-food)"></span><i data-lucide="apple"></i><span class="hb-label">Food</span><span class="hbw-num">2.10 kg</span></div>
+      <div class="hbw-row"><div><div class="hbw-row-name">Dinner, freeze-dried</div><div class="hbw-row-note">one per evening</div></div><span class="hbw-row-flags"><span class="hb-badge">Consumable</span></span><span class="hbw-row-w"><span class="hbw-row-q">3×</span>125 g</span></div>
+      <div class="hbw-row"><div><div class="hbw-row-name">Snickers</div></div><span class="hbw-row-flags"><span class="hb-badge">Consumable</span></span><span class="hbw-row-w"><span class="hbw-row-q">6×</span>50 g</span></div>
+    </div>
+  </div>
+  <button class="hb-btn hb-btn--ghost hbw-show-all">Show all 27 items<i data-lucide="chevron-down"></i></button>
+  <div class="hbw-foot"><a class="hbw-link" href="#"><i data-lucide="external-link"></i>Open in HikingBuddy</a></div>
+</section>
+</template>
+<script>document.querySelectorAll('.slot').forEach(function(s){s.appendChild(document.getElementById('tpl').content.cloneNode(true))});HB.mountIcons();</script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!-- @dsCard group="Activity" height=520 subtitle="Undo all AI changes from a day, with conflicts" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>UndoDialog — preview</title>
+<style>body{margin:0;background:var(--bg)}</style>
+</head>
+<body>
+<div class="hb" style="position:relative;height:520px"><div class="hb-scrim">
+<div class="hb-dialog" role="alertdialog" aria-labelledby="ud-t" style="width:min(540px,100%)">
+  <h2 class="hb-dialog-title" id="ud-t"><i data-lucide="undo-2"></i>Undo AI changes from today?</h2>
+  <p class="hb-dialog-text">This reverts <b>41 changes</b> made by AI today: Claude (2 sessions, 31 changes) and ChatGPT (1 session, 10 changes). Your own changes stay as they are.</p>
+  <div class="hb-conflict" style="grid-column:auto">
+    <div class="hb-conflict-head"><i data-lucide="triangle-alert"></i><div><b>3 of them conflict</b> with later changes:</div></div>
+    <ul>
+      <li><b>Sawyer Squeeze</b> weight: you changed it to 82 g at 15:20.</li>
+      <li><b>Gas canister 230 g</b> quantity in <b>Jeseníky, 3 days</b>: you changed it to 2 at 17:05.</li>
+      <li><b>Jeseníky, 3 days</b> name: you renamed it at 17:30.</li>
+    </ul>
+  </div>
+  <div class="hb-dialog-actions"><button class="hb-btn hb-btn--ghost hb-spacer">Cancel</button><button class="hb-btn hb-btn--secondary">Undo all 41</button><button class="hb-btn hb-btn--primary"><i data-lucide="undo-2"></i>Undo 38, keep later changes</button></div>
+</div></div></div>
+<script>HB.mountIcons();</script>
+</body>
+</html>

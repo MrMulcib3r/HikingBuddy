@@ -1,0 +1,51 @@
+<!-- @dsCard group="Account" height=430 subtitle="Header: guest and signed in, menu open" -->
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>AccountMenu — preview</title>
+<style>body{margin:0;background:var(--bg)} .pv-cap{font:500 12px/16px var(--font-sans);color:var(--ink-muted);padding:0 24px}</style>
+</head>
+<body>
+<div class="hb" style="display:grid;gap:8px;padding:12px 0 24px">
+  <div class="pv-cap">Guest</div>
+  <header class="hb-header" style="padding-top:4px">
+    <div class="hb-brand"><i data-hb-icon="mark"></i>HikingBuddy</div>
+    <div class="hb-header-actions">
+      <span class="hb-badge hb-badge--warning"><i data-lucide="triangle-alert"></i>Not saving to a file</span>
+      <button class="hb-btn hb-btn--ghost hb-btn--sm"><i data-lucide="hard-drive-download"></i>Export</button>
+      <button class="hb-btn hb-btn--ghost hb-btn--sm"><i data-lucide="hard-drive-upload"></i>Import</button>
+      <div class="hb-seg"><button aria-pressed="true">g / kg</button><button aria-pressed="false">oz / lb</button></div>
+      <button class="hb-btn hb-btn--secondary hb-btn--sm"><i data-lucide="bot"></i>Connect to AI</button>
+      <button class="hb-btn hb-btn--secondary hb-btn--sm"><i data-lucide="log-in"></i>Sign in</button>
+    </div>
+  </header>
+  <div class="pv-cap">Signed in, menu open</div>
+  <header class="hb-header" style="padding-top:4px;position:relative">
+    <div class="hb-brand"><i data-hb-icon="mark"></i>HikingBuddy</div>
+    <div class="hb-header-actions">
+      <span class="hb-status hb-status--saved"><i data-lucide="cloud"></i>Saved</span>
+      <button class="hb-btn hb-btn--ghost hb-btn--sm"><i data-lucide="hard-drive-download"></i>Export</button>
+      <button class="hb-btn hb-btn--ghost hb-btn--sm"><i data-lucide="hard-drive-upload"></i>Import</button>
+      <div class="hb-seg"><button aria-pressed="true">g / kg</button><button aria-pressed="false">oz / lb</button></div>
+      <button class="hb-btn hb-btn--secondary hb-btn--sm"><i data-lucide="bot"></i>Connect to AI</button>
+      <button class="hb-account" aria-haspopup="menu" aria-expanded="true" aria-label="Account menu, Martin Malínek"><span class="hb-avatar">MM</span><span class="hb-account-name">Martin</span><i data-lucide="chevron-down"></i></button>
+    </div>
+    <ul class="hb-menu" role="menu" style="position:absolute;right:24px;top:60px">
+      <li class="hb-menu-head" role="none"><span class="hb-avatar">MM</span><div><strong>Martin Malínek</strong><span>martin@example.com</span></div></li>
+      <li role="none"><button class="hb-menu-item" role="menuitem"><i data-lucide="bot"></i>Connect to AI</button></li>
+      <li role="none"><button class="hb-menu-item" role="menuitem"><i data-lucide="history"></i>Activity<span class="hb-menu-meta">27 new</span></button></li>
+      <li class="hb-menu-sep" role="separator"></li>
+      <li role="none"><button class="hb-menu-item" role="menuitem"><i data-lucide="log-out"></i>Sign out</button></li>
+    </ul>
+  </header>
+  <div style="height:150px"></div>
+  <div class="pv-cap">Save status variants (signed in)</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;padding:0 24px">
+    <span class="hb-status hb-status--saved"><i data-lucide="cloud"></i>Saved</span>
+    <span class="hb-status hb-status--saving"><i data-lucide="refresh-cw"></i>Saving…</span>
+    <span class="hb-status hb-status--offline"><i data-lucide="cloud-off"></i>Offline · changes kept</span>
+    <span class="hb-status hb-status--limit"><i data-lucide="hourglass"></i>Daily limit reached</span>
+  </div>
+</div>
+<script>HB.mountIcons();</script>
+</body>
+</html>
