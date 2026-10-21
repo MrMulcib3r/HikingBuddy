@@ -23,4 +23,4 @@ npm run dev
 Then open the address shown in the terminal (usually http://localhost:5173).
 
 ## Deployment
-Every push to `main` is built and deployed automatically by Cloudflare (one Worker: static app + `/api` + `/auth`, D1 database): `npm run build` in `app/`, then `npm run deploy` (applies D1 migrations, then `wrangler deploy` using `app/wrangler.jsonc`). Secrets never go into the repo: `wrangler secret put` / `app/.dev.vars`.
+Every push to `main` is built and deployed automatically by Cloudflare (one Worker: static app + `/api` + `/auth` + the MCP server at `/mcp` with OAuth, D1 database, KV for OAuth tokens): `npm run build` in `app/`, then `npm run deploy` (applies D1 migrations, then `wrangler deploy` using `app/wrangler.jsonc`). Secrets never go into the repo: `wrangler secret put` / `app/.dev.vars`.

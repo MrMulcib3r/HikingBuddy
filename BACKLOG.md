@@ -81,7 +81,6 @@ _Zbývají jen dvě položky, které jdou ověřit až po nasazení na web (FR-2
 _Cíl (PRD v33, 2026-10-21): uživatel si připojí vlastní AI klienta (Claude, ChatGPT) přes MCP server HikingBuddy; AI umí všechno, co uživatel, a odpovídá s widgety HikingBuddy přímo v chatu. Pořadí je závazné, každý krok zvlášť. Zadání pro Claude Code: `PRDRequirements/mcp-integration/claude-code-prompts.md`, pro Claude Design: `PRDRequirements/mcp-integration/claude-design-prompt.md`._
 
 - [ ] [UI] Design pro účty, Connect to AI, Activity a widgety MCP Apps – zadat Claude Design (`claude-design-prompt.md`). Proč: widgety v chatu a nové obrazovky zatím nemají design; potřeba před krokem 5, ideálně dřív. (2026-10-21, Martin)
-- [ ] [FEATURE] Krok 3: MCP server s OAuth (zatím jen text) – AI klient umí všechno, co uživatel; pravidla PRD platí i pro AI (FR-5 jako povinná volba). PRD FR-26. (2026-10-21, Martin)
 - [ ] [FEATURE] Krok 4: Pop-up „Connect to AI“ – krátký návod, adresa MCP serveru s Copy, OK. PRD FR-28. (2026-10-21, Martin)
 - [ ] [FEATURE] Krok 5: Widgety MCP Apps v AI klientovi – souhrn gearlistu, seznam, návrh změn s Confirm / Reject. Až po designu. PRD FR-27. (2026-10-21, Martin)
 - [ ] [FEATURE] Krok 6: Eval MCP serveru – 10 zadání, před/po úpravě popisů nástrojů. PRD FR-26. (2026-10-21, Martin)
@@ -132,6 +131,18 @@ _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, př
   5. **Konflikt:** změň váhu položky (A → B), pak ještě jednou (B → C). U první změny klikni Undo → žluté upozornění „Undo would overwrite 1 later change“ s druhou změnou; Cancel nic neudělá, „Undo anyway“ vrátí váhu na A.
   6. Přepnutí jednotek ani zavření banneru šablony se do historie nezapisuje. Import lokálních dat nebo zálohy je jeden záznam s Undo.
   7. AI změny („Claude“, krok AI s rozbalením, „Undo all AI changes from this day“) uvidíš naostro až po kroku 3 (MCP). Ověřil jsem je lokálně simulovaným klientem, screenshoty v `design/2026-10-mcp/implemented/step2/`.
+
+- [ ] [FEATURE] Krok 3: MCP server s OAuth (zatím jen text) – AI klient (Claude) se připojí k HikingBuddy, přihlásí se stejným Google účtem a umí všechno, co ty: číst, přidávat, měnit i mazat. Pravidla PRD platí i pro AI (FR-5 jako povinná volba, snapshot/šablona jen s potvrzením). Každý krok AI je v Activity jako „Claude“ s Undo; v Activity je sekce „Connected AI apps“ s „Revoke access“. PRD FR-26 (upřesnění v36). (2026-10-21, Martin; implementováno 2026-10-22) → **Jak otestovat** (na veřejné adrese po pushi; lokálně Claude MCP server nevidí):
+  1. **Připojení:** claude.ai → Settings → Connectors → **Add custom connector** → název „HikingBuddy“, URL `https://hikingbuddy.mmalinek.workers.dev/mcp` → Add → Connect. Otevře se okno HikingBuddy: když nejsi přihlášený, „Sign in with Google“; pak „Allow Claude to use your HikingBuddy?“ → **Allow**. Okno se zavře a konektor je „Connected“.
+  2. V novém chatu zapni konektor HikingBuddy (ikona nástrojů pod polem pro zprávu) a zkus těchto 5 vět:
+     - „Create a gearlist for 3 days in Jeseníky with rain from my gear“ → gearlist se objeví na webu (po přepnutí na záložku) a v Activity je jeden záznam „Claude … Created gearlist … with N items“ s Undo.
+     - „What's the base weight of my Weekend Hikes list and what are its three heaviest items?“ → odpoví bez jakékoli změny (v Activity nic nového).
+     - „Make my rain jacket 20 g heavier.“ → **musí se zeptat**, jestli změnit všude, nebo vytvořit kopii (FR-5); po odpovědi změnu udělá.
+     - „Remove everything I don't need for a day hike from the Jeseníky list.“ → odebere řádky; v Activity jeden krok s rozbalením na jednotlivé změny.
+     - „Undo your last change.“ → odebrané řádky se vrátí (v Activity „Undid Claude's change from …“).
+  3. **Undo na webu:** v Activity klikni Undo u kroku „Created gearlist …“ → gearlist zmizí z webu.
+  4. **Revoke:** Activity → Connected AI apps → Claude → **Revoke access** → potvrzení. Další dotaz v Claude už HikingBuddy nedosáhne (Claude nabídne znovu připojit).
+  5. ChatGPT na bezplatném účtu vlastní konektory neumí (viz chat), proto netestuj.
 
 
 ## ✅ Hotovo
