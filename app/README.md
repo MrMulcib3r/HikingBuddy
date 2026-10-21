@@ -21,13 +21,15 @@ npm run build   # type-checks and produces a production build in dist/
 
 ## Data storage — read this before changing `src/types.ts` or `src/storage.ts`
 
-This is an MVP with **no account or server** — all data lives in the browser's
-`localStorage`, under the single key `hikingbuddy-state` (see `src/constants.ts`), plus a
-manual `.json` export/import safety net (`src/components/BackupControls.tsx`).
+Without an account, all data lives in the browser's `localStorage`, under the single key
+`hikingbuddy-state` (see `src/constants.ts`), plus a manual `.json` export/import safety net
+(`src/components/BackupControls.tsx`). Signed in (PRD v33/v34), the account's data is in
+Cloudflare D1 (`migrations/`, `worker/db.ts`) and the browser keeps a working copy under
+`hikingbuddy-account-<userId>`.
 
 **Full policy lives in `../CLAUDE.md`** (repo root, "Data storage" section) — read it before
 touching the data model. Short version: `STORAGE_KEY` never changes again; every shape
 change to `AppState` bumps `CURRENT_SCHEMA_VERSION` and adds a migration function to the
-`MIGRATIONS` map in `src/storage.ts` (see `migrateV1ToV2` for the pattern); test it against
+`MIGRATIONS` map in `src/core/schema.ts` (see `migrateV1ToV2` for the pattern); test it against
 real old-shape data before calling it done. This exists because skipping it once, on
 2026-09-22, made a real update look like it had silently deleted the user's data.

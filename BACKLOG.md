@@ -81,7 +81,6 @@ _Zbývají jen dvě položky, které jdou ověřit až po nasazení na web (FR-2
 _Cíl (PRD v33, 2026-10-21): uživatel si připojí vlastní AI klienta (Claude, ChatGPT) přes MCP server HikingBuddy; AI umí všechno, co uživatel, a odpovídá s widgety HikingBuddy přímo v chatu. Pořadí je závazné, každý krok zvlášť. Zadání pro Claude Code: `PRDRequirements/mcp-integration/claude-code-prompts.md`, pro Claude Design: `PRDRequirements/mcp-integration/claude-design-prompt.md`._
 
 - [ ] [UI] Design pro účty, Connect to AI, Activity a widgety MCP Apps – zadat Claude Design (`claude-design-prompt.md`). Proč: widgety v chatu a nové obrazovky zatím nemají design; potřeba před krokem 5, ideálně dřív. (2026-10-21, Martin)
-- [ ] [FEATURE] Krok 1: Server, databáze D1 a přihlášení přes Google – režim bez účtu zůstává, po přihlášení data na serveru, import lokálních dat. Proč: základ pro MCP server a stejná data na všech zařízeních. PRD FR-23, FR-24. (2026-10-21, Martin)
 - [ ] [FEATURE] Krok 2: Historie změn a Undo – panel Activity, značka You / AI, Undo i pro smazání. Proč: AI smí mazat, uživatel musí vidět a vrátit, co agent udělal. PRD FR-25. (2026-10-21, Martin)
 - [ ] [FEATURE] Krok 3: MCP server s OAuth (zatím jen text) – AI klient umí všechno, co uživatel; pravidla PRD platí i pro AI (FR-5 jako povinná volba). PRD FR-26. (2026-10-21, Martin)
 - [ ] [FEATURE] Krok 4: Pop-up „Connect to AI“ – krátký návod, adresa MCP serveru s Copy, OK. PRD FR-28. (2026-10-21, Martin)
@@ -115,6 +114,17 @@ _Mimo scope. Uložené nápady pro případ, že by appka vyšla veřejně s mon
 ## 🧪 Test
 
 _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, přesuň do ✅ Hotovo; když ne, napiš k položce, co je špatně, a vrať ji do 🔴 Teď._
+
+- [ ] [FEATURE] Krok 1: Server, databáze D1 a přihlášení přes Google – režim bez účtu zůstává, po přihlášení data na serveru, import lokálních dat. PRD FR-23, FR-24 (upřesnění v34). (2026-10-21, Martin; implementováno 2026-10-21) → **Jak otestovat** (nejdřív nastavení Google a Cloudflare podle Claudova návodu v chatu):
+  1. **Bez přihlášení** (lokálně i na webu): appka funguje jako dřív – Vault, gearlisty, datový soubor, demo, Export/Import. Vpravo nahoře přibylo jen „Sign in“.
+  2. **Přihlášení lokálně:** `npm run dev` v `app/`, otevři http://localhost:5173 → Sign in → dialog s výhodami → tlačítko Google → vyber účet. Vpravo nahoře uvidíš „Saved“ a svůj avatar se jménem.
+  3. **Import:** při prvním přihlášení v prohlížeči, kde máš data (nebo připojený datový soubor), se ukáže „Import your local gear?“ s počty. Zvol import → v účtu jsou stejná data. Lokální data zůstanou (odhlas se a uvidíš je).
+  4. **Jiný prohlížeč:** přihlas se stejným účtem např. v Edge nebo v anonymním okně → stejná data, bez nabídky importu. Změna v jednom prohlížeči se ve druhém objeví po přepnutí zpět na jeho záložku.
+  5. **Druhý Google účet:** přihlas se jiným účtem → prázdný účet (uvítací karta s „Load demo data“), nevidí nic z prvního účtu.
+  6. **Offline:** v DevTools (F12 → Network → Offline) udělej změnu → žlutý pruh „You are offline.“ a „Offline · changes kept“. Vrať připojení → „Saved“ a změna je v jiném prohlížeči.
+  7. **3-cestný dialog** s účtem: uprav váhu položky použité ve dvou gearlistech → dialog Cancel / Create a copy / Continue jako dřív.
+  8. **Odhlášení:** avatar → Sign out → zase režim bez účtu s lokálními daty.
+  9. **Na veřejné adrese** (po pushi): totéž na https://hikingbuddy.mmalinek.workers.dev.
 
 
 ## ✅ Hotovo
