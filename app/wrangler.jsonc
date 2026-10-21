@@ -1,11 +1,40 @@
-// Cloudflare Workers config: the app is published as static files only (no server code).
-// Cloudflare runs `npm run build` and then `npx wrangler deploy`, which uploads ./dist.
+// Cloudflare Workers config (PRD v33, FR-24). One Worker serves:
+// - the static app (built by Vite into ./dist) and shared gearlist links (FR-18),
+// - the server code in ./worker for /api (data) and /auth (Google sign-in).
+// Cloudflare runs `npm run build`, then `npm run deploy` (D1 migrations + wrangler deploy).
+// Nothing secret belongs here: the repo is public. Secrets go to `wrangler secret put` and
+// locally to app/.dev.vars (git-ignored).
 {
+  "$schema": "node_modules/wrangler/config-schema.json",
   "name": "hikingbuddy",
-  "compatibility_date": "2026-10-20",
+  "main": "./worker/index.ts",
+  "compatibility_date": "2026-10-19",
+  "compatibility_flags": ["nodejs_compat"],
   "assets": {
-    "directory": "./dist",
-    "not_found_handling": "single-page-application"
+    "not_found_handling": "single-page-application",
+    // Only these paths reach the server code; everything else is a static file.
+    "run_worker_first": ["/api/*", "/auth/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "hikingbuddy",
+      // Not a secret: the id only works with Martin's Cloudflare account.
+      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "migrations_dir": "migrations"
+    }
+  ],
+  // FR-24: 60 requests a minute per user / IP (worker/rateLimit.ts).
+  "ratelimits": [
+    {
+      "name": "API_LIMITER",
+      "namespace_id": "1001",
+      "simple": { "limit": 60, "period": 60 }
+    }
+  ],
+  "vars": {
+    // Google OAuth client id (public; Google Cloud Console → Credentials). Empty = sign-in off.
+    "GOOGLE_CLIENT_ID": ""
   },
   "workers_dev": true,
   "preview_urls": true,

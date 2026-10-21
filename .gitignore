@@ -12,3 +12,8 @@ attachments/
 Ad hoc notes (created by Martin, do not delete).md
 TrackingProjectProgress/
 Claude outputs/
+
+# Local secrets and Cloudflare's local dev data (PRD v33) — never commit
+app/.dev.vars
+.dev.vars
+app/.wrangler/
