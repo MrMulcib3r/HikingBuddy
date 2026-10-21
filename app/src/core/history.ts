@@ -384,16 +384,21 @@ function summarizeGroup(group: RecordedGroup): RichPart[] {
   // A new gearlist filled in the same step (possibly with new Gear Vault items for it).
   if (
     (first.type === 'CREATE_LIST' || first.type === 'CREATE_LIST_FROM_TEMPLATE') &&
-    rest.every((o) => (o.type === 'ADD_ITEM_TO_LIST' && o.listId === first.id) || o.type === 'ADD_GEAR_ITEM' || o.type === 'ADD_CATEGORY')
+    rest.every(
+      (o) =>
+        ((o.type === 'ADD_ITEM_TO_LIST' || o.type === 'UPDATE_LIST_ITEM') && o.listId === first.id) || o.type === 'ADD_GEAR_ITEM' || o.type === 'ADD_CATEGORY'
+    )
   ) {
     const rows = changes.flatMap((c) => c.diffs).filter((d) => d.k === 'row' && d.b === null && d.l === first.id).length;
     const newItems = rest.filter((o) => o.type === 'ADD_GEAR_ITEM').length;
     return ['Created gearlist ', { b: first.name.trim() }, ` with ${plural(rows, 'item')}${newItems ? ` (${newItems} new in Gear Vault)` : ''}`];
   }
-  if (ops.every((o) => o.type === 'ADD_ITEM_TO_LIST' && o.listId === (first as { listId?: string }).listId)) {
+  // Several items added to one list (an AI step may also set worn / consumable / note on them).
+  if (first.type === 'ADD_ITEM_TO_LIST' && ops.every((o) => (o.type === 'ADD_ITEM_TO_LIST' || o.type === 'UPDATE_LIST_ITEM') && o.listId === first.listId)) {
+    const added = ops.filter((o) => o.type === 'ADD_ITEM_TO_LIST').length;
     const name = changes[0].text.find((p): p is { b: string } => typeof p === 'object' && 'b' in p);
     const list = changes[0].text.filter((p): p is { b: string } => typeof p === 'object' && 'b' in p)[1];
-    if (name && list) return ['Added ', name, ` and ${plural(ops.length - 1, 'more item')} to `, list];
+    if (name && list && added > 1) return ['Added ', name, ` and ${plural(added - 1, 'more item')} to `, list];
   }
   if (ops.every((o) => o.type === 'REMOVE_LIST_ITEM' && o.listId === (first as { listId?: string }).listId)) {
     const list = changes[0].text.filter((p): p is { b: string } => typeof p === 'object' && 'b' in p)[1];

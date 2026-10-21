@@ -1,6 +1,7 @@
 // Cloudflare Workers config (PRD v33, FR-24). One Worker serves:
 // - the static app (built by Vite into ./dist) and shared gearlist links (FR-18),
-// - the server code in ./worker for /api (data) and /auth (Google sign-in).
+// - the server code in ./worker for /api (data), /auth (Google sign-in) and the MCP server
+//   (/mcp with OAuth: /authorize, /oauth/*, /.well-known/*; PRD v33, FR-26).
 // Cloudflare runs `npm run build`, then `npm run deploy` (D1 migrations + wrangler deploy).
 // Nothing secret belongs here: the repo is public. Secrets go to `wrangler secret put` and
 // locally to app/.dev.vars (git-ignored).
@@ -9,11 +10,13 @@
   "name": "hikingbuddy",
   "main": "./worker/index.ts",
   "compatibility_date": "2026-10-19",
-  "compatibility_flags": ["nodejs_compat"],
+  // global_fetch_strictly_public: needed by workers-oauth-provider to read an AI client's public
+  // metadata document (Client ID Metadata Documents, FR-26).
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
     "not_found_handling": "single-page-application",
     // Only these paths reach the server code; everything else is a static file.
-    "run_worker_first": ["/api/*", "/auth/*"]
+    "run_worker_first": ["/api/*", "/auth/*", "/mcp", "/mcp/*", "/authorize", "/oauth/*", "/.well-known/*"]
   },
   "d1_databases": [
     {
@@ -24,6 +27,8 @@
       "migrations_dir": "migrations"
     }
   ],
+  // FR-26: the MCP server's OAuth clients, grants and tokens (workers-oauth-provider). Not a secret.
+  "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "e2930b20cf114f0284bda89f476a1315" }],
   // FR-24: 60 requests a minute per user / IP (worker/rateLimit.ts).
   "ratelimits": [
     {

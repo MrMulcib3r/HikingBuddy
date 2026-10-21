@@ -8,6 +8,7 @@ import { HISTORY_DAYS, type ChangeIcon, type RichPart } from '../core/history';
 import { useApp } from '../state/AppContext';
 import { formatClock, formatDayMonth, formatDayShort, plural } from '../utils/text';
 import { ConflictLine, RichText } from './RichText';
+import { ConnectedAiApps } from './ConnectedAiApps';
 import { UndoDialog } from './UndoDialog';
 import { Badge, Icon, IconButton } from './ui';
 
@@ -79,6 +80,7 @@ export function ActivityPanel({ onClose }: { onClose: () => void }) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [conflict, setConflict] = useState<ConflictState | null>(null);
   const [dialog, setDialog] = useState<DialogState | null>(null);
+  const [revokeOpen, setRevokeOpen] = useState(false);
   const sheetRef = useRef<HTMLElement>(null);
   const dataVersion = account?.sync.dataVersion;
   const undo = account?.sync.undo;
@@ -102,11 +104,11 @@ export function ActivityPanel({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     sheetRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !dialog) onClose();
+      if (e.key === 'Escape' && !dialog && !revokeOpen) onClose();
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [onClose, dialog]);
+  }, [onClose, dialog, revokeOpen]);
 
   const days = useMemo(() => groupByDay((entries ?? []).slice(0, limit)), [entries, limit]);
 
@@ -301,7 +303,7 @@ export function ActivityPanel({ onClose }: { onClose: () => void }) {
   }
 
   return createPortal(
-    <div className="sheet-backdrop" role="presentation" onClick={onClose}>
+    <div className="sheet-backdrop" role="presentation" onClick={() => !revokeOpen && onClose()}>
       <aside ref={sheetRef} tabIndex={-1} className="sheet" role="dialog" aria-modal="true" aria-labelledby="activity-title" onClick={(e) => e.stopPropagation()}>
         <div className="sheet-head">
           <h2 className="panel-title sheet-title" id="activity-title">
@@ -312,6 +314,7 @@ export function ActivityPanel({ onClose }: { onClose: () => void }) {
         </div>
         <div className="sheet-body">
           <p className="sheet-intro">Last 30 days. Undo puts things back the way they were before the change.</p>
+          <ConnectedAiApps refreshKey={dataVersion} onDialogChange={setRevokeOpen} />
           {loadError && (
             <p className="act-error act-load-error" role="alert">
               {loadError}
