@@ -34,7 +34,7 @@ export function SignInDialog({ onClose }: { onClose: () => void }) {
               .finally(() => setBusy(false));
           },
         });
-        gsi.renderButton(buttonRef.current, { type: 'standard', theme: 'outline', size: 'large', text: 'signin_with', shape: 'rectangular', logo_alignment: 'left' });
+        gsi.renderButton(buttonRef.current, { type: 'standard', theme: 'outline', size: 'large', text: 'signin_with', shape: 'rectangular', logo_alignment: 'left', locale: 'en' });
       })
       .catch((err: unknown) => !cancelled && setError(err instanceof Error ? err.message : String(err)));
     return () => {

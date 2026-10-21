@@ -20,7 +20,7 @@
       "binding": "DB",
       "database_name": "hikingbuddy",
       // Not a secret: the id only works with Martin's Cloudflare account.
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "database_id": "3ab43250-5d69-4534-9231-98630f9e8428",
       "migrations_dir": "migrations"
     }
   ],
@@ -34,7 +34,7 @@
   ],
   "vars": {
     // Google OAuth client id (public; Google Cloud Console → Credentials). Empty = sign-in off.
-    "GOOGLE_CLIENT_ID": ""
+    "GOOGLE_CLIENT_ID": "811787571787-akqkd2dae59fu1dm2blvk8uvijl1rv4m.apps.googleusercontent.com"
   },
   "workers_dev": true,
   "preview_urls": true,

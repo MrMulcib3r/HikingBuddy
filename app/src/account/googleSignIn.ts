@@ -20,7 +20,7 @@ export function loadGoogleIdentity(): Promise<GoogleIdApi> {
   if (!loading) {
     loading = new Promise((resolve, reject) => {
       const script = document.createElement('script');
-      script.src = 'https://accounts.google.com/gsi/client';
+      script.src = 'https://accounts.google.com/gsi/client?hl=en'; // UI is English
       script.async = true;
       script.onload = () => (window.google?.accounts?.id ? resolve(window.google.accounts.id) : reject(new Error('Google sign-in did not load.')));
       script.onerror = () => {
