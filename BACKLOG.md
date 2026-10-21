@@ -81,7 +81,6 @@ _Zbývají jen dvě položky, které jdou ověřit až po nasazení na web (FR-2
 _Cíl (PRD v33, 2026-10-21): uživatel si připojí vlastní AI klienta (Claude, ChatGPT) přes MCP server HikingBuddy; AI umí všechno, co uživatel, a odpovídá s widgety HikingBuddy přímo v chatu. Pořadí je závazné, každý krok zvlášť. Zadání pro Claude Code: `PRDRequirements/mcp-integration/claude-code-prompts.md`, pro Claude Design: `PRDRequirements/mcp-integration/claude-design-prompt.md`._
 
 - [ ] [UI] Design pro účty, Connect to AI, Activity a widgety MCP Apps – zadat Claude Design (`claude-design-prompt.md`). Proč: widgety v chatu a nové obrazovky zatím nemají design; potřeba před krokem 5, ideálně dřív. (2026-10-21, Martin)
-- [ ] [FEATURE] Krok 2: Historie změn a Undo – panel Activity, značka You / AI, Undo i pro smazání. Proč: AI smí mazat, uživatel musí vidět a vrátit, co agent udělal. PRD FR-25. (2026-10-21, Martin)
 - [ ] [FEATURE] Krok 3: MCP server s OAuth (zatím jen text) – AI klient umí všechno, co uživatel; pravidla PRD platí i pro AI (FR-5 jako povinná volba). PRD FR-26. (2026-10-21, Martin)
 - [ ] [FEATURE] Krok 4: Pop-up „Connect to AI“ – krátký návod, adresa MCP serveru s Copy, OK. PRD FR-28. (2026-10-21, Martin)
 - [ ] [FEATURE] Krok 5: Widgety MCP Apps v AI klientovi – souhrn gearlistu, seznam, návrh změn s Confirm / Reject. Až po designu. PRD FR-27. (2026-10-21, Martin)
@@ -125,6 +124,14 @@ _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, př
   7. **3-cestný dialog** s účtem: uprav váhu položky použité ve dvou gearlistech → dialog Cancel / Create a copy / Continue jako dřív.
   8. **Odhlášení:** avatar → Sign out → zase režim bez účtu s lokálními daty.
   9. **Na veřejné adrese** (po pushi): totéž na https://hikingbuddy.mmalinek.workers.dev.
+- [ ] [FEATURE] Krok 2: Historie změn a Undo – panel Activity (avatar → Activity), štítky You / AI, Undo jedné změny, celého kroku AI i všech AI změn dne, konflikt, smazané věci jdou vrátit 30 dní. PRD FR-25 (upřesnění v35). (2026-10-21, Martin; implementováno 2026-10-21) → **Jak otestovat** (přihlášený; lokálně `npm run db:migrate:local` a `npm run dev` v `app/`, na webu po pushi nic nastavovat nemusíš):
+  1. Udělej pár změn: přidej položku do Vaultu, změň váhu, přidej ji do gearlistu, uprav množství a **smaž celý gearlist** (s položkami a snapshotem).
+  2. Avatar vpravo nahoře → **Activity**. Zprava se vysune panel: nadpis „Today · …“, tvoje změny se štítkem „You“, časem a popisem (např. „Changed weight of **X**: 85 g → 79 g“). Smazaný gearlist je přeškrtnutý se štítkem „Restorable until …“.
+  3. U smazaného gearlistu klikni **Undo** → gearlist je zpátky i s položkami a snapshotem. Nahoře přibude „Undid your change from …“, původní záznam má „Undone …“.
+  4. U „Undid …“ klikni Undo → gearlist zase zmizí („Redid …“). Původní záznam jde znovu vrátit.
+  5. **Konflikt:** změň váhu položky (A → B), pak ještě jednou (B → C). U první změny klikni Undo → žluté upozornění „Undo would overwrite 1 later change“ s druhou změnou; Cancel nic neudělá, „Undo anyway“ vrátí váhu na A.
+  6. Přepnutí jednotek ani zavření banneru šablony se do historie nezapisuje. Import lokálních dat nebo zálohy je jeden záznam s Undo.
+  7. AI změny („Claude“, krok AI s rozbalením, „Undo all AI changes from this day“) uvidíš naostro až po kroku 3 (MCP). Ověřil jsem je lokálně simulovaným klientem, screenshoty v `design/2026-10-mcp/implemented/step2/`.
 
 
 ## ✅ Hotovo
