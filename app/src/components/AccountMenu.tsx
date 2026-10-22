@@ -1,17 +1,18 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
-import { ChevronDown, Cloud, CloudOff, History, Hourglass, LogIn, LogOut, RefreshCw, TriangleAlert } from 'lucide-react';
+import { Bot, ChevronDown, Cloud, CloudOff, History, Hourglass, LogIn, LogOut, RefreshCw, TriangleAlert } from 'lucide-react';
 import { useAuth } from '../account/AuthContext';
 import { useAccount } from '../account/AccountContext';
 import type { AccountUser } from '../account/api';
 import type { SaveStatus } from '../account/accountStore';
 import { ActivityPanel } from './ActivityPanel';
 import { SignInDialog } from './SignInDialog';
+import { useOpenConnectAi } from './ConnectAIDialog';
 import { Icon } from './ui';
 
 /**
  * Design system AccountMenu (PRD v33, FR-23): the right end of the header.
- * Guest: "Sign in". Signed in: avatar + first name with a menu (Activity, Sign out; Connect to
- * AI arrives with step 4). "Connect to AI" in the header comes with step 4.
+ * Guest: "Sign in". Signed in: avatar + first name with a menu (Connect to AI, Activity, Sign
+ * out). The "Connect to AI" header button (FR-28) sits next to it for both, see App.tsx.
  */
 export function SignInButton() {
   const [open, setOpen] = useState(false);
@@ -79,6 +80,7 @@ export function AccountMenu() {
   const { signOut } = useAuth();
   const [open, setOpen] = useState(false);
   const [activityOpen, setActivityOpen] = useState(false);
+  const openConnectAi = useOpenConnectAi();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLUListElement>(null);
 
@@ -156,6 +158,20 @@ export function AccountMenu() {
               role="menuitem"
               onClick={() => {
                 setOpen(false);
+                openConnectAi();
+              }}
+            >
+              <Icon icon={Bot} />
+              Connect to AI
+            </button>
+          </li>
+          <li role="none">
+            <button
+              type="button"
+              className="account-menu-item"
+              role="menuitem"
+              onClick={() => {
+                setOpen(false);
                 setActivityOpen(true);
               }}
             >
@@ -163,6 +179,7 @@ export function AccountMenu() {
               Activity
             </button>
           </li>
+          <li role="separator" className="account-menu-sep" />
           <li role="none">
             <button
               type="button"

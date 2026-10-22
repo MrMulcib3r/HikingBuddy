@@ -10,37 +10,7 @@ import { Dialog, DialogActions, Icon } from './ui';
  * Google is the only sign-in method.
  */
 export function SignInDialog({ onClose }: { onClose: () => void }) {
-  const { googleClientId, signInWithGoogle } = useAuth();
-  const buttonRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
-
-  useEffect(() => {
-    if (!googleClientId) return;
-    let cancelled = false;
-    loadGoogleIdentity()
-      .then((gsi) => {
-        if (cancelled || !buttonRef.current) return;
-        gsi.initialize({
-          client_id: googleClientId,
-          ux_mode: 'popup',
-          auto_select: false,
-          callback: ({ credential }) => {
-            setBusy(true);
-            setError(null);
-            signInWithGoogle(credential)
-              .then(onClose)
-              .catch((err: unknown) => setError(err instanceof Error ? err.message : String(err)))
-              .finally(() => setBusy(false));
-          },
-        });
-        gsi.renderButton(buttonRef.current, { type: 'standard', theme: 'outline', size: 'large', text: 'signin_with', shape: 'rectangular', logo_alignment: 'left', locale: 'en' });
-      })
-      .catch((err: unknown) => !cancelled && setError(err instanceof Error ? err.message : String(err)));
-    return () => {
-      cancelled = true;
-    };
-  }, [googleClientId, signInWithGoogle, onClose]);
 
   return (
     <Dialog title="Sign in" titleIcon={LogIn} labelledBy="sign-in-title" onBackdropClick={onClose}>
@@ -84,12 +54,48 @@ export function SignInDialog({ onClose }: { onClose: () => void }) {
         <button type="button" className="btn btn-ghost dialog-cancel" onClick={onClose}>
           Not now
         </button>
-        {googleClientId === null ? (
-          <span className="fineprint">Sign-in isn't set up yet.</span>
-        ) : (
-          <div className={`gsi-slot ${busy ? 'is-busy' : ''}`} ref={buttonRef} aria-busy={busy} />
-        )}
+        <GoogleSignInButton onSignedIn={onClose} onError={setError} />
       </DialogActions>
     </Dialog>
   );
+}
+
+/**
+ * Google's own "Sign in with Google" button (Google Identity Services). Shared by the Sign in
+ * dialog and the guest variant of "Connect to AI" (FR-28).
+ */
+export function GoogleSignInButton({ onSignedIn, onError }: { onSignedIn?: () => void; onError: (message: string | null) => void }) {
+  const { googleClientId, signInWithGoogle } = useAuth();
+  const buttonRef = useRef<HTMLDivElement>(null);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!googleClientId) return;
+    let cancelled = false;
+    loadGoogleIdentity()
+      .then((gsi) => {
+        if (cancelled || !buttonRef.current) return;
+        gsi.initialize({
+          client_id: googleClientId,
+          ux_mode: 'popup',
+          auto_select: false,
+          callback: ({ credential }) => {
+            setBusy(true);
+            onError(null);
+            signInWithGoogle(credential)
+              .then(() => onSignedIn?.())
+              .catch((err: unknown) => onError(err instanceof Error ? err.message : String(err)))
+              .finally(() => setBusy(false));
+          },
+        });
+        gsi.renderButton(buttonRef.current, { type: 'standard', theme: 'outline', size: 'large', text: 'signin_with', shape: 'rectangular', logo_alignment: 'left', locale: 'en' });
+      })
+      .catch((err: unknown) => !cancelled && onError(err instanceof Error ? err.message : String(err)));
+    return () => {
+      cancelled = true;
+    };
+  }, [googleClientId, signInWithGoogle, onSignedIn, onError]);
+
+  if (googleClientId === null) return <span className="fineprint">Sign-in isn't set up yet.</span>;
+  return <div className={`gsi-slot ${busy ? 'is-busy' : ''}`} ref={buttonRef} aria-busy={busy} />;
 }

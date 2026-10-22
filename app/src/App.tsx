@@ -17,6 +17,7 @@ import { SharedGearlistPage } from './components/SharedGearlistPage';
 import { AppFrame } from './components/AppFrame';
 import { AccountMenu, SaveStatusChip, SignInButton } from './components/AccountMenu';
 import { AccountBanners } from './components/AccountBanners';
+import { ConnectAiButton, ConnectAiProvider } from './components/ConnectAIDialog';
 import { ImportLocalDialog } from './components/ImportLocalDialog';
 import { isShareHash, parseShareHash } from './share';
 import './App.css';
@@ -36,7 +37,10 @@ function App() {
 
   return (
     <AuthProvider>
-      <Root />
+      {/* FR-28: above Root, so the pop-up survives the guest → account switch at sign-in. */}
+      <ConnectAiProvider>
+        <Root />
+      </ConnectAiProvider>
     </AuthProvider>
   );
 }
@@ -140,6 +144,7 @@ function AppShell() {
             <BackupControls />
           </div>
           <UnitToggle />
+          <ConnectAiButton />
           {account ? <AccountMenu /> : <SignInButton />}
         </>
       }
