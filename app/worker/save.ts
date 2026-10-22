@@ -19,16 +19,22 @@ export interface SaveResult {
 export async function saveWithRetry(
   db: D1Database,
   userId: string,
-  change: (state: AppState) => { state: AppState; rejected: { index: number; error: Error }[]; entries?: HistoryEntry[] }
+  change: (state: AppState) => {
+    state: AppState;
+    rejected: { index: number; error: Error }[];
+    entries?: HistoryEntry[];
+    /** More statements for the same transaction (FR-27: the proposal a confirmed change came from). */
+    extra?: D1PreparedStatement[];
+  }
 ): Promise<SaveResult> {
   for (let attempt = 0; ; attempt++) {
     const loaded = await loadState(db, userId);
-    const { state, rejected, entries = [] } = change(loaded.state);
+    const { state, rejected, entries = [], extra = [] } = change(loaded.state);
     const rejectedOut = rejected.map((r) => ({ index: r.index, message: r.error.message }));
     if (state === loaded.state && entries.length === 0) return { schemaVersion: CURRENT_SCHEMA_VERSION, version: loaded.version, state, rejected: rejectedOut };
     try {
       // The history entries are written in the same transaction as the change (FR-25).
-      const version = await saveState(db, userId, loaded.version, loaded.state, state, entries.map((e) => insertEntryStatement(db, userId, e)));
+      const version = await saveState(db, userId, loaded.version, loaded.state, state, [...entries.map((e) => insertEntryStatement(db, userId, e)), ...extra]);
       return { schemaVersion: CURRENT_SCHEMA_VERSION, version, state, rejected: rejectedOut };
     } catch (err) {
       if (err instanceof VersionConflict && attempt < 3) continue;

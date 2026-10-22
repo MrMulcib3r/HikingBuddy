@@ -1,4 +1,4 @@
-import { useMemo, useState, type DragEvent } from 'react';
+import { useEffect, useMemo, useState, type DragEvent } from 'react';
 import { useApp } from '../state/AppContext';
 import { describeUsage, findAffectedLists, findAffectedTemplates } from '../state/logic';
 import { TEMPLATE_NAME } from '../constants';
@@ -7,6 +7,7 @@ import { UNCATEGORIZED } from '../types';
 import { fromGrams, formatWeight, toGrams } from '../utils/weight';
 import { sortByOrder } from '../utils/reorder';
 import { dragMime, isDragging, makeDragHandlers } from '../utils/dnd';
+import { clearAppLink, readAppLink } from '../utils/appLink';
 import { ConfirmDialog } from './ConfirmDialog';
 import { plural } from '../utils/text';
 import { VaultEditDialog } from './VaultEditDialog';
@@ -55,6 +56,26 @@ export function GearVaultPanel() {
   const [categoryManagerOpen, setCategoryManagerOpen] = useState(false);
   const [pendingCoreEdit, setPendingCoreEdit] = useState<PendingCoreEdit | null>(null);
   const [pendingDelete, setPendingDelete] = useState<PendingDelete | null>(null);
+
+  // FR-27: "Open in HikingBuddy" from an item card in the AI chat (#item=<id>): scroll to the
+  // item and highlight it briefly, once its data is here.
+  const [linkedItem, setLinkedItem] = useState(() => readAppLink('item'));
+  useEffect(() => {
+    const onHashChange = () => setLinkedItem(readAppLink('item'));
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+  const linkedItemLoaded = linkedItem !== null && state.gearItems.some((g) => g.id === linkedItem);
+  useEffect(() => {
+    if (!linkedItemLoaded || !linkedItem) return;
+    const row = document.querySelector<HTMLElement>(`[data-vault-item="${CSS.escape(linkedItem)}"]`);
+    clearAppLink('item');
+    if (!row) return;
+    row.scrollIntoView({ block: 'center' });
+    row.classList.add('is-linked');
+    const timer = window.setTimeout(() => row.classList.remove('is-linked'), 2400);
+    return () => window.clearTimeout(timer);
+  }, [linkedItem, linkedItemLoaded]);
 
   const filteredItems = useMemo(() => {
     return state.gearItems.filter((item) => {
@@ -397,7 +418,7 @@ function VaultItemRow({ item, usage, unitPreference, categories, onCreateCategor
   const categoryName = categories.find((c) => c.id === item.categoryId)?.name ?? UNCATEGORIZED;
 
   return (
-    <div className="vault-item-row" {...dragProps}>
+    <div className="vault-item-row" data-vault-item={item.id} {...dragProps}>
       <span className="drag-handle" title="Drag to reorder, or onto a gearlist to add it">
         <Icon icon={ActionIcon.drag} size={16} />
       </span>

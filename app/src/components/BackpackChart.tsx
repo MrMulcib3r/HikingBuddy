@@ -5,6 +5,7 @@ import { formatWeight } from '../utils/weight';
 import { categoryColor, type CategoryColorKey } from '../utils/categoryStyle';
 import {
   INSIDE_LABEL_MIN,
+  PACK_BODY,
   PACK_BOTTOM,
   PACK_TOP,
   TIERS,
@@ -17,7 +18,7 @@ import {
   type GearPart,
   type PackCategory,
 } from '../utils/pack';
-import { PackGear } from './PackGear';
+import { PackBehind, PackFrontPocket, PackGear } from './PackGear';
 import { CategoryIcon } from './CategoryIcon';
 import { ActionIcon } from './icons/actionIcons';
 import { HikerIcon } from './icons/HikerIcons';
@@ -42,9 +43,9 @@ import { Icon } from './ui';
 
 const TIER_ICONS = { ultralight: Feather, lightweight: Footprints, traditional: Mountain };
 
-// Shape A body: outline AND clip path of the colour layers. The chart reserves room around the
-// pack (viewBox -30 0 370 306) for the outside labels and the tier gear, so nothing jumps.
-const BODY = 'M44 94A58 58 0 0 1 102 36H118A58 58 0 0 1 176 94V242A26 26 0 0 1 150 268H70A26 26 0 0 1 44 242Z';
+// The chart reserves room around the pack (viewBox -30 0 370 306) for the outside labels and
+// the tier gear, so nothing jumps.
+const BODY = PACK_BODY;
 const VIEWBOX = '-30 0 370 306';
 
 /** Relative luminance of a #rrggbb colour (WCAG), to pick dark or light percentage text. */
@@ -152,11 +153,7 @@ export function BackpackChart({ categories, consumable, worn, unit, animate = tr
           {gear('axe')}
           {gear('poles')}
           {/* behind the body: handle and side pockets */}
-          <path d="M94 38V26a16 16 0 0 1 32 0v12" className="pack-detail" />
-          <rect x="27" y="150" width="21" height="92" rx="9" className="pack-empty" />
-          <rect x="27" y="150" width="21" height="92" rx="9" className="pack-detail" />
-          <rect x="172" y="150" width="21" height="92" rx="9" className="pack-empty" />
-          <rect x="172" y="150" width="21" height="92" rx="9" className="pack-detail" />
+          <PackBehind />
           {gear('pockets')}
           <path d={BODY} className="pack-empty" />
           <g clipPath={`url(#${clipId})`}>
@@ -179,7 +176,7 @@ export function BackpackChart({ categories, consumable, worn, unit, animate = tr
             ))}
           </g>
           {/* front pocket (the lid seam was removed in v2 — it crossed the percentages) */}
-          <rect x="72" y="182" width="76" height="66" rx="16" className="pack-detail" strokeOpacity={0.55} />
+          <PackFrontPocket />
           <path d={BODY} className="pack-outline" />
           {/* percentages inside big layers, drawn above the pocket outline */}
           <g clipPath={`url(#${clipId})`}>

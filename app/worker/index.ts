@@ -10,7 +10,7 @@ import type { Operation } from '../src/core/operations';
 import { entryFromGroup, entryUndoneAt, importEntry, recordOperations, type Actor } from '../src/core/history';
 import { importIntoAccount } from '../src/core/importState';
 import { CURRENT_SCHEMA_VERSION, isEmptyState, runMigrations } from '../src/core/schema';
-import { loadHistory, loadState, purgeOld, upsertGoogleUser } from './db';
+import { isDailyLimitError, loadHistory, loadState, purgeOld, upsertGoogleUser } from './db';
 import { endSession, sessionUser, startSession, verifyGoogleCredential } from './auth';
 import { appStateSchema, importRequestSchema, opsRequestSchema, undoRequestSchema } from './schemas';
 import { rateLimit } from './rateLimit';
@@ -26,12 +26,6 @@ type ErrorCode = 'unauthorized' | 'forbidden' | 'invalid' | 'rate_limited' | 'da
 
 function fail(c: Context<AppEnv>, status: 400 | 401 | 403 | 409 | 429 | 500 | 503, error: ErrorCode, message: string) {
   return c.json({ error, message }, status);
-}
-
-/** D1 on the free plan fails every query after the daily row limit until 00:00 UTC (PRD 4a). */
-function isDailyLimitError(err: unknown): boolean {
-  const text = String(err);
-  return /exceeded/i.test(text) && /(daily|free tier|limit)/i.test(text);
 }
 
 app.onError((err, c) => {

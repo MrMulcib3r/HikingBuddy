@@ -39,6 +39,8 @@ export function packCategoriesFromItems(
 }
 
 // Pack geometry (shape A), in viewBox units. Layers fill the body from BOTTOM up to TOP.
+/** Shape A body: outline AND clip path of the colour layers (BackpackChart, chat widget). */
+export const PACK_BODY = 'M44 94A58 58 0 0 1 102 36H118A58 58 0 0 1 176 94V242A26 26 0 0 1 150 268H70A26 26 0 0 1 44 242Z';
 export const PACK_TOP = 36;
 export const PACK_BOTTOM = 268;
 /** Thinnest layer (~9px on screen): every category stays visible and easy to hover. */

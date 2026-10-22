@@ -19,6 +19,12 @@ export interface LoadedState {
 
 export class VersionConflict extends Error {}
 
+/** D1 on the free plan fails every query after the daily row limit until 00:00 UTC (PRD 4a). */
+export function isDailyLimitError(err: unknown): boolean {
+  const text = String(err);
+  return /exceeded/i.test(text) && /(daily|free tier|limit)/i.test(text);
+}
+
 const nowIso = () => new Date().toISOString();
 
 export async function loadState(db: D1Database, userId: string): Promise<LoadedState> {
@@ -327,6 +333,7 @@ export async function purgeOld(db: D1Database, now = new Date()): Promise<void> 
   const deletedLists = `SELECT user_id, id FROM gear_lists WHERE deleted_at IS NOT NULL AND deleted_at < ?1`;
   const results = await db.batch([
     db.prepare('DELETE FROM activity WHERE created_at < ?1').bind(cutoff),
+    db.prepare('DELETE FROM proposals WHERE created_at < ?1').bind(cutoff),
     db.prepare(`DELETE FROM gear_list_rows WHERE (user_id, list_id) IN (${deletedLists})`).bind(cutoff),
     db.prepare(`DELETE FROM snapshots WHERE (user_id, list_id) IN (${deletedLists})`).bind(cutoff),
     db.prepare('DELETE FROM gear_lists WHERE deleted_at IS NOT NULL AND deleted_at < ?1').bind(cutoff),

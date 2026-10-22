@@ -106,3 +106,22 @@ export function PackGear({ part, isNew }: { part: GearPart; isNew: boolean }) {
     </g>
   );
 }
+
+/** The pack's handle and side pockets, drawn behind the body (BackpackChart and the chat
+ * widget's compact pack, FR-27 — one shape, defined once). */
+export function PackBehind() {
+  return (
+    <>
+      <path d="M94 38V26a16 16 0 0 1 32 0v12" className="pack-detail" />
+      <rect x="27" y="150" width="21" height="92" rx="9" className="pack-empty" />
+      <rect x="27" y="150" width="21" height="92" rx="9" className="pack-detail" />
+      <rect x="172" y="150" width="21" height="92" rx="9" className="pack-empty" />
+      <rect x="172" y="150" width="21" height="92" rx="9" className="pack-detail" />
+    </>
+  );
+}
+
+/** The front pocket, drawn over the colour layers. */
+export function PackFrontPocket() {
+  return <rect x="72" y="182" width="76" height="66" rx="16" className="pack-detail" strokeOpacity={0.55} />;
+}

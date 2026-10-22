@@ -20,7 +20,7 @@ export const mcpApiHandler = {
         { status: 429, headers: { 'Retry-After': '60' } }
       );
     }
-    const handler = createMcpHandler(() => createServer(env, props), { route: '/mcp', authContext: { props: { ...props } } });
+    const handler = createMcpHandler(() => createServer(env, props, new URL(request.url).origin), { route: '/mcp', authContext: { props: { ...props } } });
     return handler(request, env, ctx);
   },
 };

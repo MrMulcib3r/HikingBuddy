@@ -2585,3 +2585,24 @@ select.inline-edit-input,
   border-color: var(--forest);
   color: var(--forest);
 }
+
+/* FR-27: the Vault item opened from the AI chat ("Open in HikingBuddy", #item=<id>) lights up
+   briefly. */
+.vault-item-row.is-linked {
+  animation: vault-item-linked 2.4s ease-out;
+}
+@keyframes vault-item-linked {
+  0%,
+  40% {
+    background: var(--accent-soft);
+  }
+  100% {
+    background: transparent;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vault-item-row.is-linked {
+    animation: none;
+    outline: 2px solid var(--accent);
+  }
+}

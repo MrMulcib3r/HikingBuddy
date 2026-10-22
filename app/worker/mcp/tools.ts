@@ -12,17 +12,20 @@
  */
 import { McpServer } from '@modelcontextprotocol/server';
 import { z } from 'zod';
-import { applyOperation, LIMITS, linkedRowCount, OperationError, type GearItemPatch, type Operation } from '../../src/core/operations';
-import { entryFromGroup, entryUndoneAt, recordOperations } from '../../src/core/history';
+import { linkedRowCount, type GearItemPatch } from '../../src/core/operations';
+import { entryUndoneAt } from '../../src/core/history';
 import { categoryNameFor } from '../../src/state/logic';
 import { formatWeight } from '../../src/utils/weight';
 import { newId } from '../../src/utils/id';
-import { UNCATEGORIZED, type AppState, type GearList } from '../../src/types';
+import type { AppState } from '../../src/types';
+import { itemView, links, listGearView, stateView, summaryView, vaultGearView } from '../../src/core/widgetViews';
 import { loadHistory, loadState } from '../db';
-import { saveWithRetry } from '../save';
 import { runUndo } from '../undo';
 import type { Env, McpProps } from '../env';
-import { categoryList, gearlistsText, gearlistText, isTemplate, richText, usageText, vaultText } from './text';
+import { DELETE, fail, findItem, findList, findRow, grams, idIn, makeRunner, nameIn, noteIn, norm, now, ok, quantity, READ, Refusal, resolveCategory, WRITE, type Step } from './step';
+import { gearlistsText, gearlistText, richText, usageText, vaultText } from './text';
+import { registerProposalTools } from './proposals';
+import { registerWidget, WIDGET_META } from './widget';
 
 const INSTRUCTIONS = `HikingBuddy is the user's personal hiking gear planner. Gear Vault = the gear the user owns. Gearlists = per-trip packing lists built from Gear Vault items, with Base / Consumables / Worn / Total weights.
 Rules:
@@ -30,70 +33,9 @@ Rules:
 - Never invent gear. Gearlists can only contain items from the user's Gear Vault. If something is missing, tell the user and ask before adding it with add_gear_items.
 - Weights in inputs are always grams per piece. Answers show the user's own units.
 - When a tool answers that a choice or confirmation is needed (FR-5 create_copy / update_everywhere, overwriting a snapshot, replacing the template), ask the user and call again with their answer. Never pick it yourself.
+- To change 2 or more things in an existing gearlist or Gear Vault at once, call propose_changes: the user confirms each change in the HikingBuddy widget, and nothing is saved before that. A new gearlist (create_gearlist) and single changes go directly.
+- Tools that show a HikingBuddy widget in the chat (gearlist summary, gear list, item card, proposal) also return text; keep your own answer short and don't repeat every number the widget shows.
 - Every change appears in the user's Activity panel in the HikingBuddy web app and can be undone there; undo_last_ai_step undoes your own last change.`;
-
-type ToolResult = { content: { type: 'text'; text: string }[]; isError?: boolean };
-const ok = (text: string): ToolResult => ({ content: [{ type: 'text', text }] });
-const fail = (text: string): ToolResult => ({ content: [{ type: 'text', text }], isError: true });
-
-/** A tool refuses the step without changing anything. */
-class Refusal extends Error {}
-
-/** The operations of one AI step, built on a working copy so later ops can see earlier ones
- * (e.g. the row a just-added item landed in). */
-class Step {
-  ops: Operation[] = [];
-  state: AppState;
-  constructor(state: AppState) {
-    this.state = state;
-  }
-  push(op: Operation) {
-    this.state = applyOperation(this.state, op);
-    this.ops.push(op);
-  }
-}
-
-const now = () => new Date().toISOString();
-const norm = (s: string) => s.trim().toLowerCase();
-
-// ---------------------------------------------------------------------------------------------
-// Lookups with messages the model can act on
-
-function findList(state: AppState, listId: string, allowTemplate = true): GearList {
-  const list = state.gearLists.find((l) => l.id === listId) ?? (allowTemplate ? state.templates.find((t) => t.id === listId) : undefined);
-  if (list) return list;
-  if (!allowTemplate && isTemplate(state, listId)) throw new Refusal('This is the template, not a gearlist. This action works only on gearlists.');
-  throw new Refusal(`No gearlist with id "${listId}". Call list_gearlists for the current ids.`);
-}
-
-function findItem(state: AppState, itemId: string) {
-  const item = state.gearItems.find((g) => g.id === itemId);
-  if (!item) throw new Refusal(`No Gear Vault item with id "${itemId}". Call get_gear_vault for the current ids.`);
-  return item;
-}
-
-/** A category by id or name (case-insensitive). "Uncategorized" = no category. */
-function resolveCategory(state: AppState, ref: string): string | null {
-  if (norm(ref) === norm(UNCATEGORIZED)) return null;
-  const cat = state.categories.find((c) => c.id === ref) ?? state.categories.find((c) => norm(c.name) === norm(ref));
-  if (!cat) throw new Refusal(`No category "${ref}". Existing categories: ${categoryList(state)}. Use one of them, or create a new one with add_category (ask the user first).`);
-  return cat.id;
-}
-
-function findRow(list: GearList, rowId: string) {
-  const row = list.items.find((i) => i.id === rowId);
-  if (!row) throw new Refusal(`No row with id "${rowId}" in "${list.name}". Call get_gearlist for the current row ids.`);
-  return row;
-}
-
-// ---------------------------------------------------------------------------------------------
-// Input shapes
-
-const grams = z.number().min(0).max(LIMITS.maxWeightGrams);
-const quantity = z.number().int().min(0).max(LIMITS.maxQuantity);
-const nameIn = z.string().trim().min(1).max(LIMITS.nameLength);
-const noteIn = z.string().max(LIMITS.noteLength);
-const idIn = z.string().min(1).max(LIMITS.idLength);
 
 const listItemInput = z.object({
   gear_item_id: idIn.describe('Id of an item that exists in Gear Vault (from get_gear_vault).'),
@@ -103,10 +45,6 @@ const listItemInput = z.object({
   note: noteIn.optional().describe('Note for this row in this gearlist only.'),
 });
 
-const READ = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false };
-const WRITE = { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false };
-const DELETE = { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: false };
-
 /** "AI · Claude" in Activity. Clients register under various names ("claude.ai", "Claude"). */
 export function friendlyClientName(name: string | undefined): string {
   const n = (name ?? '').trim();
@@ -115,53 +53,17 @@ export function friendlyClientName(name: string | undefined): string {
   return n.slice(0, 60) || 'AI app';
 }
 
-export function createServer(env: Env, props: McpProps): McpServer {
+/** `origin`: the web app's address, for "Open in HikingBuddy" links in the widget. */
+export function createServer(env: Env, props: McpProps, origin: string): McpServer {
   const server = new McpServer({ name: 'HikingBuddy', version: '1.0.0' }, { instructions: INSTRUCTIONS });
   const db = env.DB;
   const { userId } = props;
   const who = { actor: 'ai' as const, client: props.clientName };
 
-  /** Runs one AI step: builds the operations on the current data, saves them with one history
-   * entry, and answers with `done(after)`. Nothing is saved when a rule refuses the step. */
-  async function change(build: (step: Step) => (after: AppState) => string): Promise<ToolResult> {
-    let refused: string | null = null;
-    let done: ((after: AppState) => string) | null = null;
-    const result = await saveWithRetry(db, userId, (state) => {
-      refused = null;
-      const step = new Step(state);
-      try {
-        done = build(step);
-      } catch (err) {
-        if (err instanceof Refusal || err instanceof OperationError) {
-          refused = err.message;
-          return { state, rejected: [] };
-        }
-        throw err;
-      }
-      if (step.ops.length === 0) return { state, rejected: [] };
-      const action = crypto.randomUUID();
-      const recorded = recordOperations(state, step.ops, step.ops.map(() => action));
-      if (recorded.rejected.length > 0) {
-        refused = recorded.rejected[0].error.message;
-        return { state, rejected: [] };
-      }
-      const at = now();
-      const entries = recorded.groups.map((group, i) => entryFromGroup(group, { id: crypto.randomUUID(), at: i === 0 ? at : new Date(Date.parse(at) + i).toISOString(), ...who }));
-      return { state: recorded.state, rejected: [], entries };
-    });
-    if (refused !== null) return fail(`Nothing was changed. ${refused}`);
-    return ok((done as unknown as (after: AppState) => string)(result.state));
-  }
-
-  async function read(fn: (state: AppState) => string): Promise<ToolResult> {
-    const { state } = await loadState(db, userId);
-    try {
-      return ok(fn(state));
-    } catch (err) {
-      if (err instanceof Refusal) return fail(err.message);
-      throw err;
-    }
-  }
+  const { change, read } = makeRunner(db, userId, who);
+  registerWidget(server);
+  registerProposalTools(server, db, userId, who, origin);
+  const summary = (state: AppState, listId: string) => summaryView(state, findList(state, listId), origin);
 
   const w = (state: AppState, g: number) => formatWeight(g, state.unitPreference);
 
@@ -179,8 +81,21 @@ export function createServer(env: Env, props: McpProps): McpServer {
         category: z.string().max(200).optional().describe('Only items in this category (name or id).'),
       }),
       annotations: READ,
+      _meta: WIDGET_META,
     },
-    async ({ query, category }) => read((state) => vaultText(state, { query, categoryId: category === undefined ? undefined : resolveCategory(state, category) }))
+    async ({ query, category }) =>
+      read((state) => {
+        const categoryId = category === undefined ? undefined : resolveCategory(state, category);
+        const text = vaultText(state, { query, categoryId });
+        if (state.gearItems.length === 0) return { text, view: stateView('empty-vault', state.unitPreference, links.app(origin)) };
+        const q = query?.trim().toLowerCase();
+        const items = state.gearItems.filter(
+          (g) => (!q || g.name.toLowerCase().includes(q) || g.note.toLowerCase().includes(q)) && (categoryId === undefined || g.categoryId === categoryId)
+        );
+        const filtered = q !== undefined || categoryId !== undefined;
+        const title = q ? `Search: ${query!.trim()}` : category !== undefined ? `Gear Vault · ${category}` : 'Gear Vault';
+        return { text, view: vaultGearView(state, items, origin, filtered ? 'search' : 'vault', title) };
+      })
   );
 
   server.registerTool(
@@ -203,10 +118,46 @@ export function createServer(env: Env, props: McpProps): McpServer {
       inputSchema: z.object({
         list_id: idIn.describe('Gearlist or template id (from list_gearlists).'),
         view: z.enum(['current', 'snapshot']).optional().describe('"current" (default) or the saved "snapshot".'),
+        show: z
+          .enum(['summary', 'items'])
+          .optional()
+          .describe('What the widget in the chat shows: "summary" (default: weights, pack and categories) or "items" (the gear row by row). The text answer is the same.'),
       }),
       annotations: READ,
+      _meta: WIDGET_META,
     },
-    async ({ list_id, view }) => read((state) => gearlistText(state, findList(state, list_id), view ?? 'current'))
+    async ({ list_id, view, show }) =>
+      read((state) => {
+        const list = findList(state, list_id);
+        const text = gearlistText(state, list, view ?? 'current');
+        if (view === 'snapshot') return list.snapshot ? { text, view: listGearView(state, list, origin, true) } : text;
+        return { text, view: show === 'items' ? listGearView(state, list, origin) : summaryView(state, list, origin) };
+      })
+  );
+
+  server.registerTool(
+    'get_gear_item',
+    {
+      title: 'Get a Gear Vault item',
+      description:
+        'Shows one Gear Vault item as a card: name, category, weight per piece, default quantity, note and the gearlists that use it. Use it when the user asks about one piece of gear.',
+      inputSchema: z.object({ item_id: idIn.describe('Gear Vault item id (from get_gear_vault).') }),
+      annotations: READ,
+      _meta: WIDGET_META,
+    },
+    async ({ item_id }) =>
+      read((state) => {
+        const item = findItem(state, item_id);
+        const used = usageText(state, item.id);
+        const text = [
+          `${item.name} · ${w(state, item.weightGrams)} per piece · ${categoryNameFor(item.categoryId, state.categories)} · default qty ${item.defaultQuantity} · id ${item.id}`,
+          item.note ? `Note: ${item.note}` : '',
+          used ? `Used in ${used}.` : 'Not in any gearlist.',
+        ]
+          .filter(Boolean)
+          .join('\n');
+        return { text, view: itemView(state, item, origin) };
+      })
   );
 
   // -------------------------------------------------------------------------------------------
@@ -234,10 +185,12 @@ export function createServer(env: Env, props: McpProps): McpServer {
         allow_duplicate_names: z.boolean().optional(),
       }),
       annotations: WRITE,
+      _meta: WIDGET_META,
     },
     async ({ items, allow_duplicate_names }) =>
       change((step) => {
         const added: string[] = [];
+        const addedIds: string[] = [];
         const skipped: string[] = [];
         for (const input of items) {
           const existing = step.state.gearItems.find((g) => norm(g.name) === norm(input.name));
@@ -254,12 +207,16 @@ export function createServer(env: Env, props: McpProps): McpServer {
             note: input.note ?? '',
           };
           step.push({ type: 'ADD_GEAR_ITEM', id, item });
+          addedIds.push(id);
           added.push(`${input.name} · ${formatWeight(input.weight_grams, step.state.unitPreference)} · ${categoryNameFor(item.categoryId, step.state.categories)} · id ${id}`);
         }
-        return () =>
-          [added.length ? `Added to Gear Vault:\n${added.map((a) => `- ${a}`).join('\n')}` : 'Nothing added.', skipped.length ? `Skipped:\n${skipped.map((s) => `- ${s}`).join('\n')}` : '']
+        return (after) => {
+          const text = [added.length ? `Added to Gear Vault:\n${added.map((a) => `- ${a}`).join('\n')}` : 'Nothing added.', skipped.length ? `Skipped:\n${skipped.map((s) => `- ${s}`).join('\n')}` : '']
             .filter(Boolean)
             .join('\n\n');
+          if (addedIds.length === 0) return text;
+          return { text, view: vaultGearView(after, after.gearItems.filter((g) => addedIds.includes(g.id)), origin, 'added', 'Added to Gear Vault') };
+        };
       })
   );
 
@@ -279,6 +236,7 @@ export function createServer(env: Env, props: McpProps): McpServer {
         if_used_elsewhere: z.enum(['create_copy', 'update_everywhere']).optional().describe("The user's answer when the item is used in gearlists or the template."),
       }),
       annotations: WRITE,
+      _meta: WIDGET_META,
     },
     async (input) =>
       change((step) => {
@@ -300,13 +258,19 @@ export function createServer(env: Env, props: McpProps): McpServer {
         if (core && used && input.if_used_elsewhere === 'create_copy') {
           const id = newId('gear');
           step.push({ type: 'ADD_GEAR_ITEM', id, item: patch });
-          return (after) => `Created a copy "${patch.name}" (id ${id}, ${w(after, patch.weightGrams)}) in Gear Vault. "${item.name}" and the gearlists using it are unchanged.`;
+          return (after) => ({
+            text: `Created a copy "${patch.name}" (id ${id}, ${w(after, patch.weightGrams)}) in Gear Vault. "${item.name}" and the gearlists using it are unchanged.`,
+            view: itemView(after, findItem(after, id), origin),
+          });
         }
         step.push({ type: 'UPDATE_GEAR_ITEM', id: item.id, patch, choice: used ? 'update_everywhere' : undefined });
         return (after) => {
           const now = findItem(after, item.id);
           const where = used && core ? ` Also updated in ${usageText(after, item.id)}.` : '';
-          return `Updated "${now.name}": ${w(after, now.weightGrams)}, ${categoryNameFor(now.categoryId, after.categories)}, default qty ${now.defaultQuantity}${now.note ? `, note "${now.note}"` : ''}.${where}`;
+          return {
+            text: `Updated "${now.name}": ${w(after, now.weightGrams)}, ${categoryNameFor(now.categoryId, after.categories)}, default qty ${now.defaultQuantity}${now.note ? `, note "${now.note}"` : ''}.${where}`,
+            view: itemView(after, now, origin),
+          };
         };
       })
   );
@@ -434,6 +398,7 @@ export function createServer(env: Env, props: McpProps): McpServer {
         items: z.array(listItemInput).max(300).optional(),
       }),
       annotations: WRITE,
+      _meta: WIDGET_META,
     },
     async ({ name, from_template, items }) =>
       change((step) => {
@@ -446,7 +411,8 @@ export function createServer(env: Env, props: McpProps): McpServer {
         const lines = items ? addItems(step, id, items) : [];
         return (after) => {
           const list = findList(after, id);
-          return [`Created gearlist "${list.name}" (id ${id}) with ${list.items.length} rows${from_template ? ' (from the template)' : ''}.`, ...lines, '', gearlistText(after, list, 'current')].join('\n');
+          const text = [`Created gearlist "${list.name}" (id ${id}) with ${list.items.length} rows${from_template ? ' (from the template)' : ''}.`, ...lines, '', gearlistText(after, list, 'current')].join('\n');
+          return { text, view: summary(after, id) };
         };
       })
   );
@@ -459,12 +425,13 @@ export function createServer(env: Env, props: McpProps): McpServer {
         "Adds Gear Vault items to a gearlist or the template. An item already in the list gets its quantity raised instead of a second row. Use only gear_item_ids from get_gear_vault; never invent items.",
       inputSchema: z.object({ list_id: idIn, items: z.array(listItemInput).min(1).max(300) }),
       annotations: WRITE,
+      _meta: WIDGET_META,
     },
     async ({ list_id, items }) =>
       change((step) => {
         const list = findList(step.state, list_id);
         const lines = addItems(step, list.id, items);
-        return (after) => [`Added to "${list.name}":`, ...lines, '', breakdownOf(after, list.id)].join('\n');
+        return (after) => ({ text: [`Added to "${list.name}":`, ...lines, '', breakdownOf(after, list.id)].join('\n'), view: summary(after, list.id) });
       })
   );
 
@@ -489,6 +456,7 @@ export function createServer(env: Env, props: McpProps): McpServer {
         if_used_elsewhere: z.enum(['create_copy', 'update_everywhere']).optional(),
       }),
       annotations: WRITE,
+      _meta: WIDGET_META,
     },
     async (input) =>
       change((step) => {
@@ -545,7 +513,7 @@ export function createServer(env: Env, props: McpProps): McpServer {
         return (after) => {
           const now = findList(after, list.id).items.find((r) => r.id === row.id);
           const desc = now ? `${now.name} × ${now.quantity} · ${w(after, now.weightGrams * now.quantity)}${now.isWorn ? ' · worn' : ''}${now.isConsumable ? ' · consumable' : ''} · ${now.categoryName}` : row.name;
-          return `Updated in "${list.name}": ${desc} (${done.join('; ')}).\n${breakdownOf(after, list.id)}`;
+          return { text: `Updated in "${list.name}": ${desc} (${done.join('; ')}).\n${breakdownOf(after, list.id)}`, view: summary(after, list.id) };
         };
       })
   );
@@ -557,13 +525,14 @@ export function createServer(env: Env, props: McpProps): McpServer {
       description: 'Removes one row from a gearlist or the template. The item stays in Gear Vault. Undoable in Activity.',
       inputSchema: z.object({ list_id: idIn, row_id: idIn }),
       annotations: DELETE,
+      _meta: WIDGET_META,
     },
     async ({ list_id, row_id }) =>
       change((step) => {
         const list = findList(step.state, list_id);
         const row = findRow(list, row_id);
         step.push({ type: 'REMOVE_LIST_ITEM', listId: list.id, itemId: row.id });
-        return (after) => `Removed ${row.name} from "${list.name}".\n${breakdownOf(after, list.id)}`;
+        return (after) => ({ text: `Removed ${row.name} from "${list.name}".\n${breakdownOf(after, list.id)}`, view: summary(after, list.id) });
       })
   );
 
@@ -650,6 +619,7 @@ export function createServer(env: Env, props: McpProps): McpServer {
         'Saves a read-only snapshot of a gearlist as it is now (typically right before the trip). A gearlist has one snapshot: if one exists, it is overwritten only with overwrite_existing=true, which the user must confirm. Without it nothing changes and the answer gives the date of the existing snapshot.',
       inputSchema: z.object({ list_id: idIn, overwrite_existing: z.boolean().optional() }),
       annotations: WRITE,
+      _meta: WIDGET_META,
     },
     async ({ list_id, overwrite_existing }) =>
       change((step) => {
@@ -658,7 +628,7 @@ export function createServer(env: Env, props: McpProps): McpServer {
           throw new Refusal(`"${list.name}" already has a snapshot from ${list.snapshot.savedAt.slice(0, 10)}. Ask the user whether to overwrite it, then call again with overwrite_existing=true.`);
         }
         step.push({ type: 'SAVE_SNAPSHOT', listId: list.id, savedAt: now(), overwrite: overwrite_existing });
-        return () => `Saved a snapshot of "${list.name}" (${list.items.length} rows)${list.snapshot ? ', replacing the previous one' : ''}.`;
+        return (after) => ({ text: `Saved a snapshot of "${list.name}" (${list.items.length} rows)${list.snapshot ? ', replacing the previous one' : ''}.`, view: summary(after, list.id) });
       })
   );
 

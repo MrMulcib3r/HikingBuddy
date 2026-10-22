@@ -5,13 +5,15 @@ import { sortByOrder } from '../utils/reorder';
 import { makeDragHandlers } from '../utils/dnd';
 import type { GearList } from '../types';
 import { TEMPLATE_NAME } from '../constants';
+import { clearAppLink, readAppLink } from '../utils/appLink';
 import { GearListDetail } from './GearListDetail';
 import { ActionIcon } from './icons/actionIcons';
 import { Icon } from './ui';
 
 export function GearListsPanel() {
   const { state, createList, createListFromTemplate } = useApp();
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  // FR-27: "Open in HikingBuddy" from the AI chat opens #gearlist=<id>.
+  const [selectedId, setSelectedId] = useState<string | null>(() => readAppLink('gearlist'));
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState('');
   const template = state.templates[0] ?? null;
@@ -23,6 +25,19 @@ export function GearListsPanel() {
   // (start appky, smazání), ukáže se první v pořadí.
   const selectedTemplate = template && template.id === selectedId ? template : null;
   const selected = selectedTemplate ?? sortedLists.find((l) => l.id === selectedId) ?? sortedLists[0] ?? null;
+
+  useEffect(() => {
+    const onHashChange = () => {
+      const linked = readAppLink('gearlist');
+      if (linked) setSelectedId(linked);
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+  // The linked gearlist is shown (the account's data may arrive a moment later): drop the hash.
+  useEffect(() => {
+    if (selected && selected.id === readAppLink('gearlist')) clearAppLink('gearlist');
+  }, [selected]);
 
   function handleCreate() {
     const trimmed = newName.trim();

@@ -17,3 +17,6 @@ Claude outputs/
 app/.dev.vars
 .dev.vars
 app/.wrangler/
+
+# Built in-chat widget (FR-27), made by `npm run build:widget`
+app/widget-dist/
