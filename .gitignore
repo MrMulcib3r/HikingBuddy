@@ -20,3 +20,6 @@ app/.wrangler/
 
 # Built in-chat widget (FR-27), made by `npm run build:widget`
 app/widget-dist/
+
+# Product discovery and business strategy (monetization, competition) — private, repo is public
+ProductDiscovery/
