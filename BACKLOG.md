@@ -81,7 +81,6 @@ _Zbývají jen dvě položky, které jdou ověřit až po nasazení na web (FR-2
 _Cíl (PRD v33, 2026-10-21): uživatel si připojí vlastní AI klienta (Claude, ChatGPT) přes MCP server HikingBuddy; AI umí všechno, co uživatel, a odpovídá s widgety HikingBuddy přímo v chatu. Pořadí je závazné, každý krok zvlášť. Zadání pro Claude Code: `PRDRequirements/mcp-integration/claude-code-prompts.md`, pro Claude Design: `PRDRequirements/mcp-integration/claude-design-prompt.md`._
 
 - [ ] [UI] Design pro účty, Connect to AI, Activity a widgety MCP Apps – zadat Claude Design (`claude-design-prompt.md`). Proč: widgety v chatu a nové obrazovky zatím nemají design; potřeba před krokem 5, ideálně dřív. (2026-10-21, Martin)
-- [ ] [FEATURE] Krok 4: Pop-up „Connect to AI“ – krátký návod, adresa MCP serveru s Copy, OK. PRD FR-28. (2026-10-21, Martin)
 - [ ] [FEATURE] Krok 5: Widgety MCP Apps v AI klientovi – souhrn gearlistu, seznam, návrh změn s Confirm / Reject. Až po designu. PRD FR-27. (2026-10-21, Martin)
 - [ ] [FEATURE] Krok 6: Eval MCP serveru – 10 zadání, před/po úpravě popisů nástrojů. PRD FR-26. (2026-10-21, Martin)
 - [ ] ~~[FEATURE] Gear advisor (GenAI) – návrh vybavení s vlastním API klíčem. PRD FR-22.~~ **Nahrazeno MCP serverem ve v33 (2026-10-21)**, viz PRD sekce 8z.
@@ -113,6 +112,11 @@ _Mimo scope. Uložené nápady pro případ, že by appka vyšla veřejně s mon
 
 _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, přesuň do ✅ Hotovo; když ne, napiš k položce, co je špatně, a vrať ji do 🔴 Teď._
 
+- [ ] [FEATURE] Krok 4: Pop-up „Connect to AI“ – krátký návod pro Claude a ChatGPT, adresa MCP serveru s Copy, OK. PRD FR-28 (upřesnění v37). (2026-10-21, Martin; implementováno 2026-10-22) → **Jak otestovat** (po nasazení na https://hikingbuddy.mmalinek.workers.dev):
+  1. **Host:** odhlášený klikni vpravo nahoře na „Connect to AI“ → vysvětlení, že je potřeba účet, „Not now“ a tlačítko Google. Přihlas se v něm → okno se nezavře a ukáže návod.
+  2. **Přihlášený:** „Connect to AI“ v hlavičce i v nabídce účtu (avatar → Connect to AI) otevře stejný pop-up. Přepni záložky Claude / ChatGPT (okno neposkočí), klikni Copy → „Copied“, OK okno zavře.
+  3. **Hlavní test:** pokud už HikingBuddy v Claude máš z kroku 3, odeber ho (Customize › Connectors). Pak připoj Claude **jen podle návodu v pop-upu** a napiš „List my gearlists“. Kde návod nesedí na to, co v Claude vidíš, napiš mi přesné znění tlačítek.
+  4. ChatGPT netestuješ (podle OpenAI dnes jen tarify Business / Enterprise); stačí přečíst, že návod dává smysl.
 - [ ] [FEATURE] Krok 1: Server, databáze D1 a přihlášení přes Google – režim bez účtu zůstává, po přihlášení data na serveru, import lokálních dat. PRD FR-23, FR-24 (upřesnění v34). (2026-10-21, Martin; implementováno 2026-10-21) → **Jak otestovat** (nejdřív nastavení Google a Cloudflare podle Claudova návodu v chatu):
   1. **Bez přihlášení** (lokálně i na webu): appka funguje jako dřív – Vault, gearlisty, datový soubor, demo, Export/Import. Vpravo nahoře přibylo jen „Sign in“.
   2. **Přihlášení lokálně:** `npm run dev` v `app/`, otevři http://localhost:5173 → Sign in → dialog s výhodami → tlačítko Google → vyber účet. Vpravo nahoře uvidíš „Saved“ a svůj avatar se jménem.
