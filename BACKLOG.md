@@ -81,7 +81,6 @@ _Zbývají jen dvě položky, které jdou ověřit až po nasazení na web (FR-2
 _Cíl (PRD v33, 2026-10-21): uživatel si připojí vlastní AI klienta (Claude, ChatGPT) přes MCP server HikingBuddy; AI umí všechno, co uživatel, a odpovídá s widgety HikingBuddy přímo v chatu. Pořadí je závazné, každý krok zvlášť. Zadání pro Claude Code: `PRDRequirements/mcp-integration/claude-code-prompts.md`, pro Claude Design: `PRDRequirements/mcp-integration/claude-design-prompt.md`._
 
 - [ ] [UI] Design pro účty, Connect to AI, Activity a widgety MCP Apps – zadat Claude Design (`claude-design-prompt.md`). Proč: widgety v chatu a nové obrazovky zatím nemají design; potřeba před krokem 5, ideálně dřív. (2026-10-21, Martin)
-- [ ] [FEATURE] Krok 5: Widgety MCP Apps v AI klientovi – souhrn gearlistu, seznam, návrh změn s Confirm / Reject. Až po designu. PRD FR-27. (2026-10-21, Martin)
 - [ ] [FEATURE] Krok 6: Eval MCP serveru – 10 zadání, před/po úpravě popisů nástrojů. PRD FR-26. (2026-10-21, Martin)
 - [ ] ~~[FEATURE] Gear advisor (GenAI) – návrh vybavení s vlastním API klíčem. PRD FR-22.~~ **Nahrazeno MCP serverem ve v33 (2026-10-21)**, viz PRD sekce 8z.
 
@@ -112,6 +111,16 @@ _Mimo scope. Uložené nápady pro případ, že by appka vyšla veřejně s mon
 
 _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, přesuň do ✅ Hotovo; když ne, napiš k položce, co je špatně, a vrať ji do 🔴 Teď._
 
+- [ ] [FEATURE] Krok 5: Widgety MCP Apps v AI klientovi – souhrn gearlistu, seznam vybavení, karta položky, návrh změn s Confirm / Reject / Confirm all, stavy (uloženo, prázdné, limit, chyba, zastaralý návrh), „Open in HikingBuddy“. PRD FR-27 (upřesnění v38). (2026-10-21, Martin; implementováno 2026-10-22) → **Jak otestovat** (na veřejné adrese po pushi; HikingBuddy už máš v Claude připojený z kroku 3/4, nic nového nenastavuješ):
+  1. V **novém** chatu v Claude se zapnutým konektorem HikingBuddy napiš „Show me my Kungsleden gearlist“ (nebo název svého gearlistu). Pod odpovědí se objeví **karta HikingBuddy**: Total, Base / Consumables / Worn, malý batoh s úrovní (např. Ultralight) a kategorie s vahou a procenty. Pokud Claude poprvé zobrazí dotaz, jestli smí HikingBuddy ukázat, povol to.
+  2. „Show the gear in it“ → seznam po kategoriích, 8 řádků a „Show all N items“ (rozbalí se na místě, nic se uvnitř nescrolluje). „Show me my rain jacket“ → karta položky s gearlisty, kde je použitá.
+  3. **Hlavní test:** „Make my Kungsleden pack lighter, propose the changes.“ → karta **PROPOSED CHANGES** s dopadem na base weight a tlačítky. Na webu se zatím nic nezměnilo.
+  4. U jednoho řádku klikni **Confirm** → řádek „Confirmed“, na webu (po přepnutí na záložku) je změna a v Activity nový řádek „Claude“. U dalšího **Reject** → přeškrtnutý, **Undo** ho vrátí. Pak **Confirm all** → zbytek se uloží jedním krokem (jeden řádek v Activity) a karta se změní na „Saved to …“.
+  5. Pokud návrh obsahuje změnu položky, která je i v jiném gearlistu, má místo Confirm „Create a copy“ / „Update everywhere“ a Confirm all ji přeskočí (napíše to).
+  6. **Zastaralý návrh:** nech si navrhnout změny, ale nepotvrzuj; na webu v tom gearlistu něco změň; pak v Claude klikni Confirm → „This proposal is out of date“.
+  7. **Open in HikingBuddy** v kartě otevře web přímo na tom gearlistu (u karty položky posune Vault na položku a krátce ji zvýrazní).
+  8. Zavři chat uprostřed rozhodování a otevři ho znovu → potvrzené řádky zůstanou potvrzené.
+  Screenshoty všech widgetů (360 a 680 px) jsou v `design/2026-10-mcp/implemented/step5/`.
 - [ ] [FEATURE] Krok 4: Pop-up „Connect to AI“ – krátký návod pro Claude a ChatGPT, adresa MCP serveru s Copy, OK. PRD FR-28 (upřesnění v37). (2026-10-21, Martin; implementováno 2026-10-22) → **Jak otestovat** (po nasazení na https://hikingbuddy.mmalinek.workers.dev):
   1. **Host:** odhlášený klikni vpravo nahoře na „Connect to AI“ → vysvětlení, že je potřeba účet, „Not now“ a tlačítko Google. Přihlas se v něm → okno se nezavře a ukáže návod.
   2. **Přihlášený:** „Connect to AI“ v hlavičce i v nabídce účtu (avatar → Connect to AI) otevře stejný pop-up. Přepni záložky Claude / ChatGPT (okno neposkočí), klikni Copy → „Copied“, OK okno zavře.
