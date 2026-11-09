@@ -73,7 +73,11 @@ Template (nemazat): - [TYP] Krátký název – co se děje / co chci (datum)
 
 _Finální scope appky je v PRD v16 (sekce 0 a 2). Položky níže jsou seřazené: nejdřív všechno dodělat a vyzkoušet lokálně, nasazení na web až nakonec (viz 🟡 Brzy). Souběžně s tím Martin prochází položky v 🧪 Test._
 
-_Zbývají jen dvě položky, které jdou ověřit až po nasazení na web (FR-20). Opravy z Martinova testu 2026-10-14 jsou v 🧪 Test._
+1. Note a Category se překrývají.![[Pasted image 20261109100737.png]]
+2. When entering quantity the field should support two digits, currently two digits are not visible. when entered and only one can be shown at a time.![[Pasted image 20261109102503.png]]
+3. The update gearlist dialogue window has "Continue" button. But "Update" button makes more sense here as the user is asked "to update it everywhere it's used". Change it.![[Pasted image 20261109103531.png]]
+4. Category field is too small. It only shows "M..." instead of Misc. There is a lot of space to have the field bigger.![[Pasted image 20261109104037.png]]
+5. Rename "Water" category to "Water system". The reason is that "Water" as an item should be in "Food" category and having category "Water" with "Water" being elsewhere does not make much sense.![[Pasted image 20261109104310.png]]
 
 
 ## 🟡 Brzy
@@ -110,6 +114,7 @@ _Mimo scope. Uložené nápady pro případ, že by appka vyšla veřejně s mon
 ## 🧪 Test
 
 _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, přesuň do ✅ Hotovo; když ne, napiš k položce, co je špatně, a vrať ji do 🔴 Teď._
+
 
 
 
