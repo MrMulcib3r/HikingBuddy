@@ -389,6 +389,19 @@
   max-width: 10ch;
   text-align: right;
 }
+/* Quantity sits in a ~40px column: the browser's up/down spinner took half of it, so only one
+   digit was visible while typing (BACKLOG Teď 2, 2026-11-09). Without the spinner 3 digits fit;
+   the keyboard arrows still step the value. */
+input.inline-edit-number:is(.list-item-qty, .vault-item-qty) {
+  appearance: textfield;
+  -moz-appearance: textfield;
+  padding: 1px 4px;
+}
+input.inline-edit-number:is(.list-item-qty, .vault-item-qty)::-webkit-inner-spin-button,
+input.inline-edit-number:is(.list-item-qty, .vault-item-qty)::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 /* Inline category select while editing (review point 13, design system InlineField): wide
    enough for the longest category name, ui type, 32px, same accent ring as other inline fields. */
 select.inline-edit-input,
@@ -975,16 +988,31 @@ select.inline-edit-input,
   max-width: 100%;
   white-space: nowrap;
 }
-/* A long category name is cut with "…" instead of sticking out of its column. */
+/* A long category name is cut with "…" instead of sticking out of its column. The +12px makes up
+   for the chip's -6px side margins (its padding overlaps them), otherwise every name lost ~12px
+   and short ones showed as "M…" / "Coo…" (BACKLOG Teď 4, 2026-11-09). */
 .row-category > .inline-edit-text {
-  max-width: 100%;
+  max-width: calc(100% + 12px);
   overflow: hidden;
   text-overflow: ellipsis;
   vertical-align: bottom;
 }
+/* While the note is being edited, its field fills the line up to the category, which stays to
+   its right on the same line instead of wrapping under it and touching the field's focus ring
+   (BACKLOG Teď 1, 2026-11-09). */
+.row-meta > input.inline-edit-input {
+  flex: 1 1 0;
+  width: auto;
+  margin-right: var(--space-1);
+}
+.row-meta > .row-category {
+  flex: none;
+  max-width: 50%;
+}
 /* While the category dropdown / "new category" field is open it takes the whole line. */
-.row-category:has(> select, > input) {
+.row-meta > .row-category:has(> select, > input) {
   flex: 1 1 100%;
+  max-width: 100%;
 }
 /* Quiet rows (review 2026-10-14, points 7–8): the category (already named by the group
    heading) and an empty "Add a note…" show only on row hover or keyboard focus. Their space is
