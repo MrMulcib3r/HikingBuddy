@@ -111,51 +111,6 @@ _Mimo scope. Uložené nápady pro případ, že by appka vyšla veřejně s mon
 
 _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, přesuň do ✅ Hotovo; když ne, napiš k položce, co je špatně, a vrať ji do 🔴 Teď._
 
-- [ ] [FEATURE] Krok 5: Widgety MCP Apps v AI klientovi – souhrn gearlistu, seznam vybavení, karta položky, návrh změn s Confirm / Reject / Confirm all, stavy (uloženo, prázdné, limit, chyba, zastaralý návrh), „Open in HikingBuddy“. PRD FR-27 (upřesnění v38). (2026-10-21, Martin; implementováno 2026-10-22) → **Jak otestovat** (na veřejné adrese po pushi; HikingBuddy už máš v Claude připojený z kroku 3/4, nic nového nenastavuješ):
-  1. V **novém** chatu v Claude se zapnutým konektorem HikingBuddy napiš „Show me my Kungsleden gearlist“ (nebo název svého gearlistu). Pod odpovědí se objeví **karta HikingBuddy**: Total, Base / Consumables / Worn, malý batoh s úrovní (např. Ultralight) a kategorie s vahou a procenty. Pokud Claude poprvé zobrazí dotaz, jestli smí HikingBuddy ukázat, povol to.
-  2. „Show the gear in it“ → seznam po kategoriích, 8 řádků a „Show all N items“ (rozbalí se na místě, nic se uvnitř nescrolluje). „Show me my rain jacket“ → karta položky s gearlisty, kde je použitá.
-  3. **Hlavní test:** „Make my Kungsleden pack lighter, propose the changes.“ → karta **PROPOSED CHANGES** s dopadem na base weight a tlačítky. Na webu se zatím nic nezměnilo.
-  4. U jednoho řádku klikni **Confirm** → řádek „Confirmed“, na webu (po přepnutí na záložku) je změna a v Activity nový řádek „Claude“. U dalšího **Reject** → přeškrtnutý, **Undo** ho vrátí. Pak **Confirm all** → zbytek se uloží jedním krokem (jeden řádek v Activity) a karta se změní na „Saved to …“.
-  5. Pokud návrh obsahuje změnu položky, která je i v jiném gearlistu, má místo Confirm „Create a copy“ / „Update everywhere“ a Confirm all ji přeskočí (napíše to).
-  6. **Zastaralý návrh:** nech si navrhnout změny, ale nepotvrzuj; na webu v tom gearlistu něco změň; pak v Claude klikni Confirm → „This proposal is out of date“.
-  7. **Open in HikingBuddy** v kartě otevře web přímo na tom gearlistu (u karty položky posune Vault na položku a krátce ji zvýrazní).
-  8. Zavři chat uprostřed rozhodování a otevři ho znovu → potvrzené řádky zůstanou potvrzené.
-  Screenshoty všech widgetů (360 a 680 px) jsou v `design/2026-10-mcp/implemented/step5/`.
-- [ ] [FEATURE] Krok 4: Pop-up „Connect to AI“ – krátký návod pro Claude a ChatGPT, adresa MCP serveru s Copy, OK. PRD FR-28 (upřesnění v37). (2026-10-21, Martin; implementováno 2026-10-22) → **Jak otestovat** (po nasazení na https://hikingbuddy.mmalinek.workers.dev):
-  1. **Host:** odhlášený klikni vpravo nahoře na „Connect to AI“ → vysvětlení, že je potřeba účet, „Not now“ a tlačítko Google. Přihlas se v něm → okno se nezavře a ukáže návod.
-  2. **Přihlášený:** „Connect to AI“ v hlavičce i v nabídce účtu (avatar → Connect to AI) otevře stejný pop-up. Přepni záložky Claude / ChatGPT (okno neposkočí), klikni Copy → „Copied“, OK okno zavře.
-  3. **Hlavní test:** pokud už HikingBuddy v Claude máš z kroku 3, odeber ho (Customize › Connectors). Pak připoj Claude **jen podle návodu v pop-upu** a napiš „List my gearlists“. Kde návod nesedí na to, co v Claude vidíš, napiš mi přesné znění tlačítek.
-  4. ChatGPT netestuješ (podle OpenAI dnes jen tarify Business / Enterprise); stačí přečíst, že návod dává smysl.
-- [ ] [FEATURE] Krok 1: Server, databáze D1 a přihlášení přes Google – režim bez účtu zůstává, po přihlášení data na serveru, import lokálních dat. PRD FR-23, FR-24 (upřesnění v34). (2026-10-21, Martin; implementováno 2026-10-21) → **Jak otestovat** (nejdřív nastavení Google a Cloudflare podle Claudova návodu v chatu):
-  1. **Bez přihlášení** (lokálně i na webu): appka funguje jako dřív – Vault, gearlisty, datový soubor, demo, Export/Import. Vpravo nahoře přibylo jen „Sign in“.
-  2. **Přihlášení lokálně:** `npm run dev` v `app/`, otevři http://localhost:5173 → Sign in → dialog s výhodami → tlačítko Google → vyber účet. Vpravo nahoře uvidíš „Saved“ a svůj avatar se jménem.
-  3. **Import:** při prvním přihlášení v prohlížeči, kde máš data (nebo připojený datový soubor), se ukáže „Import your local gear?“ s počty. Zvol import → v účtu jsou stejná data. Lokální data zůstanou (odhlas se a uvidíš je).
-  4. **Jiný prohlížeč:** přihlas se stejným účtem např. v Edge nebo v anonymním okně → stejná data, bez nabídky importu. Změna v jednom prohlížeči se ve druhém objeví po přepnutí zpět na jeho záložku.
-  5. **Druhý Google účet:** přihlas se jiným účtem → prázdný účet (uvítací karta s „Load demo data“), nevidí nic z prvního účtu.
-  6. **Offline:** v DevTools (F12 → Network → Offline) udělej změnu → žlutý pruh „You are offline.“ a „Offline · changes kept“. Vrať připojení → „Saved“ a změna je v jiném prohlížeči.
-  7. **3-cestný dialog** s účtem: uprav váhu položky použité ve dvou gearlistech → dialog Cancel / Create a copy / Continue jako dřív.
-  8. **Odhlášení:** avatar → Sign out → zase režim bez účtu s lokálními daty.
-  9. **Na veřejné adrese** (po pushi): totéž na https://hikingbuddy.mmalinek.workers.dev.
-- [ ] [FEATURE] Krok 2: Historie změn a Undo – panel Activity (avatar → Activity), štítky You / AI, Undo jedné změny, celého kroku AI i všech AI změn dne, konflikt, smazané věci jdou vrátit 30 dní. PRD FR-25 (upřesnění v35). (2026-10-21, Martin; implementováno 2026-10-21) → **Jak otestovat** (přihlášený; lokálně `npm run db:migrate:local` a `npm run dev` v `app/`, na webu po pushi nic nastavovat nemusíš):
-  1. Udělej pár změn: přidej položku do Vaultu, změň váhu, přidej ji do gearlistu, uprav množství a **smaž celý gearlist** (s položkami a snapshotem).
-  2. Avatar vpravo nahoře → **Activity**. Zprava se vysune panel: nadpis „Today · …“, tvoje změny se štítkem „You“, časem a popisem (např. „Changed weight of **X**: 85 g → 79 g“). Smazaný gearlist je přeškrtnutý se štítkem „Restorable until …“.
-  3. U smazaného gearlistu klikni **Undo** → gearlist je zpátky i s položkami a snapshotem. Nahoře přibude „Undid your change from …“, původní záznam má „Undone …“.
-  4. U „Undid …“ klikni Undo → gearlist zase zmizí („Redid …“). Původní záznam jde znovu vrátit.
-  5. **Konflikt:** změň váhu položky (A → B), pak ještě jednou (B → C). U první změny klikni Undo → žluté upozornění „Undo would overwrite 1 later change“ s druhou změnou; Cancel nic neudělá, „Undo anyway“ vrátí váhu na A.
-  6. Přepnutí jednotek ani zavření banneru šablony se do historie nezapisuje. Import lokálních dat nebo zálohy je jeden záznam s Undo.
-  7. AI změny („Claude“, krok AI s rozbalením, „Undo all AI changes from this day“) uvidíš naostro až po kroku 3 (MCP). Ověřil jsem je lokálně simulovaným klientem, screenshoty v `design/2026-10-mcp/implemented/step2/`.
-
-- [ ] [FEATURE] Krok 3: MCP server s OAuth (zatím jen text) – AI klient (Claude) se připojí k HikingBuddy, přihlásí se stejným Google účtem a umí všechno, co ty: číst, přidávat, měnit i mazat. Pravidla PRD platí i pro AI (FR-5 jako povinná volba, snapshot/šablona jen s potvrzením). Každý krok AI je v Activity jako „Claude“ s Undo; v Activity je sekce „Connected AI apps“ s „Revoke access“. PRD FR-26 (upřesnění v36). (2026-10-21, Martin; implementováno 2026-10-22) → **Jak otestovat** (na veřejné adrese po pushi; lokálně Claude MCP server nevidí):
-  1. **Připojení:** claude.ai → Settings → Connectors → **Add custom connector** → název „HikingBuddy“, URL `https://hikingbuddy.mmalinek.workers.dev/mcp` → Add → Connect. Otevře se okno HikingBuddy: když nejsi přihlášený, „Sign in with Google“; pak „Allow Claude to use your HikingBuddy?“ → **Allow**. Okno se zavře a konektor je „Connected“.
-  2. V novém chatu zapni konektor HikingBuddy (ikona nástrojů pod polem pro zprávu) a zkus těchto 5 vět:
-     - „Create a gearlist for 3 days in Jeseníky with rain from my gear“ → gearlist se objeví na webu (po přepnutí na záložku) a v Activity je jeden záznam „Claude … Created gearlist … with N items“ s Undo.
-     - „What's the base weight of my Weekend Hikes list and what are its three heaviest items?“ → odpoví bez jakékoli změny (v Activity nic nového).
-     - „Make my rain jacket 20 g heavier.“ → **musí se zeptat**, jestli změnit všude, nebo vytvořit kopii (FR-5); po odpovědi změnu udělá.
-     - „Remove everything I don't need for a day hike from the Jeseníky list.“ → odebere řádky; v Activity jeden krok s rozbalením na jednotlivé změny.
-     - „Undo your last change.“ → odebrané řádky se vrátí (v Activity „Undid Claude's change from …“).
-  3. **Undo na webu:** v Activity klikni Undo u kroku „Created gearlist …“ → gearlist zmizí z webu.
-  4. **Revoke:** Activity → Connected AI apps → Claude → **Revoke access** → potvrzení. Další dotaz v Claude už HikingBuddy nedosáhne (Claude nabídne znovu připojit).
-  5. ChatGPT na bezplatném účtu vlastní konektory neumí (viz chat), proto netestuj.
 
 
 ## ✅ Hotovo
@@ -279,3 +234,48 @@ _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, př
    ~~Sdílená stránka na telefonu: u ×1 jen jedna váha. → netestovatelné lokálně, sdílené gearlisty nefungují s lokální adresou. Znovu otestovat po nasazení.~~
   ~~Share gearlist feature not working locally. This is ok but will need to retest while deployed online.~~
 - [x] [FEATURE] Nasazení na web (PRD FR-20) – nasazeno 2026-10-20 na https://hikingbuddy.mmalinek.workers.dev, repo veřejné, historie vyčištěná od osobních souborů. → **Jak otestovat:** (1) appka se otevře a „Load demo data“ funguje; (2) „Connect data file“ a připojení tvého datového souboru; (3) sdílení gearlistu: odkaz otevři i v telefonu (body 1 a 2 z 🔴 Teď); (4) kontaktní formulář odešle zprávu z veřejné adresy.
+- [x] [FEATURE] Krok 5: Widgety MCP Apps v AI klientovi – souhrn gearlistu, seznam vybavení, karta položky, návrh změn s Confirm / Reject / Confirm all, stavy (uloženo, prázdné, limit, chyba, zastaralý návrh), „Open in HikingBuddy“. PRD FR-27 (upřesnění v38). (2026-10-21, Martin; implementováno 2026-10-22) → **Jak otestovat** (na veřejné adrese po pushi; HikingBuddy už máš v Claude připojený z kroku 3/4, nic nového nenastavuješ):
+  1. ~~V **novém** chatu v Claude se zapnutým konektorem HikingBuddy napiš „Show me my Kungsleden gearlist“ (nebo název svého gearlistu). Pod odpovědí se objeví **karta HikingBuddy**: Total, Base / Consumables / Worn, malý batoh s úrovní (např. Ultralight) a kategorie s vahou a procenty. Pokud Claude poprvé zobrazí dotaz, jestli smí HikingBuddy ukázat, povol to.~~
+  2. ~~„Show the gear in it“ → seznam po kategoriích, 8 řádků a „Show all N items“ (rozbalí se na místě, nic se uvnitř nescrolluje). „Show me my rain jacket“ → karta položky s gearlisty, kde je použitá.~~
+  3. ~~**Hlavní test:** „Make my Kungsleden pack lighter, propose the changes.“ → karta **PROPOSED CHANGES** s dopadem na base weight a tlačítky. Na webu se zatím nic nezměnilo.~~
+  4. ~~U jednoho řádku klikni **Confirm** → řádek „Confirmed“, na webu (po přepnutí na záložku) je změna a v Activity nový řádek „Claude“. U dalšího **Reject** → přeškrtnutý, **Undo** ho vrátí. Pak **Confirm all** → zbytek se uloží jedním krokem (jeden řádek v Activity) a karta se změní na „Saved to …“.~~
+  5. ~~Pokud návrh obsahuje změnu položky, která je i v jiném gearlistu, má místo Confirm „Create a copy“ / „Update everywhere“ a Confirm all ji přeskočí (napíše to).~~
+  6. ~~**Zastaralý návrh:** nech si navrhnout změny, ale nepotvrzuj; na webu v tom gearlistu něco změň; pak v Claude klikni Confirm → „This proposal is out of date“.~~
+  7. ~~**Open in HikingBuddy** v kartě otevře web přímo na tom gearlistu (u karty položky posune Vault na položku a krátce ji zvýrazní).~~
+  8. ~~Zavři chat uprostřed rozhodování a otevři ho znovu → potvrzené řádky zůstanou potvrzené.~~
+  ~~Screenshoty všech widgetů (360 a 680 px) jsou v `design/2026-10-mcp/implemented/step5/`.~~
+- [ ] ~~[FEATURE] Krok 4: Pop-up „Connect to AI“ – krátký návod pro Claude a ChatGPT, adresa MCP serveru s Copy, OK. PRD FR-28 (upřesnění v37). (2026-10-21, Martin; implementováno 2026-10-22) → **Jak otestovat** (po nasazení na https://hikingbuddy.mmalinek.workers.dev):~~
+  1. ~~**Host:** odhlášený klikni vpravo nahoře na „Connect to AI“ → vysvětlení, že je potřeba účet, „Not now“ a tlačítko Google. Přihlas se v něm → okno se nezavře a ukáže návod.~~
+  2. ~~**Přihlášený:** „Connect to AI“ v hlavičce i v nabídce účtu (avatar → Connect to AI) otevře stejný pop-up. Přepni záložky Claude / ChatGPT (okno neposkočí), klikni Copy → „Copied“, OK okno zavře.~~
+  3. ~~**Hlavní test:** pokud už HikingBuddy v Claude máš z kroku 3, odeber ho (Customize › Connectors). Pak připoj Claude **jen podle návodu v pop-upu** a napiš „List my gearlists“. Kde návod nesedí na to, co v Claude vidíš, napiš mi přesné znění tlačítek.~~
+  4. ~~ChatGPT netestuješ (podle OpenAI dnes jen tarify Business / Enterprise); stačí přečíst, že návod dává smysl.~~
+- [ ] ~~[FEATURE] Krok 1: Server, databáze D1 a přihlášení přes Google – režim bez účtu zůstává, po přihlášení data na serveru, import lokálních dat. PRD FR-23, FR-24 (upřesnění v34). (2026-10-21, Martin; implementováno 2026-10-21) → **Jak otestovat** (nejdřív nastavení Google a Cloudflare podle Claudova návodu v chatu):~~
+  1. ~~**Bez přihlášení** (lokálně i na webu): appka funguje jako dřív – Vault, gearlisty, datový soubor, demo, Export/Import. Vpravo nahoře přibylo jen „Sign in“.~~
+  2. ~~**Přihlášení lokálně:** `npm run dev` v `app/`, otevři http://localhost:5173 → Sign in → dialog s výhodami → tlačítko Google → vyber účet. Vpravo nahoře uvidíš „Saved“ a svůj avatar se jménem.~~
+  3. ~~**Import:** při prvním přihlášení v prohlížeči, kde máš data (nebo připojený datový soubor), se ukáže „Import your local gear?“ s počty. Zvol import → v účtu jsou stejná data. Lokální data zůstanou (odhlas se a uvidíš je).~~
+  4. ~~**Jiný prohlížeč:** přihlas se stejným účtem např. v Edge nebo v anonymním okně → stejná data, bez nabídky importu. Změna v jednom prohlížeči se ve druhém objeví po přepnutí zpět na jeho záložku.~~
+  5. ~~**Druhý Google účet:** přihlas se jiným účtem → prázdný účet (uvítací karta s „Load demo data“), nevidí nic z prvního účtu.~~
+  6. ~~**Offline:** v DevTools (F12 → Network → Offline) udělej změnu → žlutý pruh „You are offline.“ a „Offline · changes kept“. Vrať připojení → „Saved“ a změna je v jiném prohlížeči.~~
+  7. ~~**3-cestný dialog** s účtem: uprav váhu položky použité ve dvou gearlistech → dialog Cancel / Create a copy / Continue jako dřív.~~
+  8. ~~**Odhlášení:** avatar → Sign out → zase režim bez účtu s lokálními daty.~~
+  9. ~~**Na veřejné adrese** (po pushi): totéž na https://hikingbuddy.mmalinek.workers.dev.~~
+- [ ] ~~[FEATURE] Krok 2: Historie změn a Undo – panel Activity (avatar → Activity), štítky You / AI, Undo jedné změny, celého kroku AI i všech AI změn dne, konflikt, smazané věci jdou vrátit 30 dní. PRD FR-25 (upřesnění v35). (2026-10-21, Martin; implementováno 2026-10-21) → **Jak otestovat** (přihlášený; lokálně `npm run db:migrate:local` a `npm run dev` v `app/`, na webu po pushi nic nastavovat nemusíš):~~
+  1. ~~Udělej pár změn: přidej položku do Vaultu, změň váhu, přidej ji do gearlistu, uprav množství a **smaž celý gearlist** (s položkami a snapshotem).~~
+  2. ~~Avatar vpravo nahoře → **Activity**. Zprava se vysune panel: nadpis „Today · …“, tvoje změny se štítkem „You“, časem a popisem (např. „Changed weight of **X**: 85 g → 79 g“). Smazaný gearlist je přeškrtnutý se štítkem „Restorable until …“.~~
+  3. ~~U smazaného gearlistu klikni **Undo** → gearlist je zpátky i s položkami a snapshotem. Nahoře přibude „Undid your change from …“, původní záznam má „Undone …“.~~
+  4. ~~U „Undid …“ klikni Undo → gearlist zase zmizí („Redid …“). Původní záznam jde znovu vrátit.~~
+  5. ~~**Konflikt:** změň váhu položky (A → B), pak ještě jednou (B → C). U první změny klikni Undo → žluté upozornění „Undo would overwrite 1 later change“ s druhou změnou; Cancel nic neudělá, „Undo anyway“ vrátí váhu na A.~~
+  6. ~~Přepnutí jednotek ani zavření banneru šablony se do historie nezapisuje. Import lokálních dat nebo zálohy je jeden záznam s Undo.~~
+  7. ~~AI změny („Claude“, krok AI s rozbalením, „Undo all AI changes from this day“) uvidíš naostro až po kroku 3 (MCP). Ověřil jsem je lokálně simulovaným klientem, screenshoty v `design/2026-10-mcp/implemented/step2/`.~~
+
+- [ ] ~~[FEATURE] Krok 3: MCP server s OAuth (zatím jen text) – AI klient (Claude) se připojí k HikingBuddy, přihlásí se stejným Google účtem a umí všechno, co ty: číst, přidávat, měnit i mazat. Pravidla PRD platí i pro AI (FR-5 jako povinná volba, snapshot/šablona jen s potvrzením). Každý krok AI je v Activity jako „Claude“ s Undo; v Activity je sekce „Connected AI apps“ s „Revoke access“. PRD FR-26 (upřesnění v36). (2026-10-21, Martin; implementováno 2026-10-22) → **Jak otestovat** (na veřejné adrese po pushi; lokálně Claude MCP server nevidí):~~
+  1. ~~**Připojení:** claude.ai → Settings → Connectors → **Add custom connector** → název „HikingBuddy“, URL `https://hikingbuddy.mmalinek.workers.dev/mcp` → Add → Connect. Otevře se okno HikingBuddy: když nejsi přihlášený, „Sign in with Google“; pak „Allow Claude to use your HikingBuddy?“ → **Allow**. Okno se zavře a konektor je „Connected“.~~
+  2. ~~V novém chatu zapni konektor HikingBuddy (ikona nástrojů pod polem pro zprávu) a zkus těchto 5 vět:~~
+     - ~~„Create a gearlist for 3 days in Jeseníky with rain from my gear“ → gearlist se objeví na webu (po přepnutí na záložku) a v Activity je jeden záznam „Claude … Created gearlist … with N items“ s Undo.~~
+     - ~~„What's the base weight of my Weekend Hikes list and what are its three heaviest items?“ → odpoví bez jakékoli změny (v Activity nic nového).~~
+     - ~~„Make my rain jacket 20 g heavier.“ → **musí se zeptat**, jestli změnit všude, nebo vytvořit kopii (FR-5); po odpovědi změnu udělá.~~
+     - ~~„Remove everything I don't need for a day hike from the Jeseníky list.“ → odebere řádky; v Activity jeden krok s rozbalením na jednotlivé změny.~~
+     - ~~„Undo your last change.“ → odebrané řádky se vrátí (v Activity „Undid Claude's change from …“).~~
+  3. ~~**Undo na webu:** v Activity klikni Undo u kroku „Created gearlist …“ → gearlist zmizí z webu.~~
+  4. ~~**Revoke:** Activity → Connected AI apps → Claude → **Revoke access** → potvrzení. Další dotaz v Claude už HikingBuddy nedosáhne (Claude nabídne znovu připojit).~~
+  5. ~~ChatGPT na bezplatném účtu vlastní konektory neumí (viz chat), proto netestuj.~~
