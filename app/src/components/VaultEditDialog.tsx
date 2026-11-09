@@ -31,7 +31,7 @@ interface VaultEditDialogProps {
  * - Create a copy of the item: adds a new Gear Vault item with the new values; every
  *   existing gearlist (including the one being edited from, if any) keeps pointing at the
  *   old, unchanged item — except the specific row being edited, which switches to the copy.
- * - Continue: applies the edit to the shared item, so it updates in every gearlist that uses it.
+ * - Update (called "Continue" until 2026-11-09): applies the edit to the shared item, so it updates in every gearlist that uses it.
  */
 export function VaultEditDialog({
   title,
@@ -40,7 +40,7 @@ export function VaultEditDialog({
   onCopy,
   onContinue,
   copyLabel = 'Create a copy of the item',
-  continueLabel = 'Continue',
+  continueLabel = 'Update',
   continueDanger = false,
   affectedLists = [],
 }: VaultEditDialogProps) {
