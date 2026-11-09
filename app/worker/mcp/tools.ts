@@ -343,7 +343,7 @@ export function createServer(env: Env, props: McpProps, origin: string): McpServ
     'delete_category',
     {
       title: 'Delete a category',
-      description: 'Deletes a category the user created. Its items stay in Gear Vault as "Uncategorized". The default categories (Backpack, Shelter System, Sleep System, Clothing, Cooking, Food, Water, Electronics, Hygiene, Misc) can be renamed but not deleted.',
+      description: 'Deletes a category the user created. Its items stay in Gear Vault as "Uncategorized". The default categories (Backpack, Shelter System, Sleep System, Clothing, Cooking, Food, Water System, Electronics, Hygiene, Misc) can be renamed but not deleted.',
       inputSchema: z.object({ category: z.string().max(200).describe('Category name or id.') }),
       annotations: DELETE,
     },

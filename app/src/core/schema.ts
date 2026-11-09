@@ -20,7 +20,7 @@ import type { AppState } from '../types';
  * localStorage, the data file, Import and imports into an account), so a user who hasn't
  * opened the app in months still gets their data upgraded correctly.
  */
-export const CURRENT_SCHEMA_VERSION = 7;
+export const CURRENT_SCHEMA_VERSION = 8;
 
 export interface StoredPayload {
   schemaVersion: number;
@@ -227,6 +227,38 @@ const migrateV6ToV7: Migration = (raw) => {
   };
 };
 
+/**
+ * Schema 8 = same shape; content only. The category "Water" is renamed to "Water System"
+ * (Martin, BACKLOG 2026-11-09: water itself belongs under Food, the category is for bottles and
+ * filters). Does exactly what renaming it by hand does (RENAME_CATEGORY in operations.ts): the
+ * category's name changes, and linked gearlist/template rows shown under "Water" follow it.
+ * Custom entries and snapshots keep their names. Skipped when there is no "Water" category or a
+ * "Water System" one already exists. Signed-in users' data gets the same rename in D1 migration
+ * 0004_rename_water_category.sql.
+ */
+const migrateV7ToV8: Migration = (raw) => {
+  const state = (raw ?? {}) as Record<string, any>;
+  const categories: any[] = Array.isArray(state.categories) ? state.categories : [];
+  const NEW_NAME = 'Water System';
+  const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();
+  if (categories.some((c) => norm(c?.name) === norm(NEW_NAME))) return state;
+  const old = categories.find((c) => norm(c?.name) === 'water');
+  if (!old) return state;
+  const oldName = old.name;
+  const renameRows = (l: any) => ({
+    ...l,
+    items: (Array.isArray(l?.items) ? l.items : []).map((it: any) =>
+      it?.gearItemId && it.categoryName === oldName ? { ...it, categoryName: NEW_NAME } : it
+    ),
+  });
+  return {
+    ...state,
+    categories: categories.map((c) => (c === old ? { ...c, name: NEW_NAME } : c)),
+    gearLists: (Array.isArray(state.gearLists) ? state.gearLists : []).map(renameRows),
+    templates: (Array.isArray(state.templates) ? state.templates : []).map(renameRows),
+  };
+};
+
 const MIGRATIONS: Record<number, Migration> = {
   1: migrateV1ToV2,
   2: migrateV2ToV3,
@@ -234,6 +266,7 @@ const MIGRATIONS: Record<number, Migration> = {
   4: migrateV4ToV5,
   5: migrateV5ToV6,
   6: migrateV6ToV7,
+  7: migrateV7ToV8,
 };
 
 export function runMigrations(state: unknown, fromVersion: number): AppState {

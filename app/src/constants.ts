@@ -12,7 +12,7 @@ export const DEFAULT_CATEGORIES: Category[] = [
   { id: 'cat-clothing', name: 'Clothing', order: 3 },
   { id: 'cat-cooking', name: 'Cooking', order: 4 },
   { id: 'cat-food', name: 'Food', order: 5 },
-  { id: 'cat-water', name: 'Water', order: 6 },
+  { id: 'cat-water', name: 'Water System', order: 6 }, // "Water" until schema 8 (2026-11-09)
   { id: 'cat-electronics', name: 'Electronics', order: 7 },
   { id: 'cat-hygiene', name: 'Hygiene', order: 8 },
   { id: 'cat-misc', name: 'Misc', order: 9 },
