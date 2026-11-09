@@ -73,12 +73,6 @@ Template (nemazat): - [TYP] Krátký název – co se děje / co chci (datum)
 
 _Finální scope appky je v PRD v16 (sekce 0 a 2). Položky níže jsou seřazené: nejdřív všechno dodělat a vyzkoušet lokálně, nasazení na web až nakonec (viz 🟡 Brzy). Souběžně s tím Martin prochází položky v 🧪 Test._
 
-1. Note a Category se překrývají.![[Pasted image 20261109100737.png]]
-2. When entering quantity the field should support two digits, currently two digits are not visible. when entered and only one can be shown at a time.![[Pasted image 20261109102503.png]]
-3. The update gearlist dialogue window has "Continue" button. But "Update" button makes more sense here as the user is asked "to update it everywhere it's used". Change it.![[Pasted image 20261109103531.png]]
-4. Category field is too small. It only shows "M..." instead of Misc. There is a lot of space to have the field bigger.![[Pasted image 20261109104037.png]]
-5. Rename "Water" category to "Water system". The reason is that "Water" as an item should be in "Food" category and having category "Water" with "Water" being elsewhere does not make much sense.![[Pasted image 20261109104310.png]]
-
 
 ## 🟡 Brzy
 
@@ -114,6 +108,15 @@ _Mimo scope. Uložené nápady pro případ, že by appka vyšla veřejně s mon
 ## 🧪 Test
 
 _Hotovo od Claude, čeká na Martinovo ověření v appce. Když to funguje, přesuň do ✅ Hotovo; když ne, napiš k položce, co je špatně, a vrať ji do 🔴 Teď._
+
+- [ ] [UI] Note a Category se překrývají + kategorie ukazuje jen „M…“ / „Coo…“ (Teď 1 a 4, implementováno 2026-11-09). Jedna příčina: štítek kategorie v řádku se vždy ořízl o ~12 px a pole poznámky při editaci zabralo celý řádek. ![[Pasted image 20261109100737.png]] ![[Pasted image 20261109104037.png]]
+  - Jak otestovat: v gearlistu najeď myší na řádek → kategorie (např. „Misc“, „Cooking“) je vidět celá. Klikni na poznámku („Add a note…“) → pole poznámky je vedle kategorie na stejném řádku, nic se nepřekrývá. Klik na kategorii pořád otevře výběr přes celý řádek. Totéž ve Vaultu.
+- [ ] [UI] Množství: při psaní byla vidět jen jedna číslice (Teď 2, implementováno 2026-11-09). U pole množství (gearlist i Vault) jsou schované šipky nahoru/dolů, vejdou se 3 číslice; šipky na klávesnici fungují dál. ![[Pasted image 20261109102503.png]]
+  - Jak otestovat: klikni na „×1“ u řádku a napiš 12 nebo 123 → všechny číslice jsou vidět, Enter uloží.
+- [ ] [CR] Dialog „This item is used elsewhere“: tlačítko „Continue“ → „Update“ (Teď 3, implementováno 2026-11-09). Varianta při mazání („Delete everywhere“) zůstala. ![[Pasted image 20261109103531.png]]
+  - Jak otestovat: změň váhu položky, která je ve víc gearlistech → poslední tlačítko se jmenuje „Update“ a dělá totéž co dřív Continue.
+- [ ] [CR] Kategorie „Water“ → „Water System“, i ve stávajících datech (Teď 5, implementováno 2026-11-09). Velké „S“ kvůli shodě se „Shelter System“ / „Sleep System“. V demo datech je položka „Water“ přesunutá do Food. ![[Pasted image 20261109104310.png]]
+  - Jak otestovat: (1) otevři appku jako host se svými daty → kategorie se jmenuje „Water System“ ve Vaultu i v gearlistech, snapshoty mají dál „Water“ (jsou zamražené). (2) Po nasazení se přihlas → totéž v účtu (přejmenuje to D1 migrace 0004 při deployi). (3) „Load demo data“ → „Water“ (1,5 l) je ve Food.
 
 
 
