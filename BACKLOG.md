@@ -67,11 +67,33 @@ Template (nemazat): - [TYP] Krátký název – co se děje / co chci (datum)
 - [ ] ~~[FEATURE] Skutečná databáze na serveru – appka s účtem, data uložená na serveru místo jen v prohlížeči. Proč: jediné řešení bez ručních kroků a zároveň technický základ pro sync mezi zařízeními (PRD sekce 7, bod 2) i komunitní sdílení (PRD sekce 9). Větší krok, dává smysl řešit až s těmito featurami, ne samostatně kvůli záloze. Viz PRD sekce 6a, bod 2. (2026-09-24, navrhl Claude)~~ **Vyřazeno ve v16 (2026-10-09)**, data řeší auto-save do souboru (FR-16).
 
 - [ ] [FEATURE] „Import to my HikingBuddy“ na stránce sdíleného gearlistu – návštěvník si sdílený gearlist jedním klikem uloží k sobě (gearlist + jeho položky do Vaultu), bez účtů a serveru, protože odkaz (FR-18) už celý gearlist nese. Položky se přidají jako nové, bez párování s Vaultem (rozhodnutí Martina, PRD 9.3). Proč: malá „lokální“ verze nápadu z PRD sekce 9.3. Mimo uzavřený scope, rozhoduje Martin. (2026-10-13, navrhl Claude)
+- [ ] [FEATURE] Pre-hike checklist u každého gearlistu – seznam bodů, které si před výletem odškrtávám. Proč: ne všechno je v batohu nebo v gearlistu – jídlo je v ledničce, některé věci večer předem ještě používám (rukavice na běh), něco je potřeba zařídit (natankovat, koupit lístek na bus). (2026-11-18, Martin)
+  - **Jen body se zaškrtávacím políčkem**, žádný volný text. Bod jde přidat, upravit, odškrtnout a smazat. Proč: appka vždy vypadá úhledně a odpadá většina technických rizik volného textu (víceřádková editace, Escape mazající rozepsaný text, dlouhý text).
+  - **Bez nastavení zapnout/vypnout:** prázdný checklist = jen malý odkaz „+ Add pre-hike checklist“, vyplněný se zobrazí.
+  - **Rozhodnutí (Martin, 2026-11-18):** ve sdíleném odkazu (FR-18) checklist **není** (soukromé údaje + délka URL); snapshot ho **obsahuje** včetně stavu odškrtnutí; šablona (template) ho **přebírá** – v novém gearlistu ze šablony jsou body neodškrtnuté (návrh Claude, potvrdit).
+  - **Dva prototypy, Martin vybere:** (1) checklist vpravo vedle tabulky kategorií, **batoh zůstává stejně velký** (nezmenšovat, ať appka není jedna velká tabulka) – náčrt `design/pre-hike-checklist-sketch-2026-11-18.png`; (2) sbalitelný panel přes celou šířku pod vizualizací, nad tabulkou položek. U prototypu 1 ukázat i užší notebook (cca 1366 px) a mobil – tam se checklist nejspíš musí přesunout pod vizualizaci.
+  - **Otevřené k doladění:** limit počtu bodů a délky bodu (návrh: max 50 bodů, 200 znaků); řazení bodů přetažením (teď ano, nebo později?).
+  - Technicky: nové pole gearlistu → nová verze schématu + migrace, sloupec/tabulka v D1, záznam do historie po jednotlivých změnách (Undo), nový MCP nástroj („přidej do checklistu: koupit lístek“). Mimo uzavřený scope (PRD v16/v33) → před stavbou zapsat do PRD jako nový FR.
+- [ ] [UI] Design system: komponenta Pre-hike checklist – prázdný stav („+ Add pre-hike checklist“), řádek bodu se zaškrtávacím políčkem (hotový bod / nehotový), přidání bodu, sbalení/rozbalení panelu. Proč: ať nová komponenta nevznikne „bokem“ mimo design system. Patří k FEATURE Pre-hike checklist výše, řešit před prototypy. (2026-11-18, Martin)
 - [x] [CR] `npm audit` hlásí 1 „high“ zranitelnost v `source-map-js` — balíček používá jen sestavovací nástroj (Vite) při vývoji, do appky v prohlížeči se nedostane. Opravit `npm audit fix` před nasazením (FR-20). (2026-10-09, našel Claude) **Opraveno 2026-10-13** (`npm audit fix`, 0 zranitelností).
 
 ## 🔴 Teď
 
 _Finální scope appky je v PRD v16 (sekce 0 a 2). Položky níže jsou seřazené: nejdřív všechno dodělat a vyzkoušet lokálně, nasazení na web až nakonec (viz 🟡 Brzy). Souběžně s tím Martin prochází položky v 🧪 Test._
+
+- [ ] [BUG] Menu účtu se na mobilu otevírá mimo obrazovku – klik na avatar „M“ v hlavičce → menu vyjede zčásti za levý okraj (e-mail i položky jsou useknuté); čekal jsem, že bude celé vidět. (2026-11-17, Martin)
+  - Pravděpodobná příčina: menu je ukotvené k pravému okraji avataru a otevírá se doleva. Na mobilu se hlavička zalomí, avatar skončí vlevo a menu přeteče viewport.
+  - Řešení: menu se vždy drží uvnitř obrazovky (pozice podle skutečného místa tlačítka); na úzkém displeji se otevře přes celou šířku pod hlavičkou.
+  - Hotovo, když: menu je celé vidět na mobilu (šířka cca 360–430 px) i na desktopu.
+- [ ] [UI] Mobilní navigace: přepínač Gear Vault | Gearlists – na mobilu jsou sekce pod sebou a s velkým Vaultem (100+ položek) je ke gearlistům potřeba scrollovat „kilometr“. (2026-11-17, Martin)
+  - Řešení: jen na mobilu přilepený (sticky) přepínač **Gear Vault | Gearlists** hned pod hlavičkou, ve stylu přepínače g/kg | oz/lb. Ukazuje vždy jen jednu sekci a zůstává vidět i při scrollování.
+  - Appka si pamatuje naposledy otevřenou sekci (např. rovnou Gearlists při balení).
+  - Desktop beze změny (dva sloupce).
+  - Hotovo, když: na telefonu se z Vaultu ke gearlistu (a zpět) dostanu jedním ťuknutím, bez scrollování.
+- [ ] [UI] Kompaktní hlavička na mobilu – hlavička (Saved, Export, Import, jednotky, Connect to AI, účet) se na mobilu zalomí do několika řádků a zabere asi třetinu obrazovky. (2026-11-17, Martin)
+  - Řešení: na mobilu přesunout Export, Import a Connect to AI do menu účtu, aby se hlavička vešla na jeden řádek (logo, stav uložení, jednotky, účet).
+  - Bonus: z velké části odstraní příčinu bugu s menu účtu (avatar se už nezalomí doleva).
+  - Hotovo, když: na telefonu je hlavička na jednom řádku a přesunuté akce jsou dostupné z menu účtu.
 
 
 ## 🟡 Brzy
